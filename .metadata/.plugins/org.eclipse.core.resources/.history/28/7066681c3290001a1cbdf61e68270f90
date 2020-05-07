@@ -1,0 +1,325 @@
+Message-ID: <997570260.2796.1587739492009.JavaMail.sofacmgr@lxpr429a>
+Subject: Exported From Confluence
+MIME-Version: 1.0
+Content-Type: multipart/related; 
+	boundary="----=_Part_2795_1494157441.1587739492009"
+
+------=_Part_2795_1494157441.1587739492009
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-Location: file:///C:/exported.html
+
+<html xmlns:o=3D'urn:schemas-microsoft-com:office:office'
+      xmlns:w=3D'urn:schemas-microsoft-com:office:word'
+      xmlns:v=3D'urn:schemas-microsoft-com:vml'
+      xmlns=3D'urn:w3-org-ns:HTML'>
+<head>
+    <meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8=
+">
+    <title>1) Docker</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:TargetScreenSize>1024x640</o:TargetScreenSize>
+            <o:PixelsPerInch>72</o:PixelsPerInch>
+            <o:AllowPNG/>
+        </o:OfficeDocumentSettings>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>90</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+                <!--
+        @page Section1 {
+            size: 8.5in 11.0in;
+            margin: 1.0in;
+            mso-header-margin: .5in;
+            mso-footer-margin: .5in;
+            mso-paper-source: 0;
+        }
+
+        table {
+            border: solid 1px;
+            border-collapse: collapse;
+        }
+
+        table td, table th {
+            border: solid 1px;
+            padding: 5px;
+        }
+
+        td {
+            page-break-inside: avoid;
+        }
+
+        tr {
+            page-break-after: avoid;
+        }
+
+        div.Section1 {
+            page: Section1;
+        }
+
+        /* Confluence print stylesheet. Common to all themes for print medi=
+a */
+/* Full of !important until we improve batching for print CSS */
+
+@media print {
+    #main {
+        padding-bottom: 1em !important; /* The default padding of 6em is to=
+o much for printouts */
+    }
+
+    body {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        font-size: 10pt;
+        line-height: 1.2;
+    }
+
+    body, #full-height-container, #main, #page, #content, .has-personal-sid=
+ebar #content {
+        background: #fff !important;
+        color: #000 !important;
+        border: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    a, a:link, a:visited, a:focus, a:hover, a:active {
+        color: #000;
+    }
+
+    #content h1,
+    #content h2,
+    #content h3,
+    #content h4,
+    #content h5,
+    #content h6 {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        page-break-after: avoid;
+    }
+
+    pre {
+        font-family: Monaco, "Courier New", monospace;
+    }
+
+    #header,
+    .aui-header-inner,
+    #navigation,
+    #sidebar,
+    .sidebar,
+    #personal-info-sidebar,
+    .ia-fixed-sidebar,
+    .page-actions,
+    .navmenu,
+    .ajs-menu-bar,
+    .noprint,
+    .inline-control-link,
+    .inline-control-link a,
+    a.show-labels-editor,
+    .global-comment-actions,
+    .comment-actions,
+    .quick-comment-container,
+    #addcomment {
+        display: none !important;
+    }
+
+    /* CONF-28544 cannot print multiple pages in IE */
+    #splitter-content {
+        position: relative !important;
+    }
+
+    .comment .date::before {
+        content: none !important; /* remove middot for print view */
+    }
+
+    h1.pagetitle img {
+        height: auto;
+        width: auto;
+    }
+
+    .print-only {
+        display: block;
+    }
+
+    #footer {
+        position: relative !important; /* CONF-17506 Place the footer at en=
+d of the content */
+        margin: 0;
+        padding: 0;
+        background: none;
+        clear: both;
+    }
+
+    #poweredby {
+        border-top: none;
+        background: none;
+    }
+
+    #poweredby li.print-only {
+        display: list-item;
+        font-style: italic;
+    }
+
+    #poweredby li.noprint {
+        display: none;
+    }
+
+    /* no width controls in print */
+    .wiki-content .table-wrap,
+    .wiki-content p,
+    .panel .codeContent,
+    .panel .codeContent pre,
+    .image-wrap {
+        overflow: visible !important;
+    }
+
+    /* TODO - should this work? */
+    #children-section,
+    #comments-section .comment,
+    #comments-section .comment .comment-body,
+    #comments-section .comment .comment-content,
+    #comments-section .comment p {
+        page-break-inside: avoid;
+    }
+
+    #page-children a {
+        text-decoration: none;
+    }
+
+    /**
+     hide twixies
+
+     the specificity here is a hack because print styles
+     are getting loaded before the base styles. */
+    #comments-section.pageSection .section-header,
+    #comments-section.pageSection .section-title,
+    #children-section.pageSection .section-header,
+    #children-section.pageSection .section-title,
+    .children-show-hide {
+        padding-left: 0;
+        margin-left: 0;
+    }
+
+    .children-show-hide.icon {
+        display: none;
+    }
+
+    /* personal sidebar */
+    .has-personal-sidebar #content {
+        margin-right: 0px;
+    }
+
+    .has-personal-sidebar #content .pageSection {
+        margin-right: 0px;
+    }
+
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}
+-->
+    </style>
+</head>
+<body>
+    <h1>1) Docker</h1>
+    <div class=3D"Section1">
+        <h1 id=3D"id-1)Docker-ContainersvsVMs">Containers vs VMs</h1>
+<h4 class=3D"readme file file-markup wiki-content" id=3D"id-1)Docker-"><spa=
+n class=3D"confluence-embedded-file-wrapper confluence-embedded-manual-size=
+"><img class=3D"confluence-embedded-image irc_mi confluence-external-resour=
+ce" alt=3D"Image result for container vs vm" height=3D"359" width=3D"638" s=
+rc=3D"https://www.sdxcentral.com/wp-content/uploads/2016/01/containers-vers=
+us-virtual-machines-docker-inc-rightscale.jpg" data-image-src=3D"https://ww=
+w.sdxcentral.com/wp-content/uploads/2016/01/containers-versus-virtual-machi=
+nes-docker-inc-rightscale.jpg"></span></h4>
+<h1 id=3D"id-1)Docker-Dockercomposants">Docker composants</h1>
+<h4 class=3D"readme file file-markup wiki-content" id=3D"id-1)Docker-Docker=
+engine">Docker engine</h4>
+<p>Containerization technology combined with a work flow for building and c=
+ontainerizing applications.</p>
+<p>Doc: <a href=3D"https://docs.docker.com/engine/" class=3D"external-link"=
+ rel=3D"nofollow">https://docs.docker.com/engine/</a></p>
+<h4 class=3D"readme file file-markup wiki-content" id=3D"id-1)Docker-Docker=
+client">Docker client</h4>
+<p>Command line used for communication with the Docker engine.</p>
+<p>Doc: <a href=3D"https://docs.docker.com/engine/reference/commandline/cli=
+/" class=3D"external-link" rel=3D"nofollow">https://docs.docker.com/engine/=
+reference/commandline/cli/</a></p>
+<h4 class=3D"readme file file-markup wiki-content" id=3D"id-1)Docker-Image"=
+>Image</h4>
+<p class=3D"readme file file-markup wiki-content">A package including your =
+application and its environment. It contains the filesystem made available =
+to the application and metadata, such as the path to the executable.</p>
+<p class=3D"readme file file-markup wiki-content">Doc: <a href=3D"https://d=
+ocs.docker.com/engine/reference/commandline/images/" class=3D"external-link=
+" rel=3D"nofollow">https://docs.docker.com/engine/reference/commandline/ima=
+ges/</a></p>
+<p class=3D"readme file file-markup wiki-content"><a href=3D"https://hub.do=
+cker.com/" class=3D"external-link" rel=3D"nofollow">Get images: https://hub=
+.docker.com/</a></p>
+<h4 class=3D"readme file file-markup wiki-content" id=3D"id-1)Docker-Contai=
+ner">Container</h4>
+<p class=3D"readme file file-markup wiki-content">A running Docker Image as=
+ a process running on the computer running Docker.</p>
+<p class=3D"readme file file-markup wiki-content">Completely isolated from =
+the host and all other processes running on that host.</p>
+<p class=3D"readme file file-markup wiki-content">The container can only ac=
+cess and use up the amount of resources (CPU, RAM, etc.) that are allocated=
+ to it.</p>
+<p class=3D"readme file file-markup wiki-content">Doc: <a href=3D"https://w=
+ww.docker.com/what-container" class=3D"external-link" rel=3D"nofollow">http=
+s://www.docker.com/what-container</a></p>
+<h4 class=3D"readme file file-markup wiki-content" id=3D"id-1)Docker-Regist=
+ry">Registry</h4>
+<p class=3D"readme file file-markup wiki-content">A repository where images=
+ are stored. When an image is built you can either run it on the same compu=
+ter or push it to a registry, it will be then available for a pull (downloa=
+d) on another computer.</p>
+<p class=3D"readme file file-markup wiki-content">Doc: <a href=3D"https://d=
+ocs.docker.com/registry/" class=3D"external-link" rel=3D"nofollow">https://=
+docs.docker.com/registry/</a></p>
+<h4 class=3D"readme file file-markup wiki-content" id=3D"id-1)Docker-Networ=
+k">Network</h4>
+<p>Networks that makes possible communication between containdockerers.</p>
+<p>Doc:<a href=3D"https://docs.docker.com/network/" class=3D"external-link"=
+ rel=3D"nofollow"> https://docs.docker.com/network/</a></p>
+<h4 class=3D"readme file file-markup wiki-content" id=3D"id-1)Docker-Volume=
+">Volume</h4>
+<p>Mechanism for persisting data in containers.</p>
+<p>Doc: <a href=3D"https://docs.docker.com/storage/volumes/" class=3D"exter=
+nal-link" rel=3D"nofollow">https://docs.docker.com/storage/volumes/</a></p>
+<h4 class=3D"readme file file-markup wiki-content" id=3D"id-1)Docker-Docker=
+file/docker-compose">Dockerfile/docker-compose</h4>
+<p>File used for image build.</p>
+<p>Doc: <a href=3D"https://docs.docker.com/engine/reference/builder/" class=
+=3D"external-link" rel=3D"nofollow">https://docs.docker.com/engine/referenc=
+e/builder/</a></p>
+<p><a href=3D"https://docs.docker.com/engine/reference/builder/" class=3D"e=
+xternal-link" rel=3D"nofollow">Best practices: </a><a href=3D"https://docs.=
+docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-n=
+umber-of-layers" class=3D"external-link" rel=3D"nofollow">https://docs.dock=
+er.com/develop/develop-images/dockerfile_best-practices/#minimize-the-numbe=
+r-of-layers</a></p>
+<p class=3D"readme file file-markup wiki-content"><span class=3D"confluence=
+-embedded-file-wrapper"><img class=3D"confluence-embedded-image confluence-=
+external-resource" alt=3D"Alt text" src=3D"https://bytebucket.org/wymarsali=
+s/paas/raw/c29f8b9184a1f9781e521e5fd63c3e801144133c/training/docker01.svg?r=
+aw=3Dtrue&amp;token=3D68f1dde3661ae39a84ee28285c45f7eaefa26021" data-image-=
+src=3D"https://bytebucket.org/wymarsalis/paas/raw/c29f8b9184a1f9781e521e5fd=
+63c3e801144133c/training/docker01.svg?raw=3Dtrue&amp;token=3D68f1dde3661ae3=
+9a84ee28285c45f7eaefa26021"></span></p>
+<p class=3D"readme file file-markup wiki-content">&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+    </div>
+</body>
+</html>
+------=_Part_2795_1494157441.1587739492009--

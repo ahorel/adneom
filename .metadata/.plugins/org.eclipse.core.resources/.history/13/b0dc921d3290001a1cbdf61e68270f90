@@ -1,0 +1,283 @@
+Message-ID: <1677957272.2792.1587739385180.JavaMail.sofacmgr@lxpr429a>
+Subject: Exported From Confluence
+MIME-Version: 1.0
+Content-Type: multipart/related; 
+	boundary="----=_Part_2791_542219237.1587739385179"
+
+------=_Part_2791_542219237.1587739385179
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-Location: file:///C:/exported.html
+
+<html xmlns:o=3D'urn:schemas-microsoft-com:office:office'
+      xmlns:w=3D'urn:schemas-microsoft-com:office:word'
+      xmlns:v=3D'urn:schemas-microsoft-com:vml'
+      xmlns=3D'urn:w3-org-ns:HTML'>
+<head>
+    <meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8=
+">
+    <title>IV) PAAS</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:TargetScreenSize>1024x640</o:TargetScreenSize>
+            <o:PixelsPerInch>72</o:PixelsPerInch>
+            <o:AllowPNG/>
+        </o:OfficeDocumentSettings>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>90</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+                <!--
+        @page Section1 {
+            size: 8.5in 11.0in;
+            margin: 1.0in;
+            mso-header-margin: .5in;
+            mso-footer-margin: .5in;
+            mso-paper-source: 0;
+        }
+
+        table {
+            border: solid 1px;
+            border-collapse: collapse;
+        }
+
+        table td, table th {
+            border: solid 1px;
+            padding: 5px;
+        }
+
+        td {
+            page-break-inside: avoid;
+        }
+
+        tr {
+            page-break-after: avoid;
+        }
+
+        div.Section1 {
+            page: Section1;
+        }
+
+        /* Confluence print stylesheet. Common to all themes for print medi=
+a */
+/* Full of !important until we improve batching for print CSS */
+
+@media print {
+    #main {
+        padding-bottom: 1em !important; /* The default padding of 6em is to=
+o much for printouts */
+    }
+
+    body {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        font-size: 10pt;
+        line-height: 1.2;
+    }
+
+    body, #full-height-container, #main, #page, #content, .has-personal-sid=
+ebar #content {
+        background: #fff !important;
+        color: #000 !important;
+        border: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    a, a:link, a:visited, a:focus, a:hover, a:active {
+        color: #000;
+    }
+
+    #content h1,
+    #content h2,
+    #content h3,
+    #content h4,
+    #content h5,
+    #content h6 {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        page-break-after: avoid;
+    }
+
+    pre {
+        font-family: Monaco, "Courier New", monospace;
+    }
+
+    #header,
+    .aui-header-inner,
+    #navigation,
+    #sidebar,
+    .sidebar,
+    #personal-info-sidebar,
+    .ia-fixed-sidebar,
+    .page-actions,
+    .navmenu,
+    .ajs-menu-bar,
+    .noprint,
+    .inline-control-link,
+    .inline-control-link a,
+    a.show-labels-editor,
+    .global-comment-actions,
+    .comment-actions,
+    .quick-comment-container,
+    #addcomment {
+        display: none !important;
+    }
+
+    /* CONF-28544 cannot print multiple pages in IE */
+    #splitter-content {
+        position: relative !important;
+    }
+
+    .comment .date::before {
+        content: none !important; /* remove middot for print view */
+    }
+
+    h1.pagetitle img {
+        height: auto;
+        width: auto;
+    }
+
+    .print-only {
+        display: block;
+    }
+
+    #footer {
+        position: relative !important; /* CONF-17506 Place the footer at en=
+d of the content */
+        margin: 0;
+        padding: 0;
+        background: none;
+        clear: both;
+    }
+
+    #poweredby {
+        border-top: none;
+        background: none;
+    }
+
+    #poweredby li.print-only {
+        display: list-item;
+        font-style: italic;
+    }
+
+    #poweredby li.noprint {
+        display: none;
+    }
+
+    /* no width controls in print */
+    .wiki-content .table-wrap,
+    .wiki-content p,
+    .panel .codeContent,
+    .panel .codeContent pre,
+    .image-wrap {
+        overflow: visible !important;
+    }
+
+    /* TODO - should this work? */
+    #children-section,
+    #comments-section .comment,
+    #comments-section .comment .comment-body,
+    #comments-section .comment .comment-content,
+    #comments-section .comment p {
+        page-break-inside: avoid;
+    }
+
+    #page-children a {
+        text-decoration: none;
+    }
+
+    /**
+     hide twixies
+
+     the specificity here is a hack because print styles
+     are getting loaded before the base styles. */
+    #comments-section.pageSection .section-header,
+    #comments-section.pageSection .section-title,
+    #children-section.pageSection .section-header,
+    #children-section.pageSection .section-title,
+    .children-show-hide {
+        padding-left: 0;
+        margin-left: 0;
+    }
+
+    .children-show-hide.icon {
+        display: none;
+    }
+
+    /* personal sidebar */
+    .has-personal-sidebar #content {
+        margin-right: 0px;
+    }
+
+    .has-personal-sidebar #content .pageSection {
+        margin-right: 0px;
+    }
+
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}
+-->
+    </style>
+</head>
+<body>
+    <h1>IV) PAAS</h1>
+    <div class=3D"Section1">
+        <h3 id=3D"IV)PAAS-Introduction">Introduction</h3>
+<h3 class=3D"confluence-link" id=3D"IV)PAAS-ComposantsduPAAS">Composants du=
+ PAAS</h3>
+<p style=3D"margin-left: 30.0px;"> </p>
+<div class=3D"plugin_pagetree">=20
+<ul class=3D"plugin_pagetree_children_list plugin_pagetree_children_list_no=
+leftspace">=20
+<div class=3D"plugin_pagetree_children">=20
+</div>=20
+</ul>=20
+<fieldset class=3D"hidden">=20
+<input type=3D"hidden" name=3D"treeId" value=3D"">=20
+<input type=3D"hidden" name=3D"treeRequestId" value=3D"/confluence/plugins/=
+pagetree/naturalchildren.action?decorator=3Dnone&amp;excerpt=3Dfalse&amp;so=
+rt=3Dposition&amp;reverse=3Dfalse&amp;disableLinks=3Dfalse&amp;expandCurren=
+t=3Dfalse">=20
+<input type=3D"hidden" name=3D"treePageId" value=3D"579633215">=20
+<input type=3D"hidden" name=3D"noRoot" value=3D"false">=20
+<input type=3D"hidden" name=3D"rootPageId" value=3D"579633215">=20
+<input type=3D"hidden" name=3D"rootPage" value=3D"">=20
+<input type=3D"hidden" name=3D"startDepth" value=3D"0">=20
+<input type=3D"hidden" name=3D"spaceKey" value=3D"ECLAIR">=20
+<input type=3D"hidden" name=3D"i18n-pagetree.loading" value=3D"Chargement e=
+n cours...">=20
+<input type=3D"hidden" name=3D"i18n-pagetree.error.permission" value=3D"Imp=
+ossible de charger l'arborescence des pages. Vous n'=C3=AAtes apparemment p=
+as autoris=C3=A9 =C3=A0 afficher la page racine.">=20
+<input type=3D"hidden" name=3D"i18n-pagetree.eeror.general" value=3D"Un pro=
+bl=C3=A8me a =C3=A9t=C3=A9 d=C3=A9tect=C3=A9 lors de la r=C3=A9cup=C3=A9rat=
+ion de l'arborescence des pages. Veuillez consulter le fichier journal du s=
+erveur pour plus d'informations.">=20
+<input type=3D"hidden" name=3D"loginUrl" value=3D"/confluence/login.action?=
+os_destination=3D%2Fexportword%3FpageId%3D579633215&amp;permissionViolation=
+=3Dtrue">=20
+<input type=3D"hidden" name=3D"mobile" value=3D"false">=20
+<fieldset class=3D"hidden">=20
+<input type=3D"hidden" name=3D"ancestorId" value=3D"579633215">=20
+</fieldset>=20
+</fieldset>=20
+</div>=20
+<p></p>
+<h3 id=3D"IV)PAAS-Training">Training</h3>
+<p>Rendez vous sur dans la partie <a href=3D"/confluence/display/ECLAIR/Tra=
+ining">Training</a>. (N=C3=A9cessite des acc=C3=A8s particuliers)</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+    </div>
+</body>
+</html>
+------=_Part_2791_542219237.1587739385179--

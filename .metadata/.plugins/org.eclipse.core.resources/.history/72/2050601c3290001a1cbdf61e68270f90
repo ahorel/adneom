@@ -1,0 +1,17 @@
+package main.java;
+
+public class Currency {
+
+	public  static Currency EUR;
+
+	public String name() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static Currency valueOf(String string) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

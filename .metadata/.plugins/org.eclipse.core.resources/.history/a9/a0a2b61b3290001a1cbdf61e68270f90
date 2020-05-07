@@ -1,0 +1,70 @@
+package main.java;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class Main {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+	 	/*
+		List<List<CompletableFuture<ResultatTriBO>>> completableFutures = listeEtatsControleNaeBO.stream()
+	 			.map(etatControleNae -> etatControleNae.getResultatsTriAsync(null))
+	 			.collect(Collectors.toList());
+	 	
+	 	CompletableFuture<Void> allFutures = CompletableFuture
+	 	        .allOf(completableFutures.toArray(new CompletableFuture[completableFutures.size()]));
+	 	
+	 	  CompletableFuture<List<List<ResultatTriBO>>> allCompletableFutures = allFutures.thenApply(future -> {
+	 		return completableFutures.stream()
+	 				.map(
+	 						completableFuture -> completableFuture.
+	 						stream()
+	 						.map(
+	 								completableFutureInner -> completableFutureInner.join()
+	 							)
+	 						.collect(Collectors.toList())
+	 					)
+	 				.collect(Collectors.toList());
+	 	});
+	 	  */
+	 	
+	 	 Map<String, List<String>> map = new HashMap<String, List<String>>();
+	 	map.put("0", Arrays.asList("rouge","vert","jaune","bleu","violet"));
+  	 	map.put("1", Arrays.asList("petit","grand","moyen","immense","microscopique"));
+  	 	map.put("2", Arrays.asList("pomme","banane","tomate","cerise","raisin")); 
+	 	 
+  	 	String a="";
+	 	 map.entrySet()
+	     .stream()
+	     .map(m -> {
+	    	 		  Stream<Object> test = m.getValue()
+	    			 .stream()
+	    			 .map(t -> t.toString());
+	    	 		  a.toString();
+	    	 		  return m.getValue().stream();
+	     			}
+	     		
+
+	    );
+	     /*
+	     .filter(f0 -> !f0.equals(ColisBO.SSCC_INCONNU))
+	     .map(Map.Entry::getValue)
+	     .map(m2 -> m2
+	     		.stream()
+	     		.filter(
+	     				resultatTri -> ArticleUtil.getCodeCoupureByArticle(resultatTri.getIdGTINArticle())==coupure.instanceEquivalentS1().getCode()
+	     				)
+	     		//A faire en comparableFuture
+	     		.map(ResultatTriBO::getNbBillets)
+	     		//Fin a faire en comparableFuture
+	     		.collect(Collectors.toList())
+	     	)
+	      .forEach(System.out::println);  
+	 	  */
+	}
+}

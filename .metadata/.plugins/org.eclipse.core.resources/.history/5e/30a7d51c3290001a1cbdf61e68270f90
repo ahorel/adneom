@@ -1,0 +1,576 @@
+Message-ID: <1942937633.3854.1587743594222.JavaMail.sofacmgr@lxpr429a>
+Subject: Exported From Confluence
+MIME-Version: 1.0
+Content-Type: multipart/related; 
+	boundary="----=_Part_3853_2029339464.1587743594222"
+
+------=_Part_3853_2029339464.1587743594222
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-Location: file:///C:/exported.html
+
+<html xmlns:o=3D'urn:schemas-microsoft-com:office:office'
+      xmlns:w=3D'urn:schemas-microsoft-com:office:word'
+      xmlns:v=3D'urn:schemas-microsoft-com:vml'
+      xmlns=3D'urn:w3-org-ns:HTML'>
+<head>
+    <meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8=
+">
+    <title>Basic commands</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:TargetScreenSize>1024x640</o:TargetScreenSize>
+            <o:PixelsPerInch>72</o:PixelsPerInch>
+            <o:AllowPNG/>
+        </o:OfficeDocumentSettings>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>90</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+                <!--
+        @page Section1 {
+            size: 8.5in 11.0in;
+            margin: 1.0in;
+            mso-header-margin: .5in;
+            mso-footer-margin: .5in;
+            mso-paper-source: 0;
+        }
+
+        table {
+            border: solid 1px;
+            border-collapse: collapse;
+        }
+
+        table td, table th {
+            border: solid 1px;
+            padding: 5px;
+        }
+
+        td {
+            page-break-inside: avoid;
+        }
+
+        tr {
+            page-break-after: avoid;
+        }
+
+        div.Section1 {
+            page: Section1;
+        }
+
+        /* Confluence print stylesheet. Common to all themes for print medi=
+a */
+/* Full of !important until we improve batching for print CSS */
+
+@media print {
+    #main {
+        padding-bottom: 1em !important; /* The default padding of 6em is to=
+o much for printouts */
+    }
+
+    body {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        font-size: 10pt;
+        line-height: 1.2;
+    }
+
+    body, #full-height-container, #main, #page, #content, .has-personal-sid=
+ebar #content {
+        background: #fff !important;
+        color: #000 !important;
+        border: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    a, a:link, a:visited, a:focus, a:hover, a:active {
+        color: #000;
+    }
+
+    #content h1,
+    #content h2,
+    #content h3,
+    #content h4,
+    #content h5,
+    #content h6 {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        page-break-after: avoid;
+    }
+
+    pre {
+        font-family: Monaco, "Courier New", monospace;
+    }
+
+    #header,
+    .aui-header-inner,
+    #navigation,
+    #sidebar,
+    .sidebar,
+    #personal-info-sidebar,
+    .ia-fixed-sidebar,
+    .page-actions,
+    .navmenu,
+    .ajs-menu-bar,
+    .noprint,
+    .inline-control-link,
+    .inline-control-link a,
+    a.show-labels-editor,
+    .global-comment-actions,
+    .comment-actions,
+    .quick-comment-container,
+    #addcomment {
+        display: none !important;
+    }
+
+    /* CONF-28544 cannot print multiple pages in IE */
+    #splitter-content {
+        position: relative !important;
+    }
+
+    .comment .date::before {
+        content: none !important; /* remove middot for print view */
+    }
+
+    h1.pagetitle img {
+        height: auto;
+        width: auto;
+    }
+
+    .print-only {
+        display: block;
+    }
+
+    #footer {
+        position: relative !important; /* CONF-17506 Place the footer at en=
+d of the content */
+        margin: 0;
+        padding: 0;
+        background: none;
+        clear: both;
+    }
+
+    #poweredby {
+        border-top: none;
+        background: none;
+    }
+
+    #poweredby li.print-only {
+        display: list-item;
+        font-style: italic;
+    }
+
+    #poweredby li.noprint {
+        display: none;
+    }
+
+    /* no width controls in print */
+    .wiki-content .table-wrap,
+    .wiki-content p,
+    .panel .codeContent,
+    .panel .codeContent pre,
+    .image-wrap {
+        overflow: visible !important;
+    }
+
+    /* TODO - should this work? */
+    #children-section,
+    #comments-section .comment,
+    #comments-section .comment .comment-body,
+    #comments-section .comment .comment-content,
+    #comments-section .comment p {
+        page-break-inside: avoid;
+    }
+
+    #page-children a {
+        text-decoration: none;
+    }
+
+    /**
+     hide twixies
+
+     the specificity here is a hack because print styles
+     are getting loaded before the base styles. */
+    #comments-section.pageSection .section-header,
+    #comments-section.pageSection .section-title,
+    #children-section.pageSection .section-header,
+    #children-section.pageSection .section-title,
+    .children-show-hide {
+        padding-left: 0;
+        margin-left: 0;
+    }
+
+    .children-show-hide.icon {
+        display: none;
+    }
+
+    /* personal sidebar */
+    .has-personal-sidebar #content {
+        margin-right: 0px;
+    }
+
+    .has-personal-sidebar #content .pageSection {
+        margin-right: 0px;
+    }
+
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}
+-->
+    </style>
+</head>
+<body>
+    <h1>Basic commands</h1>
+    <div class=3D"Section1">
+        <h1 id=3D"Basiccommands-/*<![CDATA[*/div.rbtoc1587743594119{padding=
+:0px;}div.rbtoc1587743594119ul{list-style:disc;margin-left:0px;}div.rbtoc15=
+87743594119li{margin-left:0px;padding-left:0px;}/*]]>*/#Basiccommands-Insta=
+ll/Upgrade#Basiccommands-Install/UpgradeAddyumDo"><style type=3D"text/css">=
+/*<![CDATA[*/
+div.rbtoc1587743594119 {padding: 0px;}
+div.rbtoc1587743594119 ul {list-style: disc;margin-left: 0px;}
+div.rbtoc1587743594119 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style>
+<div class=3D"toc-macro rbtoc1587743594119">=20
+<ul class=3D"toc-indentation">=20
+<li><a href=3D"#Basiccommands-"></a></li>=20
+<li><a href=3D"#Basiccommands-Install/Upgrade">Install / Upgrade</a>=20
+<ul class=3D"toc-indentation">=20
+<li><a href=3D"#Basiccommands-AddyumDockerrepository">Add yum Docker reposi=
+tory</a></li>=20
+<li><a href=3D"#Basiccommands-Listexistingdockerreleases">List existing doc=
+ker releases</a></li>=20
+<li><a href=3D"#Basiccommands-UpgradeDocker">Upgrade Docker</a></li>=20
+</ul> </li>=20
+<li><a href=3D"#Basiccommands-Operations">Operations</a>=20
+<ul class=3D"toc-indentation">=20
+<li><a href=3D"#Basiccommands-SearchanimageinDockerhub">Search an image in =
+Dockerhub</a></li>=20
+<li><a href=3D"#Basiccommands-Searchforanimageinaprivateregistry">Search fo=
+r an image in a private registry</a></li>=20
+<li><a href=3D"#Basiccommands-Listimagespresentinthecache">List images pres=
+ent in the cache</a></li>=20
+<li><a href=3D"#Basiccommands-Stopcontainer">Stop container</a></li>=20
+<li><a href=3D"#Basiccommands-Removecontainer">Remove container</a></li>=20
+</ul> </li>=20
+<li><a href=3D"#Basiccommands-Run">Run</a></li>=20
+<li><a href=3D"#Basiccommands-Build">Build</a></li>=20
+<li><a href=3D"#Basiccommands-Dockercompose">Docker compose</a>=20
+<ul class=3D"toc-indentation">=20
+<li><a href=3D"#Basiccommands-Installdocker-compose">Install docker-compose=
+</a></li>=20
+<li><a href=3D"#Basiccommands-Runacontainerserviceusingdocker-compose">Run =
+a container service using docker-compose</a></li>=20
+</ul> </li>=20
+<li><a href=3D"#Basiccommands-APIcalls(withoutDockerclient)">API calls (wit=
+hout Docker client)</a>=20
+<ul class=3D"toc-indentation">=20
+<li><a href=3D"#Basiccommands-Configuration">Configuration</a></li>=20
+<li><a href=3D"#Basiccommands-Build.1">Build</a></li>=20
+<li><a href=3D"#Basiccommands-Tag">Tag</a></li>=20
+<li><a href=3D"#Basiccommands-Push">Push</a></li>=20
+</ul> </li>=20
+</ul>=20
+</div></h1>
+<h1 id=3D"Basiccommands-Install/Upgrade">Install / Upgrade</h1>
+<h4 id=3D"Basiccommands-AddyumDockerrepository">Add yum Docker repository</=
+h4>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">yum-con=
+fig-manager --add-repo https://download.docker.com/linux/centos/docker-ce.r=
+epo</pre>=20
+</div>
+</div>
+<h4 id=3D"Basiccommands-Listexistingdockerreleases">List existing docker re=
+leases</h4>
+<div class=3D"codehilite language-shell">
+<pre><span>&nbsp;</span>
+</pre>
+</div>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">yum lis=
+t docker-ce --showduplicates | sort -r</pre>=20
+</div>
+</div>
+<h4 id=3D"Basiccommands-UpgradeDocker">Upgrade Docker</h4>
+<p>List installed Docker packages</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">yum lis=
+t installed | grep docker</pre>=20
+</div>
+</div>
+<div class=3D"codehilite language-shell">
+<pre>&nbsp;</pre>
+</div>
+<p>Remove existing Docker engine and selinux packages if any</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">yum rem=
+ove docker-engine-selinux.noarch docker-engine.x86_64</pre>=20
+</div>
+</div>
+<p>Install latest Docker engine:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">yum ins=
+tall docker-ce.x86_64</pre>=20
+</div>
+</div>
+<p>Show Docker status, start if necessary:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">systemc=
+tl status docker
+systemctl restart docker</pre>=20
+</div>
+</div>
+<div class=3D"codehilite language-shell">
+<h1 id=3D"Basiccommands-Operations">Operations</h1>
+</div>
+<h4 id=3D"Basiccommands-SearchanimageinDockerhub">Search an image in Docker=
+hub</h4>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">docker =
+search nginx</pre>=20
+</div>
+</div>
+<h4 id=3D"Basiccommands-Searchforanimageinaprivateregistry">Search for an i=
+mage in a private registry</h4>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">curl --=
+cacert /root/ca-certs/domain.crt -X GET https://myregistrydomain.com/v2/_ca=
+talog</pre>=20
+</div>
+</div>
+<h4 id=3D"Basiccommands-Listimagespresentinthecache">List images present in=
+ the cache</h4>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">docker =
+images</pre>=20
+</div>
+</div>
+<div class=3D"codehilite language-shell">
+<h4 id=3D"Basiccommands-Stopcontainer">Stop container</h4>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">docker =
+stop mycontainer</pre>=20
+</div>
+</div>
+<h4 id=3D"Basiccommands-Removecontainer">Remove container</h4>
+</div>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">docker =
+rm -v mycontainer</pre>=20
+</div>
+</div>
+<div class=3D"codehilite language-shell">
+<h1 id=3D"Basiccommands-Run">Run</h1>
+</div>
+<p>example of running minio storage:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">docker =
+run --net=3Dhost -p 9000:9000 --name myminio  -e "MINIO_ACCESS_KEY=3DAKIAIO=
+SFODNN7EXAMPLE" -e "MINIO_SECRET_KEY=3DwJalrXUtnFEMI/K7MDENG/bPxRf iCYEXAMP=
+LEKEY" -v /root/minio/data:/data -v /root/minio/config:/root/.minio myregis=
+try.com/minio/minio server /data</pre>=20
+</div>
+</div>
+<div class=3D"codehilite language-shell">
+<h1 id=3D"Basiccommands-Build"><span>Build</span></h1>
+<p><span>In the example below, we will build a docker image of wildfly with=
+ an admin user. For that, we will create a file named <code>Dockerfile</cod=
+e>, which is a convenient way to specify what we could include in our image=
+. The following Dockerfile: 1/pull release 10.1 of wildfly, 2/execute add-u=
+ser.sh script to add a user, 3/execute a command to start Wildfly server:</=
+span></p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">FROM jb=
+oss/wildfly:10.1.0.Final
+RUN /opt/jboss/wildfly/bin/add-user.sh admin admin --silent
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement=
+", "0.0.0.0"]</pre>=20
+</div>
+</div>
+<p>&nbsp;To build the following image, just type the following in the same =
+directory where the Dockerfile is stored:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">docker =
+build --tag=3Djboss/wildfly-admin .</pre>=20
+</div>
+</div>
+<h1 id=3D"Basiccommands-Dockercompose">Docker compose</h1>
+</div>
+<p>What Docker compose is: a declarative approach to configure and run cont=
+ainers. First, write a Docker compose yaml file, then run it and if ok, git=
+ commit, git push.</p>
+<h2 id=3D"Basiccommands-Installdocker-compose">Install docker-compose</h2>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">curl -L=
+ https://github.com/docker/compose/releases/download/1.16.1/docker-compose-=
+`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose </pre>=20
+</div>
+</div>
+<h2 id=3D"Basiccommands-Runacontainerserviceusingdocker-compose">Run a cont=
+ainer service using docker-compose</h2>
+<p>Create a compose directory:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">mkdir -=
+p compose/minio &amp;&amp; cd compose/minio</pre>=20
+</div>
+</div>
+<div class=3D"codehilite language-shell">
+<pre><span>&nbsp;</span></pre>
+</div>
+<p>Edit a compose yaml file named <code>docker-compose.yml</code>:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">version=
+: '3.3'
+services:
+&nbsp; myminio:
+&nbsp;&nbsp;&nbsp; image: myregistry.com/minio/minio
+&nbsp;&nbsp;&nbsp; command: server /data
+&nbsp;&nbsp;&nbsp; volumes:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - /root/minio/data:/data
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - /root/minio/config:/root/.minio
+&nbsp;&nbsp;&nbsp; ports:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - "9000:9000"
+&nbsp;&nbsp;&nbsp; network_mode: "host"
+&nbsp;&nbsp;&nbsp; environment:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MINIO_ACCESS_KEY: MINIO_ACCESS_KEY=3Dminiomi=
+nio
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MINIO_SECRET_KEY: MINIO_SECRET_KEY=3Dminiomi=
+nio</pre>=20
+</div>
+</div>
+<div class=3D"codehilite language-shell">
+<pre>&nbsp;</pre>
+</div>
+<p>Run the service in detached mode:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">docker =
+run -d --net=3Dhost -p 9000:9000 --name myminio  -e "MINIO_ACCESS_KEY=3Dmin=
+iominio" -e "MINIO_SECRET_KEY=3Dminiominio" -v /root/minio/data:/data -v /r=
+oot/minio/config:/root/.minio myregistry.com/minio/minio</pre>=20
+</div>
+</div>
+<h1 id=3D"Basiccommands-APIcalls(withoutDockerclient)">API calls (without D=
+ocker client)</h1>
+<p>Some environments (Windows 7...) do not meet the requirements to install=
+ the Docker client. Instead of using the client, you can just call Docker A=
+PIs with an HTTP client.</p>
+<p>Here is how you can build an image for a JavaEE application and push it =
+to a registry, using only basic Bash commands that will run on Linux, Jenki=
+ns and Git for Windows. The comments show the corresponding docker commands=
+.</p>
+<h2 id=3D"Basiccommands-Configuration">Configuration</h2>
+<p>Here are our (fake) application name, Docker API server URL and Docker r=
+egistry URL.</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">APP=3Dm=
+yapp
+API=3Dapi.docker.local/v1.24
+REG=3Dregistry.docker.local</pre>=20
+</div>
+</div>
+<h2 id=3D"Basiccommands-Build.1">Build</h2>
+<p>First, bundle all files needed by the Docker build command (a Docker fil=
+e and a WAR archive) into a compressed TAR archive, send the archive to the=
+ Docker API server and delete the archive.</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence"># docke=
+r build --tag $APP .
+tar cfvz $APP.tgz Dockerfile $APP.war
+curl -is -H 'Content-Type: application/tar' --data-binary "@$APP.tgz" $API/=
+build?t=3D$APP
+rm $APP.tgz</pre>=20
+</div>
+</div>
+<h2 id=3D"Basiccommands-Tag">Tag</h2>
+<p>Next, tell the API server to tag the image it just received.</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence"># docke=
+r tag $APP $REG/$APP
+curl -is -XPOST $API/images/$APP/tag?repo=3D$REG/$APP</pre>=20
+</div>
+</div>
+<h2 id=3D"Basiccommands-Push">Push</h2>
+<p>Finally, tell the API server to push the image to the registry.</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence"># docke=
+r push $REG/$APP
+curl -is -XPOST -H 'X-Registry-Auth: 1' $API/images/$REG/$APP/push</pre>=20
+</div>
+</div>
+<p>If the registry is protected by basic authentication, add a header to em=
+ulate a <code>docker login</code>.</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">USER=3D=
+myuser
+PASSWORD=3Dmypassword
+&nbsp;
+# docker login -u $USER -p $PASSWORD $REG
+# docker push $REG/$APP
+XRA=3D$(echo "{\"username\": \"$USER\", \"password\": \"$PASSWORD\"}" | bas=
+e64 --wrap=3D0)
+curl -is -XPOST -H "X-Registry-Auth: $XRA" $API/images/$REG/$APP/push</pre>=
+=20
+</div>
+</div>
+    </div>
+</body>
+</html>
+------=_Part_3853_2029339464.1587743594222--

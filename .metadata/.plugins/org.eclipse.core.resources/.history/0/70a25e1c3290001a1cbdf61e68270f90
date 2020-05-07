@@ -1,0 +1,25 @@
+package fr.bdf.mga.bo;
+
+import fr.bdf.sport.bo.exceptions.ParametreInvalideException;
+
+public interface IResultatTriBO_java8 {
+	
+	public int getNbBillets();
+	public void setNbBillets(int nbBillets)
+	throws ParametreInvalideException;
+	
+	public ArticleBO getArticle();
+	public void setArticle(ArticleBO article);
+	
+	public String getIdGTINArticle();
+	public void setIdGTINArticle(String idGTINArticle);
+	
+	public void setIdentifiant(long identifiant);
+	public long getIdentifiant();
+
+	public void setIdLotMGA(long idLotMGA);
+	public Long getIdLotMGA();
+	
+	public void setIdReconciliation(long idReconciliation);
+	public Long getIdReconciliation();
+}

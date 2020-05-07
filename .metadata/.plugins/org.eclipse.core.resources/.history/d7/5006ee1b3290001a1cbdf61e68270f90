@@ -1,0 +1,382 @@
+package fr.bdf.mga.ws;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
+
+import org.apache.log4j.Logger;
+import org.apache.commons.lang.StringUtils;
+import fr.bdf.mga.bo.FluxMidefBO;
+import fr.bdf.mga.bs.BSFactoryFacade;
+import fr.bdf.mga.bs.FluxMidefBS;
+import fr.bdf.sport.bs.GCMPosteBS;
+import fr.bdf.sport.bs.exceptions.PersistenceException;
+import fr.bdf.sport.db.exceptions.AttributException;
+import fr.bdf.sport.util.SportProperties;
+import fr.hardis.bdfwsspe.BFSITFAdeliaPrcnamSUBMITSTRUCTUR00Result;
+import fr.hardis.bdfwsspe.PortTypeBDFWSSpe;
+
+public class FluxTrocade_java8 implements Callable<String> {
+
+	protected static final String TROCADE_PACKAGE = "fr.spare.trocade";
+	protected static final String ENCODING_XML = "UTF-8";
+	
+	protected static final String SYSTEM_PROPERTY_SSL_KEYSTORE = "javax.net.ssl.keyStore";
+	protected static final String SYSTEM_PROPERTY_SSL_KEYSTORE_PASSWORD = "javax.net.ssl.keyStorePassword";
+	
+	protected static final String SYSTEM_PROPERTY_SSL_TRUSTSTORE = "javax.net.ssl.trustStore";
+	protected static final String SYSTEM_PROPERTY_SSL_TRUSTSTORE_PASSWORD = "javax.net.ssl.trustStorePassword";
+	
+	protected static final String PROPERTY_WSDL_LOCATION = "trocade.wsdlLocation";
+	protected static final String PROPERTY_NAMESPACE_URI = "trocade.namespaceURI";
+	protected static final String PROPERTY_SERVICE_QNAME = "trocade.serviceQname";
+	protected static final String PROPERTY_PORT_QNAME = "trocade.portQname";
+
+	protected static final String PROPERTY_TIMEOUT = "trocade.timeout.seconds";
+	
+	protected static final String PARTNER_CODE = "MGA";
+	public static final String DESTINATAIRE = "TROCADE";
+	protected static final String FLUX_A_ENVOYER = "A_ENVOYER";
+	protected static final String FLUX_EMIS = "EMIS";
+	protected static final String FLUX_RECU = "RECU";
+	public static final String FLUX_A_REEMETTRE = "A_REEMETTRE";
+	protected static final String REPONSE_OK = "OK";
+	protected static final String REPONSE_KO = "KO";
+	public static final String ARA_OK = "ARA_OK";
+	protected static final String ARA_KO = "ARA_KO";
+	public static final String ARA_AUTRE = "AUTRE";
+	
+    protected static final Logger LOG = Logger.getLogger(FluxTrocade.class);
+    
+    protected static int TROCADE_TIMEOUT_SECONDES = 18000;
+    
+    protected String transfertFlux(String fluxXml, String messageType, String nomflux) {
+    	String reponse = null;
+    	PortTypeBDFWSSpe proxy = null;
+
+    	//***************************************************
+    	//creation/recuperation du proxy d'envoi vers Trocade
+		//***************************************************
+    	proxy = TrocadeProxySingleton.getInstance();
+    	LOG.info("Current Trocade proxy: "+proxy);
+		
+		//*************************
+		//Interrogation WS BANKNOTE
+		//*************************
+		if (!nomflux.equals(BankNotesWs.NOM_FLUX)) {
+			BFSITFAdeliaPrcnamSUBMITSTRUCTUR00Result retour = proxy
+					.submitStructuredDataFileToProcessings(PARTNER_CODE,
+							messageType, fluxXml.getBytes(), ENCODING_XML);
+
+				reponse = (retour != null && retour.getContent() != null) ? new String(Base64.getDecoder().decode(Base64.getEncoder().encode(retour.getContent()))) : null;
+
+		} else {
+		//*************************
+		//Interrogation autres WS
+		//*************************
+			byte[] retour = proxy.getShedProduction(PARTNER_CODE, messageType, fluxXml.getBytes(), ENCODING_XML);
+
+			reponse =  (retour != null) ? new String(Base64.getDecoder().decode(Base64.getEncoder().encode(retour))) : null;
+		}
+		
+		return reponse;
+    }
+
+    /**
+     * Insertion d'un flux dans la table FLUX_MIDEF
+     * @param idFlux
+     * @param nomFlux
+     * @param contenuXml
+     * @param reponse
+     * @param atelier
+     * @return
+     */
+    protected long ajoutSuiviFlux(long idFlux, String nomFlux, String contenuXml, String reponse, String atelier) {
+		// Creation du flux MIDEF
+		FluxMidefBO suiviFluxMidef = new FluxMidefBO();
+		suiviFluxMidef.setIdFlux(idFlux);
+		suiviFluxMidef.setNomFlux(nomFlux);
+		suiviFluxMidef.setEmisLe(new Date());
+		if(nomFlux.equals(BankNotesWs.NOM_FLUX)) {
+			suiviFluxMidef.setEtatFlux(FLUX_RECU);
+			suiviFluxMidef.setTentatives(1);
+		} else {
+			suiviFluxMidef.setEtatFlux(FLUX_A_ENVOYER);
+			suiviFluxMidef.setTentatives(1);
+		}
+		suiviFluxMidef.setXmlFlux(contenuXml);
+		suiviFluxMidef.setDestinataire(DESTINATAIRE);
+		suiviFluxMidef.setAtelier(atelier);
+		suiviFluxMidef.setCodeRetour(reponse);
+		try {
+			LOG.info("Ajout de suivi du flux numéro : " + idFlux);
+			getFluxMidefBS().ajouterFluxMidef(suiviFluxMidef);
+		} catch (PersistenceException e) {
+			e.printStackTrace();
+		} catch (AttributException e) {
+			e.printStackTrace();
+		}
+		return idFlux;
+	}
+    
+    /**
+     * Mise à jour synchrone du flux MIDEF via IHM
+     * @param idFlux :identifiant du flux dans la table FLUX_MIDEF
+     * @param reponse :réponse Trocade
+     * @return true si la MAJ est effective
+     */
+    protected boolean updateSuiviFluxIHM(long idFlux,String nomFlux, String reponse) {
+    	boolean isUpdated=false;
+    	FluxMidefBO suiviFluxMidef = new FluxMidefBO();
+    	
+    	//pas de MAJ detat de flux pour BankNotesWs
+    	if(StringUtils.isNotBlank(nomFlux) && !nomFlux.equals(BankNotesWs.NOM_FLUX)) {
+			suiviFluxMidef.setEtatFlux((((reponse != null) && (reponse.equals(REPONSE_OK) || reponse.equals(REPONSE_KO))) ? FLUX_EMIS : FLUX_A_REEMETTRE));
+    	}
+    	// Enregistrement de la reponse pour le flux BankNotesWs
+    	else if (nomFlux.equals(BankNotesWs.NOM_FLUX)){
+    		suiviFluxMidef.setXmlFlux(reponse);
+    	}
+    	suiviFluxMidef.setIdFlux(idFlux);
+		suiviFluxMidef.setCodeRetour((reponse != null && reponse.equals(REPONSE_OK)) ? ARA_OK : (reponse != null && reponse.equals(REPONSE_KO)) ? ARA_KO : ARA_AUTRE);
+		
+    	try {
+			LOG.info("retour Mis à jour flux " + idFlux+" via IHM :"+reponse);
+			getFluxMidefBS().majFluxMidef(suiviFluxMidef);
+			isUpdated = true;
+		} catch (PersistenceException e) {
+			e.printStackTrace();
+		} catch (AttributException e) {
+			e.printStackTrace();
+		}
+		 return isUpdated;
+	}
+    
+   
+    /**
+     * Méthode permettant d'exécuter un thread avec valeur de retour
+     * @param callableList : classe implémentant java.util.concurrent.Callable
+     * @return
+     */
+    protected final String appelWSHelper(final Callable<String> callableList){
+    	//pas besoin d'utiliser un pool de threads (newFixedThreadPool(x)) car on a qu'une tâche à soumettre  à la fois
+		final ExecutorService executor = Executors.newSingleThreadExecutor();
+		
+		String reponse = null;
+		if (StringUtils.isNotBlank(SportProperties.getProprietes().getProperty(PROPERTY_TIMEOUT))){
+			TROCADE_TIMEOUT_SECONDES = Integer.parseInt(SportProperties.getProprietes().getProperty(PROPERTY_TIMEOUT));
+		}
+		try{
+			final Future<String> exec = executor.submit(callableList);
+			//reponse de la méthode Call de la classe passée en paramètre
+			reponse=(String) exec.get(TROCADE_TIMEOUT_SECONDES, TimeUnit.SECONDS);
+		}catch (final TimeoutException e){
+			LOG.info("délai d'attente dépassé. Abandon appel du webservice après "+TROCADE_TIMEOUT_SECONDES+" "+String.valueOf(TimeUnit.SECONDS).toLowerCase());
+		}catch (final InterruptedException e) {
+			e.printStackTrace();
+		}catch (ExecutionException e) {
+			e.printStackTrace();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			executor.shutdown();
+		}
+		return reponse;
+	} 
+    
+    //java 8
+	private List<Callable<String>> mListCallables;
+	
+	private List<Callable<String>> getMListCallables() {
+		return this.mListCallables;
+	}
+	
+	private void setMListCallables(List<Callable<String>> mListCallables) {
+		this.mListCallables = mListCallables;
+	}
+
+    private final ExecutorService mExec = Executors.newFixedThreadPool(
+    		Math.min(mListCallables.size(), 100),
+    		runnable -> {
+    			Thread t = new Thread(runnable);
+    			t.setDaemon(true);
+    			return t;
+    		}
+    );
+    
+    private static Future<String> future;
+    
+    private final static Future<String> getFuture()
+    {
+    	return future;
+    }
+    
+    protected final String appelWSHelperWithThreadPool_java8(final List<Callable<String>> callableList){
+    	//Collection<Callable<String>> tasks = new Collection<Callable<String>>,
+    	//List<Future<?>> listCallables = new ArrayList<>();
+    	/*for (Callable<?> callable : tasks) {
+    	     futures.add(mExec.submit(callable));
+    	}
+    	for (Future<?> future : futures) {
+    	    future.get();
+    	}
+    	*/
+    	    	
+		String reponse = null;
+		if (StringUtils.isNotBlank(SportProperties.getProprietes().getProperty(PROPERTY_TIMEOUT))){
+			TROCADE_TIMEOUT_SECONDES = Integer.parseInt(SportProperties.getProprietes().getProperty(PROPERTY_TIMEOUT));
+		}
+		try{
+
+			//Version 2 : Stream avec CompletableFuture https://medium.com/@kalpads/fantastic-completablefuture-allof-and-how-to-handle-errors-27e8a97144a0
+
+				//A- SupplyAsync pour appel du webservice
+				List<CompletableFuture<Future<String>>> listeCallables = callableList.stream().map(m -> CompletableFuture
+						.supplyAsync(() -> mExec.submit(m)))
+						.collect(Collectors.toList());
+				//B- AllOf permet d'attendre que tous les mExec.submit soit réalisés
+				CompletableFuture<Void> allFutures = CompletableFuture.allOf(listeCallables.toArray(new CompletableFuture[listeCallables.size()]));
+
+				//C- Join pour retourner un objet différent de CompletableFuture<Void>
+				CompletableFuture<List<Future<String>>> allCompletableFutures = allFutures.thenApply(future -> { return listeCallables
+					.stream()
+					.map(completableFuture -> completableFuture.join())
+					.collect(Collectors.toList());
+			});
+			
+				//D- ThenAccept pour terminer le processus sur la nouvelle liste de completableFuture crée
+				CompletableFuture t= allCompletableFutures.thenApply(allSubmits -> {
+					return allSubmits
+							.stream()
+							.filter(Objects::nonNull)
+							//.map(m -> FluxTrocade_java8.getFuture())
+							.collect(Collectors.toList());
+				});
+				
+			//Version 1
+			
+			for(Callable<String> callableElt : callableList)
+			{
+				CompletableFuture.supplyAsync(() -> mExec.submit(callableElt))
+				.thenApply(apply -> {
+					try {
+						return apply.get(TROCADE_TIMEOUT_SECONDES, TimeUnit.SECONDS);
+					} catch (InterruptedException | ExecutionException | TimeoutException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null;
+					}
+				})
+				.thenAccept(s -> System.out.println("Messaged returned s=" + s));
+				
+				//Processus complémentaires si besoin
+				/*
+				.thenCompose(q -> CompletableFuture.supplyAsync(() -> q))
+				.thenCombine(
+					CompletableFuture.supplyAsync(() -> ""), 
+					(a,b) -> a+b);
+				*/
+			}
+			
+			
+						
+			//Faire le thenApply en .get
+			//reponse de la méthode Call de la classe passée en paramètre
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			mExec.shutdown();
+		}
+		return reponse;
+	}
+    //fin java8
+
+    protected final String appelWSHelperWithThreadPool(final Callable<String> callableClazz){
+    	//Collection<Callable<String>> tasks = new Collection<Callable<String>>,
+    	//List<Future<?>> listCallables = new ArrayList<>();
+    	/*for (Callable<?> callable : tasks) {
+    	     futures.add(mExec.submit(callable));
+    	}
+    	for (Future<?> future : futures) {
+    	    future.get();
+    	}
+    	*/
+    			
+		String reponse = null;
+		if (StringUtils.isNotBlank(SportProperties.getProprietes().getProperty(PROPERTY_TIMEOUT))){
+			TROCADE_TIMEOUT_SECONDES = Integer.parseInt(SportProperties.getProprietes().getProperty(PROPERTY_TIMEOUT));
+		}
+		try{
+			
+			final Future<String> exec = mExec.submit(callableClazz);
+			
+			//TODO
+			//Faire le thenApply en .get
+			//reponse de la méthode Call de la classe passée en paramètre
+			reponse=(String) exec.get(TROCADE_TIMEOUT_SECONDES, TimeUnit.SECONDS);
+		}catch (final TimeoutException e){
+			LOG.info("délai d'attente dépassé. Abandon appel du webservice après "+TROCADE_TIMEOUT_SECONDES+" "+String.valueOf(TimeUnit.SECONDS).toLowerCase());
+		}catch (final InterruptedException e) {
+			e.printStackTrace();
+		}catch (ExecutionException e) {
+			e.printStackTrace();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			mExec.shutdown();
+		}
+		return reponse;
+	}
+
+    
+    /**
+     * Inner Classe permettant de wrapper la méthode d'appel du WebService et permettant son appel sous forme de THREAD
+     * @author I2114HJ_DEV
+     *
+     */
+    public final class TransfertFluxAdapter extends FluxTrocade implements Callable<String> {
+        private final String fluxXml;
+        private final String messageType;
+        private final String nomflux;
+        
+        public TransfertFluxAdapter(String fluxXml, String messageType,String nomflux) {
+			this.fluxXml = fluxXml;
+			this.messageType = messageType;
+			this.nomflux = nomflux;
+		}
+        @Override
+        public String call() {
+        	//simulation long temps d'attente du serveur 
+        	//try {Thread.sleep(20000);} catch (InterruptedException e) {e.printStackTrace();}
+        	return transfertFlux(this.fluxXml, this.messageType, this.nomflux);
+        }
+    }
+       
+	protected FluxMidefBS getFluxMidefBS() {
+		return (FluxMidefBS) BSFactoryFacade.getFluxMidefBS();
+	}
+	
+	protected GCMPosteBS getGCMPosteBS() {
+		return (GCMPosteBS) new GCMPosteBS();
+	}
+
+	@Override
+	public String call() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+}

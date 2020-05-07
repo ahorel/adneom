@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="Question1Test" project="question1" tests="1" started="1" failures="1" errors="0" ignored="0">
+  <testsuite name="fr.adneom.question1.Question1Test" time="0.008">
+    <testcase name="run" classname="fr.adneom.question1.Question1Test" time="0.008">
+      <failure>java.lang.AssertionError: expected:&lt;{1=[[1], [2], [3], [4], [5]], 2=[[1, 2], [3, 4], [5]], 3=[[1, 2, 3], [4, 5]]}&gt; but was:&lt;{1=[[1], [2], [3], [4], [5]], 2=[[1], [2], [3], [4], [5]], 3=[[1], [2], [3], [4], [5]]}&gt;&#13;
+	at org.junit.Assert.fail(Assert.java:74)&#13;
+	at org.junit.Assert.failNotEquals(Assert.java:448)&#13;
+	at org.junit.Assert.assertEquals(Assert.java:102)&#13;
+	at org.junit.Assert.assertEquals(Assert.java:117)&#13;
+	at fr.adneom.question1.Question1Test.run(Question1Test.java:73)&#13;
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)&#13;
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)&#13;
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)&#13;
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)&#13;
+	at org.junit.internal.runners.TestMethod.invoke(TestMethod.java:59)&#13;
+	at org.junit.internal.runners.MethodRoadie.runTestMethod(MethodRoadie.java:98)&#13;
+	at org.junit.internal.runners.MethodRoadie$2.run(MethodRoadie.java:79)&#13;
+	at org.junit.internal.runners.MethodRoadie.runBeforesThenTestThenAfters(MethodRoadie.java:87)&#13;
+	at org.junit.internal.runners.MethodRoadie.runTest(MethodRoadie.java:77)&#13;
+	at org.junit.internal.runners.MethodRoadie.run(MethodRoadie.java:42)&#13;
+	at org.junit.internal.runners.JUnit4ClassRunner.invokeTestMethod(JUnit4ClassRunner.java:88)&#13;
+	at org.junit.internal.runners.JUnit4ClassRunner.runMethods(JUnit4ClassRunner.java:51)&#13;
+	at org.junit.internal.runners.JUnit4ClassRunner$1.run(JUnit4ClassRunner.java:44)&#13;
+	at org.junit.internal.runners.ClassRoadie.runUnprotected(ClassRoadie.java:27)&#13;
+	at org.junit.internal.runners.ClassRoadie.runProtected(ClassRoadie.java:37)&#13;
+	at org.junit.internal.runners.JUnit4ClassRunner.run(JUnit4ClassRunner.java:42)&#13;
+	at org.eclipse.jdt.internal.junit4.runner.JUnit4TestReference.run(JUnit4TestReference.java:89)&#13;
+	at org.eclipse.jdt.internal.junit.runner.TestExecution.run(TestExecution.java:41)&#13;
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:541)&#13;
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:763)&#13;
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.run(RemoteTestRunner.java:463)&#13;
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.main(RemoteTestRunner.java:209)&#13;
+&#13;
+</failure>
+    </testcase>
+  </testsuite>
+</testrun>

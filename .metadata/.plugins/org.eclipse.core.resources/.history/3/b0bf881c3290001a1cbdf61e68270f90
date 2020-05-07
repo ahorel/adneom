@@ -1,0 +1,323 @@
+Message-ID: <1638916852.3311.1587740781607.JavaMail.sofacmgr@lxpr429a>
+Subject: Exported From Confluence
+MIME-Version: 1.0
+Content-Type: multipart/related; 
+	boundary="----=_Part_3310_1548821765.1587740781606"
+
+------=_Part_3310_1548821765.1587740781606
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-Location: file:///C:/exported.html
+
+<html xmlns:o=3D'urn:schemas-microsoft-com:office:office'
+      xmlns:w=3D'urn:schemas-microsoft-com:office:word'
+      xmlns:v=3D'urn:schemas-microsoft-com:vml'
+      xmlns=3D'urn:w3-org-ns:HTML'>
+<head>
+    <meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8=
+">
+    <title>26/06/2019 - Retour redHat Summit + KubeCon + D=C3=A9mo OpenShif=
+t</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:TargetScreenSize>1024x640</o:TargetScreenSize>
+            <o:PixelsPerInch>72</o:PixelsPerInch>
+            <o:AllowPNG/>
+        </o:OfficeDocumentSettings>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>90</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+                <!--
+        @page Section1 {
+            size: 8.5in 11.0in;
+            margin: 1.0in;
+            mso-header-margin: .5in;
+            mso-footer-margin: .5in;
+            mso-paper-source: 0;
+        }
+
+        table {
+            border: solid 1px;
+            border-collapse: collapse;
+        }
+
+        table td, table th {
+            border: solid 1px;
+            padding: 5px;
+        }
+
+        td {
+            page-break-inside: avoid;
+        }
+
+        tr {
+            page-break-after: avoid;
+        }
+
+        div.Section1 {
+            page: Section1;
+        }
+
+        /* Confluence print stylesheet. Common to all themes for print medi=
+a */
+/* Full of !important until we improve batching for print CSS */
+
+@media print {
+    #main {
+        padding-bottom: 1em !important; /* The default padding of 6em is to=
+o much for printouts */
+    }
+
+    body {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        font-size: 10pt;
+        line-height: 1.2;
+    }
+
+    body, #full-height-container, #main, #page, #content, .has-personal-sid=
+ebar #content {
+        background: #fff !important;
+        color: #000 !important;
+        border: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    a, a:link, a:visited, a:focus, a:hover, a:active {
+        color: #000;
+    }
+
+    #content h1,
+    #content h2,
+    #content h3,
+    #content h4,
+    #content h5,
+    #content h6 {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        page-break-after: avoid;
+    }
+
+    pre {
+        font-family: Monaco, "Courier New", monospace;
+    }
+
+    #header,
+    .aui-header-inner,
+    #navigation,
+    #sidebar,
+    .sidebar,
+    #personal-info-sidebar,
+    .ia-fixed-sidebar,
+    .page-actions,
+    .navmenu,
+    .ajs-menu-bar,
+    .noprint,
+    .inline-control-link,
+    .inline-control-link a,
+    a.show-labels-editor,
+    .global-comment-actions,
+    .comment-actions,
+    .quick-comment-container,
+    #addcomment {
+        display: none !important;
+    }
+
+    /* CONF-28544 cannot print multiple pages in IE */
+    #splitter-content {
+        position: relative !important;
+    }
+
+    .comment .date::before {
+        content: none !important; /* remove middot for print view */
+    }
+
+    h1.pagetitle img {
+        height: auto;
+        width: auto;
+    }
+
+    .print-only {
+        display: block;
+    }
+
+    #footer {
+        position: relative !important; /* CONF-17506 Place the footer at en=
+d of the content */
+        margin: 0;
+        padding: 0;
+        background: none;
+        clear: both;
+    }
+
+    #poweredby {
+        border-top: none;
+        background: none;
+    }
+
+    #poweredby li.print-only {
+        display: list-item;
+        font-style: italic;
+    }
+
+    #poweredby li.noprint {
+        display: none;
+    }
+
+    /* no width controls in print */
+    .wiki-content .table-wrap,
+    .wiki-content p,
+    .panel .codeContent,
+    .panel .codeContent pre,
+    .image-wrap {
+        overflow: visible !important;
+    }
+
+    /* TODO - should this work? */
+    #children-section,
+    #comments-section .comment,
+    #comments-section .comment .comment-body,
+    #comments-section .comment .comment-content,
+    #comments-section .comment p {
+        page-break-inside: avoid;
+    }
+
+    #page-children a {
+        text-decoration: none;
+    }
+
+    /**
+     hide twixies
+
+     the specificity here is a hack because print styles
+     are getting loaded before the base styles. */
+    #comments-section.pageSection .section-header,
+    #comments-section.pageSection .section-title,
+    #children-section.pageSection .section-header,
+    #children-section.pageSection .section-title,
+    .children-show-hide {
+        padding-left: 0;
+        margin-left: 0;
+    }
+
+    .children-show-hide.icon {
+        display: none;
+    }
+
+    /* personal sidebar */
+    .has-personal-sidebar #content {
+        margin-right: 0px;
+    }
+
+    .has-personal-sidebar #content .pageSection {
+        margin-right: 0px;
+    }
+
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}
+-->
+    </style>
+</head>
+<body>
+    <h1>26/06/2019 - Retour redHat Summit + KubeCon + D=C3=A9mo OpenShift</=
+h1>
+    <div class=3D"Section1">
+        <p>Le mercredi 26 Juin 2019 a eu lieu dans le grand hall un retour =
+sur la participation de plusieurs membres de l'=C3=A9quipe ECLAIR =C3=A0 de=
+s events RedHat et Kubernetes.</p>
+<p>L'id=C3=A9e =C3=A9tait de partager les infos recueillies, r=C3=A9aliser =
+une premi=C3=A8re d=C3=A9monstration de OpenShift et distribuer quelques go=
+odies r=C3=A9cup=C3=A9r=C3=A9s sur place</p>
+<p>Extrait de l'invitation</p>
+<p><em>Quel meilleur moment que ce d=C3=A9but d=E2=80=99=C3=A9t=C3=A9 pour =
+vous donner des nouvelles du CLOUD avant les grandes vacances&nbsp;?</em></=
+p>
+<p><em>Venez pour&nbsp;:</em></p>
+<ul>
+<li><em>Un aper=C3=A7u de ce que nous avons vu au summit RedHat et =C3=A0 l=
+a KubeCon sur les derni=C3=A8res tendances du CLOUD</em></li>
+<li><em>Une d=C3=A9monstration de notre nouveau produit OpenShift</em></li>
+<li><em>Des goodies =C3=A0 gagner en direct de Boston et de Barcelone</em><=
+/li>
+<li><em>Un moment d=E2=80=99=C3=A9change informel o=C3=B9 vous pourrez pose=
+r toutes vos questions =C3=A0 l=E2=80=99=C3=A9quipe ECLAIR =C3=A9largie</em=
+></li>
+</ul>
+<h1 id=3D"id-26/06/2019-RetourredHatSummit+KubeCon+D=C3=A9moOpenShift-Pr=C3=
+=A9sentationpowerpoint"><span style=3D"color: rgb(0,51,102);">Pr=C3=A9senta=
+tion powerpoint</span></h1>
+<p>Les slides pr=C3=A9sent=C3=A9s le jour J (inclus les slides masqu=C3=A9s=
+ ainsi que les commentaires)</p>
+<p><img height=3D"250" style=3D"margin: 2px; border: 1px solid #ddd; box-si=
+zing: border-box; vertical-align: text-bottom;" src=3D"479ac39291a4369509d2=
+4d0455d76099" width=3D"250"></p>
+<h1 id=3D"id-26/06/2019-RetourredHatSummit+KubeCon+D=C3=A9moOpenShift-Quelq=
+uesphotos">Quelques photos</h1>
+<p><br></p>
+<h1 id=3D"id-26/06/2019-RetourredHatSummit+KubeCon+D=C3=A9moOpenShift-Quelq=
+ueslienssurladocumentationOpenshiftCATALYSE">Quelques liens sur la document=
+ation Openshift CATALYSE</h1>
+<ul>
+<li><a href=3D"/confluence/pages/viewpage.action?pageId=3D697401381">Projet=
+ Openshift - OCP / OCS - page d'introduction</a></li>
+<li><a href=3D"/confluence/display/ECLAIR/Welcome+Kit">Welcome Kit</a></li>
+</ul>
+<p><br></p>
+    </div>
+</body>
+</html>
+------=_Part_3310_1548821765.1587740781606
+Content-Type: application/octet-stream
+Content-Transfer-Encoding: base64
+Content-Location: file:///C:/479ac39291a4369509d24d0455d76099
+
+iVBORw0KGgoAAAANSUhEUgAAAPoAAAD6CAMAAAC/MqoPAAADAFBMVEX19fXv7+98fHx1dXV9fX23
+t7eenp5wcHDn5+f09PTz8/Pd3d2SkpLY2Njt7e3Q0NCioqJycnKqqqq7u7uurq6CgoKGhobOzs7D
+w8PR0dGNjY3Hx8fj4+PGxsbS0tKoqKgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAABYhwFnAAAFLElEQVR42u3ci3KiSBSA4QMCTdpLMF5ijJPxUfch9v32WjU1tbOb
+ica7yHITEM2MqZqNWf2/qRqwPTZ96AOaQBQBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+gP8B42024242lSNDfdOcn9EOdi3bPTrWNt0zSt2xXxNtO28yKPNNtnJ0tccqmzOadfWfhr/rWX+X
+Ljj1yptsxfLLLY2eszDbnWBxXPgZpV6fVmbLQPzn+uJkqZ/mNHer7pKVO1U/2WnuJKk3rIft6nWl
+cVFn+Kb3+3b16bp5qvmwTrHR6SxfX1hy1koVXCn80NSo7D9/vgV/ZQX5g9HJZp1Pc6RO6qRO6u/i
+R3hmndRJndRJndRJndRJndTfV+pa60tKPUp2lV5JrthTudKXkvrsyQ0n20se1DciwdPlzPq1TL3H
+nkS/kf97KnJ9klk/yYWnwJzLSFeqZvuxHoSp27PNt8LPKfXaWK9kKfXKxByvRKozvThB6qf5vcQH
+VbhdxjXvvxN+TqlLy6puV+uqJZeUunwwvVv36sq99ax7uazUpWHXLNW0arYhl5b6DwznMzypv7PU
+/Vfd+un6Z5S6+apkfPOcUg9ec3vwG6XOTeEAAAAAAAAAAOBHeDjcPEyEa25fBaodNWVPfhj2JGmI
+YgLVKf/1cRL60Sk1FGS9HqvRUarihi9UyVLEiK89N0yl+ruXcvKQPOyQF57IxtpQN4bcRqPMh9/s
+q23qcUi/e+jVbUdeTD3v9VhdT+t+RaRW07pdCxt0M+6042jt7f71cxYiedg3c0xsLwd5X9MV238W
+mbRHft40ePpq3Y3imLht4c9Klw+j5vZoGfYePR/+59WeHas9CYdlWLfjYq/SX1pRb0Nzs/7p59nu
+2Apt62C68g1fDGuykrUfXberRp371nRlLqPtN2QTT7KfhUTSsLg7y7da02w5FM8bD0bS2viH94iq
+7jU5tXDHFmZ9v3SG2+/RGW6rQw20bYbHwE04IU6xVyeczY9mHCGtoNRNqS2qXaXT7fWSzqPHaU13
+nGRwWYjkYWl3utYtLMNZVNoof1FCdqwHB/dGVRVSrzr7BW+r+53Ub8PSKww871UZydCHg/0SLLdF
+VRy/MsgHZHra6CaP62HvOtxbhZCdcQ/voyOtsIzPR9ngs+u5v8bCc8beIdKTSfivl++idfu5HNMy
+Ol92zn2fRaZzkXk3jJ8Xe52HYwyiS6l/Hjgad9vcxwNfS+SMJ076JVXjsFt9sJ/Uo8hoXliGfjOM
+0UungORmPm3nTSquB7Wd9YF6KFRKuhaWXrtTnHXZne2816AYMTwwiKxNxxmq/ADLnqmn1d1Sono7
+IbuznlbDzlIp96XUazdxqamsaRAXbVRY6YD1/j1+cWizl6xUo7h6eqQ2yr1mBf+91N1OfH6IejBK
+qdvbk7Ny1G7IbuoP0RtfYRmdkG9u9gp+az3xGtoe50fz1+gGXpkG2/OmTDvP1UPlNXt05ZeWVNfR
+g6Wr7VVU2lpHw8t7Da61vj7ize0+UJM4zbCHZuGLy5QtVXP7JhkYwYGQ/KhztaXz5aeBMZj9889T
+vZT69jQ3t0aLidn9I2tarZJJWOVHZHd9aLDzzVLaX4J1/A7bC3yjH+4Bx/eNTrHXpfb9kVOa6uF+
+BXy5s+LxeIbvTwrb88xgvfmcTVw0/ixkWOp2E/iNWb4M/nI+hTu/uzz/D67Dlz5avlDwOAfq25/d
+AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFyCfwFG5j648P0CjwAAAABJRU5ErkJggg==
+------=_Part_3310_1548821765.1587740781606--

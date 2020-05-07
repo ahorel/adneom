@@ -1,0 +1,1001 @@
+package fr.bdf.mga.ws;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.MimeHeader;
+import javax.xml.soap.SOAPBody;
+import javax.xml.soap.SOAPConnection;
+import javax.xml.soap.SOAPConnectionFactory;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPEnvelope;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPPart;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
+
+import fr.bdf.mga.bo.ColisBO;
+import fr.bdf.mga.bo.FluxMidefBO;
+import fr.bdf.mga.bs.BSFactoryFacade;
+import fr.bdf.mga.bs.FluxMidefBS;
+import fr.bdf.mga.ds.DSFactoryFacade;
+import fr.bdf.mga.ds.FluxMidefDS;
+import fr.bdf.mga.util.ConstantesUtils;
+import fr.bdf.mga.ws.vo.ArticleWsVO;
+import fr.bdf.mga.ws.vo.OriginalPackage;
+import fr.bdf.mga.ws.vo.PackageWsVO;
+import fr.bdf.mga.ws.vo.PackagesVO;
+import fr.bdf.mga.ws.vo.RedEndOfSessionVO;
+import fr.bdf.mga.ws.vo.ValDiscrepanciesVO;
+import fr.bdf.sport.bo.LigneBO;
+import fr.bdf.sport.bo.RattachementBO;
+import fr.bdf.sport.bs.GCMPosteFactoryBS;
+import fr.bdf.sport.bs.IGCMPosteBS;
+import fr.bdf.sport.bs.exceptions.ObjetIncompletException;
+import fr.bdf.sport.bs.exceptions.ObjetInconnuException;
+import fr.bdf.sport.bs.exceptions.PersistenceException;
+import fr.bdf.sport.db.exceptions.AccesBaseException;
+import fr.bdf.sport.db.exceptions.AttributException;
+import fr.bdf.sport.transaction.ITransaction;
+import fr.bdf.sport.util.SportProperties;
+import fr.bdf.sport.util.Util;
+
+public class MogesWs_java8 {
+
+	private static Logger log = Logger.getLogger( MogesWs_java8.class ); 
+	public static final String DESTINATAIRE_MOGES = "MOGES";
+	// Mise a jour du format de la date des flux Moges
+	public static final String formatDate = "yyyy-MM-dd'T'HH:mm:ss";
+	public static final String NOM_FLUX_DIFF = "DIFFERENCE";
+	public static final String NOM_FLUX_MULTI_COMPT = "MULTI_COMPTEUR";
+	public static final String NOM_FLUX_POCHETTES_ATY = "POCHETTES_ATY";
+	
+	
+	public static final String ETAT_OK = "EMIS";
+	public static final String ETAT_KO = "A_REEMETTRE";
+	public static final String ETAT_RECU = "RECU";
+	public static final String ETAT_A_ENVOYER = "A_ENVOYER";
+	
+	public static final String CODE_OK = "ARA_OK";
+	public static final String CODE_KO = "ARA_KO";
+	public static final String CODE_AUTRE = "AUTRE";
+	
+	public static final String TYPE_EVENEMENT_INCIDENT = "INC";
+	
+	public static final String IDENTIFIER_DIFFERENCE = "/tran/difftri";
+	public static final String IDENTIFIER_MULTI_COMPTEUR = "/tran/annrestri";
+	public static final String IDENTIFIER_POCHETTES_ATY = "/tran/anncolis";
+	
+	
+	public String getUrlMoges(){
+		Properties config = SportProperties.getProprietes();
+		return config.getProperty("webservice.moges.url");
+	}
+	
+	public List<FluxMidefBO> emissionFluxDifferenceIHM(List<ValDiscrepanciesVO> listDonneesAEnvoyer){
+
+		List<FluxMidefBO> listFlux = new ArrayList<FluxMidefBO>();
+
+		try {
+			// Liste des donnees a envoyer
+			Iterator<ValDiscrepanciesVO> itListDonnees = listDonneesAEnvoyer.iterator();
+			while (itListDonnees.hasNext()){
+				ValDiscrepanciesVO valXml = itListDonnees.next();
+
+				//QC 146: pas de flux à générer pour les fautés: pas de flux à générer si pas de deficit ou d'excédent
+				//si les données contiennent des deficits ou des excédents c'est à dire des billets autres que des billets fautés alors on crée le flux
+				// QC 199 Regression : Controle si AnomaliesDEF et AnomaliesEXC n est pas null
+				if( (valXml.getAnomaliesDEF() != null && valXml.getAnomaliesDEF().size()>0) || (valXml.getAnomaliesEXC()!=null && valXml.getAnomaliesEXC().size()>0) ){
+
+					//creation du flux
+					FluxMidefBO flux = new FluxMidefBO();
+
+					//On vérifie le type de Flux de l'Atelier
+					LigneBO ligneBO = null;
+					RattachementBO rattachementBO;
+					String numeroLigne = null;
+					try {
+						if(valXml.getListLotsMGA()!= null && valXml.getListLotsMGA().size() != 0){
+							rattachementBO = (RattachementBO) getGCMPosteBS().trouverRattachementPourMachine(valXml.getListLotsMGA().get(0).getNumeroMachine(), valXml.getListLotsMGA().get(0).getDerniereReception());
+							if (rattachementBO != null) numeroLigne = rattachementBO.getNumeroLigne();
+						}
+						else{
+							numeroLigne = valXml.getNumeroLigne();
+						}
+						ligneBO = (LigneBO) getGCMPosteBS().trouverLigne(numeroLigne);
+
+					} catch (ObjetIncompletException e1) {
+						// TODO Bloc catch auto-généré
+						e1.printStackTrace();
+					} catch (ObjetInconnuException e) {
+						// TODO Bloc catch auto-généré
+						e.printStackTrace();
+					}
+
+	                // QC 1070 : Ajout des ateliers IEDOM dans la liste des ateliers avec envoi de flux
+					if(ligneBO == null || (!ConstantesUtils.ATELIERS_AVEC_FLUX.contains(ligneBO.getCodeTypeFluxMidef()))) continue;
+
+					String atelier = valXml.getNumeroLigne();
+
+					// Identifiant du flux : SEQ_FlUX_MIDEF.nextVal
+					Long idFlux = getFluxMidefBS().nextValIdFluxMidef();
+					valXml.setAttrFlowId(Long.toString(idFlux));
+
+					// Creation du fichier XML
+					String xml = creationFichierXml(valXml);
+
+					// Creation du flux MIDEF
+					flux.setIdFlux(idFlux);
+					flux.setDestinataire(DESTINATAIRE_MOGES);
+					flux.setNomFlux(NOM_FLUX_DIFF);
+					flux.setXmlFlux(xml);
+					flux.setTentatives(1);
+					flux.setEmisLe(new Date());
+					flux.setListLotsMGA(valXml.getListLotsMGA());
+					flux.setListLotsMGAPc(valXml.getListLotsMGAPc());
+					flux.setAtelier(atelier);
+					flux.setEtatFlux(ETAT_A_ENVOYER);
+					
+					//QC 311 insertion flux en base avant envoi vers MOGES
+					getFluxMidefBS().ajouterFluxMidef(flux);
+
+					try{
+						// Appel du web service
+						SOAPMessage reponseWS = appelWsSoap(getUrlMoges(), flux);
+
+						String codeRetour = CODE_AUTRE;
+						
+						if(reponseWS != null){
+							
+							// Gestion du code retour
+							codeRetour = controleRetourWs(reponseWS, flux);
+							
+							// Affichage du resultat
+							TransformerFactory transformerFactory = TransformerFactory.newInstance();
+							Transformer transformer;
+							try {
+								transformer = transformerFactory.newTransformer();
+								Source sourceContent = reponseWS.getSOAPPart().getContent();
+								StringWriter writer = new StringWriter();
+
+								StreamResult result = new StreamResult(writer);
+								transformer.transform(sourceContent, result);
+								log.debug("********************************** emissionFluxDifferenceIHM ********************************************");
+								log.debug("\nResponse SOAP Message = "+writer.toString());
+							} catch (TransformerConfigurationException e) {
+								e.printStackTrace();
+							} catch (SOAPException e) {
+								e.printStackTrace();
+							} catch (TransformerException e) {
+								e.printStackTrace();
+							}
+						}
+
+						if(CODE_OK.equals(codeRetour)){
+							flux.setCodeRetour(CODE_OK);
+							flux.setEtatFlux(ETAT_OK);						
+						}
+						else if(CODE_KO.equals(codeRetour)){
+							flux.setCodeRetour(CODE_KO);
+							flux.setEtatFlux(ETAT_KO);						
+						}
+						else if(CODE_AUTRE.equals(codeRetour)){
+							flux.setCodeRetour(CODE_AUTRE);
+							flux.setEtatFlux(ETAT_KO);						
+						}
+
+					} catch (Exception e) {
+						flux.setCodeRetour(CODE_AUTRE);
+						flux.setEtatFlux(ETAT_KO);
+						log.error("Erreur lors de l'appel du web service Moges. \n" + e.getMessage());
+					}					
+					listFlux.add(flux);
+				}
+			}
+		} catch (PersistenceException e) {
+			e.printStackTrace();
+		} catch (AttributException e) {
+			e.printStackTrace();
+		}
+
+		if(listFlux.size() == 0) return null;
+
+		return listFlux;
+	}
+	
+	public FluxMidefBO emissionFluxMultiCompteurIHM(RedEndOfSessionVO donneesAEnvoyer){
+
+		FluxMidefBO flux = new FluxMidefBO();
+		try {
+
+				// Identifiant du flux : SEQ_FlUX_MIDEF.nextVal
+				Long idFlux = getFluxMidefBS().nextValIdFluxMidef();
+				donneesAEnvoyer.setAttrFlowId(Long.toString(idFlux));
+				String atelier = donneesAEnvoyer.getNumeroLigne();
+				
+				// Creation du fichier XML
+				String xml = creationFichierXmlMultiCompteur(donneesAEnvoyer);
+
+				// Creation du flux MIDEF
+
+				flux.setIdFlux(idFlux);
+				flux.setDestinataire(DESTINATAIRE_MOGES);
+				flux.setNomFlux(NOM_FLUX_MULTI_COMPT);
+				flux.setXmlFlux(xml);
+				flux.setTentatives(1);
+				flux.setEmisLe(new Date());
+				flux.setAtelier(atelier);
+				flux.setEtatFlux(ETAT_A_ENVOYER);
+				
+				//QC 311 insertion flux en base avant envoi vers MOGES
+				getFluxMidefBS().ajouterFluxMidef(flux);
+				
+				// Appel du web service
+				SOAPMessage reponseWS = appelWsSoap(getUrlMoges(), flux);
+
+				String codeRetour = CODE_AUTRE;
+				
+				if(reponseWS != null){
+
+					// Gestion du code retour 
+					codeRetour = controleRetourWs(reponseWS, flux);
+					
+					// Affichage de la reponse
+					TransformerFactory transformerFactory = TransformerFactory.newInstance();
+					Transformer transformer;
+					try {
+						transformer = transformerFactory.newTransformer();
+						Source sourceContent = reponseWS.getSOAPPart().getContent();
+						StringWriter writer = new StringWriter();
+
+						StreamResult result = new StreamResult(writer);
+						transformer.transform(sourceContent, result);
+						log.debug("********************************** emissionFluxMultiCompteurIHM ********************************************");
+						log.debug("\nResponse SOAP Message = "+writer.toString());
+					} catch (TransformerConfigurationException e) {
+						e.printStackTrace();
+					} catch (SOAPException e) {
+						e.printStackTrace();
+					} catch (TransformerException e) {
+						e.printStackTrace();
+					}
+	
+				}
+								
+				
+				if(CODE_OK.equals(codeRetour)){
+					flux.setCodeRetour(CODE_OK);
+					flux.setEtatFlux(ETAT_OK);						
+				}
+				else if(CODE_KO.equals(codeRetour)){
+					flux.setCodeRetour(CODE_KO);
+					flux.setEtatFlux(ETAT_KO);						
+				}
+				else if(CODE_AUTRE.equals(codeRetour)){
+					flux.setCodeRetour(CODE_AUTRE);
+					flux.setEtatFlux(ETAT_KO);						
+				}
+
+
+				
+		} catch (PersistenceException e) {
+			e.printStackTrace();
+		} catch (AttributException e) {
+			e.printStackTrace();
+		}
+	
+		return flux;
+	}
+	
+	
+	public FluxMidefBO emissionFluxPochettesAtyIHM(PackagesVO donneesAEnvoyer){
+
+		FluxMidefBO flux = new FluxMidefBO();
+		try {
+
+				// Identifiant du flux : SEQ_FlUX_MIDEF.nextVal
+				Long idFlux = getFluxMidefBS().nextValIdFluxMidef();
+				donneesAEnvoyer.setAttrFlowId(Long.toString(idFlux));
+				String atelier = donneesAEnvoyer.getNumeroLigne();
+				
+				// Creation du fichier XML
+				String xml = creationFichierXmlPochettesAty(donneesAEnvoyer);
+
+				// Creation du flux MIDEF
+				flux.setIdFlux(idFlux);
+				flux.setDestinataire(DESTINATAIRE_MOGES);
+				flux.setNomFlux(NOM_FLUX_POCHETTES_ATY);
+				flux.setXmlFlux(xml);
+				flux.setTentatives(1);
+				flux.setEmisLe(new Date());
+				flux.setAtelier(atelier);
+				flux.setEtatFlux(ETAT_A_ENVOYER);
+				
+				//QC 311 insertion flux en base avant envoi vers MOGES
+				getFluxMidefBS().ajouterFluxMidef(flux);
+				
+				// Appel du web service
+				SOAPMessage reponseWS = appelWsSoap(getUrlMoges(), flux);
+
+				String codeRetour = CODE_AUTRE;
+				
+				if(reponseWS != null){
+					
+					// Gestion du code retour
+					codeRetour = controleRetourWs(reponseWS, flux);
+					
+					// Affichage du resultat
+					TransformerFactory transformerFactory = TransformerFactory.newInstance();
+					Transformer transformer;
+					try {
+						transformer = transformerFactory.newTransformer();
+						Source sourceContent = reponseWS.getSOAPPart().getContent();
+						StringWriter writer = new StringWriter();
+
+						StreamResult result = new StreamResult(writer);
+						transformer.transform(sourceContent, result);
+						log.debug("********************************** emissionFluxPochettesAtyIHM ********************************************");
+						log.debug("\nResponse SOAP Message = "+writer.toString());
+					} catch (TransformerConfigurationException e) {
+						e.printStackTrace();
+					} catch (SOAPException e) {
+						e.printStackTrace();
+					} catch (TransformerException e) {
+						e.printStackTrace();
+					}
+
+				} 
+				
+
+				
+				if(CODE_OK.equals(codeRetour)){
+					flux.setCodeRetour(CODE_OK);
+					flux.setEtatFlux(ETAT_OK);						
+				}
+				else if(CODE_KO.equals(codeRetour)){
+					flux.setCodeRetour(CODE_KO);
+					flux.setEtatFlux(ETAT_KO);						
+				}
+				else if(CODE_AUTRE.equals(codeRetour)){
+					flux.setCodeRetour(CODE_AUTRE);
+					flux.setEtatFlux(ETAT_KO);						
+				}
+
+		} catch (PersistenceException e) {
+			e.printStackTrace();
+		} catch (AttributException e) {
+			e.printStackTrace();
+		}
+	
+		return flux;
+	}
+	//java 8 
+	public void emissionFluxBatch_java8(String nom, String etat, String fichierProperties, ITransaction tnx) {
+		
+		try {
+			Properties config = new Properties();
+			InputStream propertiesStream = this.getClass().getClassLoader().getResourceAsStream(fichierProperties);
+			final String url = config.getProperty("webservice.moges.url");
+			if(propertiesStream!= null){
+				config.load(propertiesStream);
+				//url = config.getProperty("webservice.moges.url");
+			}
+			
+			// Liste les flux a envoyer
+			List<FluxMidefBO> listFluxAEnvoyer;
+			listFluxAEnvoyer = getFluxMidefDS().trouverFluxMidefAReemettre(nom, etat, DESTINATAIRE_MOGES, null, tnx);
+			log.info("Nombre de Flux "+nom+" A Reemettre:"+listFluxAEnvoyer.size());
+			
+			//Debut code java 8 
+			List<CompletableFuture<SOAPMessage>> listCompletableFutureSoapMessages = listFluxAEnvoyer.stream()
+			.map(m -> m);
+			// TODO : transformer en mExec.appelWsSoap_java8
+			/*	private void setMListCallables(List<Callable<String>> mListCallables) {
+		this.mListCallables = mListCallables;
+	}
+
+    private final ExecutorService mExec = Executors.newFixedThreadPool(
+    		Math.min(mListCallables.size(), 100),
+    		runnable -> {
+    			Thread t = new Thread(runnable);
+    			t.setDaemon(true);
+    			return t;
+    		}
+    );*/
+				CompletableFuture.supplyAsync(() -> MogesWs.appelWsSoap_java8(url,m))
+				
+				)
+			.collect(Collectors.toList());
+			
+			//Code existant java 7
+			Iterator<FluxMidefBO> itListFluxAEnvoyer = listFluxAEnvoyer.iterator(); 
+			while(itListFluxAEnvoyer.hasNext()){
+				
+				FluxMidefBO fluxAEnvoyer = itListFluxAEnvoyer.next();
+				// Appel du web service
+				log.info("Appel du web service "+url+" pour le flux "+nom);
+				SOAPMessage reponseWS = appelWsSoap(url, fluxAEnvoyer);
+				
+				if(reponseWS != null){
+					
+					// Affichage du resultat
+					TransformerFactory transformerFactory = TransformerFactory.newInstance();
+					Transformer transformer;
+					try {
+						transformer = transformerFactory.newTransformer();
+						Source sourceContent = reponseWS.getSOAPPart().getContent();
+						StringWriter writer = new StringWriter();
+
+						StreamResult result = new StreamResult(writer);
+						transformer.transform(sourceContent, result);
+						log.debug("********************************** emissionFluxBatch ********************************************");
+						log.debug("\nResponse SOAP Message = "+writer.toString());
+					} catch (TransformerConfigurationException e) {
+						e.printStackTrace();
+					} catch (SOAPException e) {
+						e.printStackTrace();
+					} catch (TransformerException e) {
+						e.printStackTrace();
+					}
+					
+					// MAJ du statut du flux
+					String codeRetour = controleRetourWs(reponseWS, fluxAEnvoyer);
+					
+					if(CODE_OK.equals(codeRetour)){
+						fluxAEnvoyer.setCodeRetour(CODE_OK);
+						fluxAEnvoyer.setEtatFlux(ETAT_OK);						
+					}
+					else if(CODE_KO.equals(codeRetour)){
+						fluxAEnvoyer.setCodeRetour(CODE_KO);
+						fluxAEnvoyer.setEtatFlux(ETAT_KO);						
+					}
+					else if(CODE_AUTRE.equals(codeRetour)){
+						fluxAEnvoyer.setCodeRetour(CODE_AUTRE);
+						fluxAEnvoyer.setEtatFlux(ETAT_KO);						
+					}
+					fluxAEnvoyer.setTentatives(fluxAEnvoyer.getTentatives()+1);
+					getFluxMidefDS().majFluxMidef(fluxAEnvoyer, tnx);					
+				}else{
+					log.error("Erreur lors de l'envoi du flux " + fluxAEnvoyer.getNomFlux() + " : " + fluxAEnvoyer.getIdFlux()
+								+ "\n La réponse est nulle ! ");
+				}
+
+			}
+			
+		} catch (AccesBaseException e) {
+			e.printStackTrace();
+		} catch (AttributException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}	
+	//fin java 8
+	
+public void emissionFluxBatch(String nom, String etat, String fichierProperties, ITransaction tnx) {
+		
+		try {
+			Properties config = new Properties();
+			InputStream propertiesStream = this.getClass().getClassLoader().getResourceAsStream(fichierProperties);
+			String url = "";
+			if(propertiesStream!= null){
+				config.load(propertiesStream);
+				url = config.getProperty("webservice.moges.url");
+			}
+			
+			// Liste les flux a envoyer
+			List<FluxMidefBO> listFluxAEnvoyer;
+			listFluxAEnvoyer = getFluxMidefDS().trouverFluxMidefAReemettre(nom, etat, DESTINATAIRE_MOGES, null, tnx);
+			log.info("Nombre de Flux "+nom+" A Reemettre:"+listFluxAEnvoyer.size());
+			Iterator<FluxMidefBO> itListFluxAEnvoyer = listFluxAEnvoyer.iterator(); 
+			while(itListFluxAEnvoyer.hasNext()){
+				
+				FluxMidefBO fluxAEnvoyer = itListFluxAEnvoyer.next();
+				// Appel du web service
+				log.info("Appel du web service "+url+" pour le flux "+nom);
+				SOAPMessage reponseWS = appelWsSoap(url, fluxAEnvoyer);
+				
+				if(reponseWS != null){
+					
+					// Affichage du resultat
+					TransformerFactory transformerFactory = TransformerFactory.newInstance();
+					Transformer transformer;
+					try {
+						transformer = transformerFactory.newTransformer();
+						Source sourceContent = reponseWS.getSOAPPart().getContent();
+						StringWriter writer = new StringWriter();
+
+						StreamResult result = new StreamResult(writer);
+						transformer.transform(sourceContent, result);
+						log.debug("********************************** emissionFluxBatch ********************************************");
+						log.debug("\nResponse SOAP Message = "+writer.toString());
+					} catch (TransformerConfigurationException e) {
+						e.printStackTrace();
+					} catch (SOAPException e) {
+						e.printStackTrace();
+					} catch (TransformerException e) {
+						e.printStackTrace();
+					}
+					
+					// MAJ du statut du flux
+					String codeRetour = controleRetourWs(reponseWS, fluxAEnvoyer);
+					
+					if(CODE_OK.equals(codeRetour)){
+						fluxAEnvoyer.setCodeRetour(CODE_OK);
+						fluxAEnvoyer.setEtatFlux(ETAT_OK);						
+					}
+					else if(CODE_KO.equals(codeRetour)){
+						fluxAEnvoyer.setCodeRetour(CODE_KO);
+						fluxAEnvoyer.setEtatFlux(ETAT_KO);						
+					}
+					else if(CODE_AUTRE.equals(codeRetour)){
+						fluxAEnvoyer.setCodeRetour(CODE_AUTRE);
+						fluxAEnvoyer.setEtatFlux(ETAT_KO);						
+					}
+					fluxAEnvoyer.setTentatives(fluxAEnvoyer.getTentatives()+1);
+					getFluxMidefDS().majFluxMidef(fluxAEnvoyer, tnx);					
+				}else{
+					log.error("Erreur lors de l'envoi du flux " + fluxAEnvoyer.getNomFlux() + " : " + fluxAEnvoyer.getIdFlux()
+								+ "\n La réponse est nulle ! ");
+				}
+
+			}
+			
+		} catch (AccesBaseException e) {
+			e.printStackTrace();
+		} catch (AttributException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	
+	
+	private String creationFichierXmlPochettesAty(PackagesVO donneesXml){
+		
+		StringBuffer toReturn= new StringBuffer();
+		
+		// On construit le XML a envoyer
+		toReturn.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		toReturn.append("<packages xmlns=\"http://schema.escb.eu/fr/spare/moges/V1\" ");
+		toReturn.append("flowId=\""+donneesXml.getAttrFlowId()+"\" " + "emissionDate=\""+donneesXml.getAttrEmissionDate()+"\">\n");
+			toReturn.append("<cashCenterGln>"+donneesXml.getCashCenterGln()+"</cashCenterGln>\n");
+			toReturn.append("<operationDateTime>"+donneesXml.getOperationDateTime()+"</operationDateTime>\n");
+			toReturn.append("<location code=\""+donneesXml.getAttrCodelocation()+"\">\n");
+				toReturn.append("<libelle>"+donneesXml.getLibelleLocation()+"</libelle>\n");
+			toReturn.append("</location>\n");
+			
+			Iterator<PackageWsVO> itPackages = donneesXml.getListPackageWs().iterator();
+			while(itPackages.hasNext()){
+				PackageWsVO packageWs = itPackages.next();
+				toReturn.append("<package sscc=\""+packageWs.getSsccBac()+"\">\n");
+
+				Iterator<OriginalPackage> itOriginalPackage = packageWs.getListOriginalPackage().iterator();
+				while(itOriginalPackage.hasNext()){
+					OriginalPackage originalPackage = itOriginalPackage.next();
+					//QC 222 les rejets authentiques n'ont pas de colis d'origine
+					if(originalPackage.getSsccOrigin()== null || originalPackage.getSsccOrigin().equals(ColisBO.SSCC_INCONNU))
+						toReturn.append("<originalPackage>\n");
+					else
+						toReturn.append("<originalPackage sscc=\""+originalPackage.getSsccOrigin()+"\">\n");
+				
+					Iterator<ArticleWsVO> itArticles = originalPackage.getListArticle().iterator();
+					while(itArticles.hasNext()){
+						ArticleWsVO article = itArticles.next();
+						toReturn.append("<article gtin=\""+article.getGtin()+"\" quantity=\""+article.getQuantity()+"\">\n");
+						List<String> listNumBillet = article.getListNumeroBillet();
+							if(listNumBillet != null && listNumBillet.size() > 0){
+								toReturn.append("<serialNumbers>\n");
+									for(String numBillet : listNumBillet){
+										//QC 176 si le billet n'est pas supprimé en conditionneement alors l'inclure
+										if(numBillet.length()>0){
+											toReturn.append("<serialNumber>"+numBillet+"</serialNumber>\n");
+										}
+									}
+
+								toReturn.append("</serialNumbers>\n");								
+							}
+
+						toReturn.append("</article>\n");	
+					}
+					
+					
+					toReturn.append("</originalPackage>\n");
+				}
+				toReturn.append("</package>\n");
+			}
+
+			
+		toReturn.append("</packages>");
+		
+		return toReturn.toString();		
+	}
+	
+	/***
+	 * Creation du fichier xml a partir des donnees a envoyer
+	 * @param donneesXml
+	 * @return
+	 */
+	private String creationFichierXmlMultiCompteur(RedEndOfSessionVO donneesXml){
+		
+		StringBuffer toReturn= new StringBuffer();
+		
+		// On construit le XML a envoyer
+		toReturn.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		toReturn.append("<endOfSession xmlns=\"http://schema.escb.eu/fr/spare/moges/V1\" ");
+		toReturn.append("flowId=\""+donneesXml.getAttrFlowId()+"\" " + "emissionDate=\""+donneesXml.getAttrEmissionDate()+"\">\n");
+			toReturn.append("<cashCenterGln>"+donneesXml.getCashCenterGln()+"</cashCenterGln>\n");
+			toReturn.append("<operationDateTime>"+donneesXml.getOperationDateTime()+"</operationDateTime>\n");
+			toReturn.append("<location code=\""+donneesXml.getAttrCodelocation()+"\">\n");
+				toReturn.append("<libelle>"+donneesXml.getLibelleLocation()+"</libelle>\n");
+			toReturn.append("</location>\n");			
+			toReturn.append("<validator idNumber=\""+donneesXml.getValAttrIdNumber()+"\">\n");
+				toReturn.append("<firstName>"+donneesXml.getValFirstName()+"</firstName>\n");
+				toReturn.append("<lastName>"+donneesXml.getValLastName()+"</lastName>\n");
+			toReturn.append("</validator>\n");
+			toReturn.append("<discrepancies>"+donneesXml.getDiscrepancies()+"</discrepancies>\n");
+			toReturn.append("<articles>\n");
+				Iterator<ArticleWsVO> itArticles = donneesXml.getArticles().iterator();
+				while(itArticles.hasNext()){
+					ArticleWsVO article = itArticles.next();
+					//QC 168 pas d'articles avec quantité zero
+					if(article.getQuantity() != 0)
+						toReturn.append("<article gtin=\""+article.getGtin()+"\" quantity=\""+article.getQuantity()+"\" sens=\""+article.getSens()+"\"/>\n");					
+				}
+			toReturn.append("</articles>\n");
+		toReturn.append("</endOfSession>");
+		
+		return toReturn.toString();		
+	}
+	
+	/***
+	 * Creation du fichier xml a partir des donnees a envoyer
+	 * @param donneesXml
+	 * @return
+	 */
+	private String creationFichierXml(ValDiscrepanciesVO donneesXml){
+		
+		StringBuffer toReturn= new StringBuffer();
+
+		// On construit le XML a envoyer
+		toReturn.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		toReturn.append("<discrepancies xmlns=\"http://schema.escb.eu/fr/spare/moges/V1\" ");
+		toReturn.append("flowId=\""+donneesXml.getAttrFlowId()+"\" emissionDate=\""+donneesXml.getAttrEmissionDate()+"\">\n");
+			toReturn.append("<cashCenterGln>"+donneesXml.getCashCenterGln()+"</cashCenterGln>\n");
+			toReturn.append("<operationDateTime>"+donneesXml.getOperationDateTime()+"</operationDateTime>\n");
+			toReturn.append("<eventType>"+donneesXml.getEventType()+"</eventType>\n");
+			
+			toReturn.append("<validator idNumber=\""+donneesXml.getValAttrIdNumber()+"\">\n");
+				toReturn.append("<firstName>"+donneesXml.getValFirstName()+"</firstName>\n");
+				toReturn.append("<lastName>"+donneesXml.getValLastName()+"</lastName>\n");
+			toReturn.append("</validator>\n");
+			
+			toReturn.append("<location code=\""+donneesXml.getAttrCodelocation()+"\">\n");
+				toReturn.append("<libelle>"+donneesXml.getLibelleLocation()+"</libelle>\n");
+			toReturn.append("</location>\n");
+
+			if(Util.estNulleOuVide(donneesXml.getPackageSscc()) && donneesXml.getEventType().equals(TYPE_EVENEMENT_INCIDENT))
+				toReturn.append("<package>\n");
+			else
+				toReturn.append("<package sscc=\"").append(donneesXml.getPackageSscc()==null ? "" : donneesXml.getPackageSscc()).append("\">\n");
+			
+			if(donneesXml.getAnomaliesEXC() != null && !donneesXml.getAnomaliesEXC().isEmpty()){
+				Iterator<ArticleWsVO> itAnoExc = donneesXml.getAnomaliesEXC().iterator();
+				toReturn.append("<anomalies sens=\"EXC\">\n");
+				toReturn.append("<articles>\n");
+				while(itAnoExc.hasNext()){
+					ArticleWsVO article = itAnoExc.next(); 
+					toReturn.append("<article gtin=\""+article.getGtin()+"\" quantity=\""+article.getQuantity()+"\"/>\n");	
+				}
+				toReturn.append("</articles>\n");			
+				toReturn.append("</anomalies>\n");				
+			}
+			if(donneesXml.getAnomaliesDEF() != null && !donneesXml.getAnomaliesDEF().isEmpty()){
+				Iterator<ArticleWsVO> itAnoDef = donneesXml.getAnomaliesDEF().iterator();
+				toReturn.append("<anomalies sens=\"DEF\">\n");
+				toReturn.append("<articles>\n");
+				while(itAnoDef.hasNext()){
+					ArticleWsVO article = itAnoDef.next(); 
+					toReturn.append("<article gtin=\""+article.getGtin()+"\" quantity=\""+article.getQuantity()+"\"/>\n");				
+				}
+				toReturn.append("</articles>\n");
+				toReturn.append("</anomalies>\n");				
+			}
+			toReturn.append("</package>\n");
+			
+			toReturn.append("<customer gln=\""+donneesXml.getCustomerGln()+"\"/>\n");
+			
+		toReturn.append("</discrepancies>");
+		
+		return toReturn.toString();		
+	}
+	
+	/**
+	 * Creation de la requete SOAP
+	 * @param fichierBase64
+	 * @param nomFlux 
+	 * @return
+	 * @throws Exception
+	 */
+	private SOAPMessage createSOAPRequest(String fichierBase64, String nomFlux) throws Exception {
+    	
+		MessageFactory messageFactory = MessageFactory.newInstance();
+	    SOAPMessage soapMessage = messageFactory.createMessage();
+	    SOAPPart soapPart = soapMessage.getSOAPPart();	
+	
+	    String serverURI = "http://com.ws.moges.bdf.fr";
+	
+	    // SOAP Envelope
+	    SOAPEnvelope envelope = soapPart.getEnvelope();
+	    envelope.addNamespaceDeclaration("com", serverURI);
+	
+	    // SOAP Body
+	    SOAPBody soapBody = envelope.getBody();
+	    // Service : getShedProduction
+	    SOAPElement soapBodyElem = soapBody.addChildElement("add", "com");
+	        
+	    	// Element : identifier -> path
+	    	SOAPElement soapBodyIdentifier = soapBodyElem.addChildElement("identifier");
+	    	SOAPElement soapBodyPath = soapBodyIdentifier.addChildElement("path");
+	    	if(NOM_FLUX_DIFF.equals(nomFlux)){
+		    	soapBodyPath.addTextNode(IDENTIFIER_DIFFERENCE);
+	    	}
+	    	else if(NOM_FLUX_MULTI_COMPT.equals(nomFlux)){
+		    	soapBodyPath.addTextNode(IDENTIFIER_MULTI_COMPTEUR);
+	    	}
+	    	else if(NOM_FLUX_POCHETTES_ATY.equals(nomFlux)){
+	    		soapBodyPath.addTextNode(IDENTIFIER_POCHETTES_ATY);
+	    	}else{
+	    		soapBodyPath.addTextNode("");
+	    	}
+	    	
+	    	// Element : document -> content        
+	    	SOAPElement soapBodyDocument = soapBodyElem.addChildElement("document");
+	    	SOAPElement soapBodyContent = soapBodyDocument.addChildElement("content");
+	    	soapBodyContent.addTextNode(fichierBase64);
+	    		    	
+			soapMessage.saveChanges();
+		    return soapMessage;
+    }
+
+	//java 8
+	private static SOAPMessage appelWsSoap_java8(String url, FluxMidefBO flux) {
+		
+		SOAPMessage soapResponse = null;
+		log.info("Flux id "+flux.getIdFlux()+" : appel du web service " + flux.getNomFlux() + " a destination de " + flux.getDestinataire());
+		log.debug("Adresse du web service Moges : " + url);
+		
+		try {			
+			// Conversion du fichier XML en base64
+			String xml = flux.getXmlFlux();
+			
+			Base64 base64 = new Base64();
+			String fichierBase64 = new String(base64.encode(xml.getBytes()));
+			
+			// Creation de la requete SOAP
+			SOAPMessage soapRequest = null;
+			try {
+				soapRequest = createSOAPRequest(fichierBase64, flux.getNomFlux());
+				log.info("---------- soap Request -------------");
+				printSoapMessage(soapRequest);
+			} catch (Exception e) {
+				// TODO: handle exception
+				log.info(e.getStackTrace());
+			}
+			// Appel du web service
+	        SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
+	        SOAPConnection soapConnection = null;
+	        try {
+				soapConnection = soapConnectionFactory.createConnection();
+				log.info("soapConnection : " + soapConnection.toString());
+				
+				soapResponse = soapConnection.call(soapRequest, url);
+				log.info("---------- soap Response -------------");
+		        
+				printSoapMessage(soapResponse);
+		        
+		        //fermeture de la connexion
+		        soapConnection.close();
+		        
+			} catch (Exception e) {
+				log.info(e.getStackTrace());
+			}
+	        
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return soapResponse;
+	}
+	//fin java 8
+	
+	/**
+	 * Envoie les donnees xml vers le web service Moges
+	 * @param url
+	 * @param xml
+	 */
+	private SOAPMessage appelWsSoap(String url, FluxMidefBO flux) {
+		
+		SOAPMessage soapResponse = null;
+		log.info("Flux id "+flux.getIdFlux()+" : appel du web service " + flux.getNomFlux() + " a destination de " + flux.getDestinataire());
+		log.debug("Adresse du web service Moges : " + url);
+		
+		try {			
+			// Conversion du fichier XML en base64
+			String xml = flux.getXmlFlux();
+			
+			Base64 base64 = new Base64();
+			String fichierBase64 = new String(base64.encode(xml.getBytes()));
+			
+			// Creation de la requete SOAP
+			SOAPMessage soapRequest = null;
+			try {
+				soapRequest = createSOAPRequest(fichierBase64, flux.getNomFlux());
+				log.info("---------- soap Request -------------");
+				printSoapMessage(soapRequest);
+			} catch (Exception e) {
+				// TODO: handle exception
+				log.info(e.getStackTrace());
+			}
+			// Appel du web service
+	        SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
+	        SOAPConnection soapConnection = null;
+	        try {
+				soapConnection = soapConnectionFactory.createConnection();
+				log.info("soapConnection : " + soapConnection.toString());
+				
+				soapResponse = soapConnection.call(soapRequest, url);
+				log.info("---------- soap Response -------------");
+		        
+				printSoapMessage(soapResponse);
+		        
+		        //fermeture de la connexion
+		        soapConnection.close();
+		        
+			} catch (Exception e) {
+				log.info(e.getStackTrace());
+			}
+	        
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return soapResponse;
+	}
+	
+	/**
+	 * Affichage des entêtes et du contenu dun SOAPMessage
+	 * @param soapMessage
+	 */
+	private void printSoapMessage(SOAPMessage soapMessage){
+		if(soapMessage!=null){
+			
+			Iterator<MimeHeader> it = (Iterator<MimeHeader>) soapMessage.getMimeHeaders().getAllHeaders();
+			while(it.hasNext()){
+				MimeHeader mh = (MimeHeader) it.next();
+				log.info("soapMessage Header >> " + mh.getName() + " : " + mh.getValue());
+			}
+			
+			ByteArrayOutputStream sortie = new ByteArrayOutputStream();   
+			String msg = "";
+			
+			try {
+				soapMessage.writeTo(sortie);
+				msg = sortie.toString("UTF-8");
+			} catch (IOException e){
+				e.printStackTrace();
+			} catch (SOAPException e){
+				e.printStackTrace();
+			} 
+			
+			log.debug("soapMessage : " + msg);
+		}else{
+			log.debug("soapMessage is null");
+		}
+	}
+
+
+	/**
+	 * Controle de la reponse SOAP
+	 * @param reponseWS
+	 * @return
+	 */
+	private String controleRetourWs(SOAPMessage reponseWS, FluxMidefBO flux) {
+
+		String reponse = CODE_AUTRE;
+		String codeARA = "";
+		try {
+			 // Lecture de la reponse
+	        SOAPPart soapPartResp = reponseWS.getSOAPPart();
+	        SOAPEnvelope soapEnvResp = soapPartResp.getEnvelope();
+			SOAPBody soapBodyResp = soapEnvResp.getBody();
+	        String retourOK = "addResponse";
+	        
+	        // Liste des elements de body
+	        Iterator<SOAPElement> itResponse = soapBodyResp.getChildElements();
+	        if(itResponse.hasNext()){
+	        	SOAPElement element = (SOAPElement) itResponse.next();
+	        	
+	        	// Controle d erreurs techniques
+	        	if(element.getNodeName().contains(retourOK)){
+	        		SOAPElement elementAddReturn = (SOAPElement) element.getChildElements().next();
+	        		
+	        		// Lister les elements de addReturn
+	        		Iterator<SOAPElement> itAddReturn = elementAddReturn.getChildElements();
+	        		while(itAddReturn.hasNext()){
+	        			SOAPElement elementAra = (SOAPElement) itAddReturn.next();
+	        			
+	        			// Contenu de l element ara
+	        			if(elementAra.getNodeName().equals("ara") ){
+	                		Iterator<SOAPElement> itElementAra = elementAra.getChildElements();
+	                		// Controle d erreurs fonctionnelles
+	                		while(itElementAra.hasNext()){
+	                			SOAPElement ara = (SOAPElement) itElementAra.next();
+	                			codeARA = ara.getValue();
+	                			if("code".equals(ara.getNodeName()) && "MOG000".equals(ara.getValue())){
+	                				reponse = CODE_OK;
+	                			}
+	                			else if("code".equals(ara.getNodeName()) && 
+	                					("MOG001".equals(ara.getValue()) || "MOG002".equals(ara.getValue()) 
+	                							|| "MOG003".equals(ara.getValue()) || "MOG004".equals(ara.getValue()) || "MOG005".equals(ara.getValue()) 
+	                							|| "MOG006".equals(ara.getValue())) ){
+	                				reponse = CODE_KO;
+	                			}
+	                		}		
+	        			}
+	        		}
+	        	}
+	        }
+	        log.info("Code retour du flux id "+flux.getIdFlux()+" : "+reponse+" ("+codeARA+")");
+		} catch (SOAPException e) {
+			e.printStackTrace();
+		}
+
+   		return reponse;
+	}
+	
+	protected FluxMidefDS getFluxMidefDS() {
+		return (FluxMidefDS) DSFactoryFacade.getFluxMidefDS();
+	}
+	
+	protected FluxMidefBS getFluxMidefBS() {
+		return (FluxMidefBS) BSFactoryFacade.getFluxMidefBS();
+	}
+	
+	protected IGCMPosteBS getGCMPosteBS(){
+		return GCMPosteFactoryBS.getInstance();
+	}
+}
+
+	
+	
+	

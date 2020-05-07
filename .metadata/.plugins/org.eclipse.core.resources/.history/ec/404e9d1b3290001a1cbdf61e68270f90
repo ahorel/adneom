@@ -1,0 +1,1591 @@
+package fr.bdf.mga.actions.creationColis;
+
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.servlet.ServletException;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import fr.bdf.context.User;
+import fr.bdf.mga.bo.ArticleBO;
+import fr.bdf.mga.bo.ArticleColisAtlBO;
+import fr.bdf.mga.bo.ColisAtelierBO;
+import fr.bdf.mga.bo.ColisBO;
+import fr.bdf.mga.bo.ConditionnementBO;
+import fr.bdf.mga.bo.ControleDelestageBO;
+import fr.bdf.mga.bo.EltSessionMGABO;
+import fr.bdf.mga.bo.MiseEnColisBO;
+import fr.bdf.mga.bo.ReconciliationBO;
+import fr.bdf.mga.bo.ResultatTriBO;
+import fr.bdf.mga.bo.SuiviConditionnementBO;
+import fr.bdf.mga.bo.SuiviCtrlDelestageBO;
+import fr.bdf.mga.bo.ext.SessionMGABO;
+import fr.bdf.mga.bs.BSFactoryFacade;
+import fr.bdf.mga.bs.ColisAtelierBS;
+import fr.bdf.mga.bs.ConditionnementBS;
+import fr.bdf.mga.bs.CtrlDelestageBS;
+import fr.bdf.mga.bs.EltSessionBS;
+import fr.bdf.mga.bs.MiseEnColisBS;
+import fr.bdf.mga.bs.ReconciliationBS;
+import fr.bdf.mga.bs.ResultatTriBS;
+import fr.bdf.mga.bs.SuiviCtrlDelestageBS;
+import fr.bdf.mga.bs.ext.CrbTransactionsBS;
+import fr.bdf.mga.bs.ext.ReferentielBS;
+import fr.bdf.mga.bs.ext.SessionMGABS;
+import fr.bdf.mga.ref.CategorieBillet;
+import fr.bdf.mga.ref.CategorieColis;
+import fr.bdf.mga.ref.CategorieMiseEnColis;
+import fr.bdf.mga.ref.Contenant;
+import fr.bdf.mga.ref.CoupureCommun;
+import fr.bdf.mga.ref.CoupureS1;
+import fr.bdf.mga.ref.CoupureS2;
+import fr.bdf.mga.ref.EtatConditionnement;
+import fr.bdf.mga.ref.TypeTraitement;
+import fr.bdf.mga.service.creationColis.CrbChargementCndtAction;
+import fr.bdf.mga.util.ArticleUtil;
+import fr.bdf.mga.util.ColisUtil;
+import fr.bdf.mga.util.ConstantesUtils;
+import fr.bdf.mga.vo.ConditionnementByMiseEnColisVO;
+import fr.bdf.mga.vo.MiseEnColisVO;
+import fr.bdf.mga.vo.SuiviCndtsByCoupVO;
+import fr.bdf.sport.actions.cr.SportCRAction;
+import fr.bdf.sport.bo.CoupureBO;
+import fr.bdf.sport.bo.IAgentBO;
+import fr.bdf.sport.bo.ICoupureBO;
+import fr.bdf.sport.bo.LigneBO;
+import fr.bdf.sport.bo.RattachementBO;
+import fr.bdf.sport.bo.exceptions.ParametreInvalideException;
+import fr.bdf.sport.bo.exceptions.ParametreNulException;
+import fr.bdf.sport.bs.GCMPosteFactoryBS;
+import fr.bdf.sport.bs.GCMSportFactoryBS;
+import fr.bdf.sport.bs.IGCMPosteBS;
+import fr.bdf.sport.bs.IGCMSportBS;
+import fr.bdf.sport.bs.exceptions.ObjetExistantException;
+import fr.bdf.sport.bs.exceptions.ObjetIncompletException;
+import fr.bdf.sport.bs.exceptions.ObjetInconnuException;
+import fr.bdf.sport.bs.exceptions.OperationInterditeException;
+import fr.bdf.sport.bs.exceptions.PersistenceException;
+import fr.bdf.sport.db.exceptions.AccesBaseException;
+import fr.bdf.sport.db.exceptions.AttributException;
+import fr.bdf.sport.util.CoupureUtil;
+import fr.bdf.sport.util.Util;
+import fr.bdf.utils.ApplicationProperty;
+import fr.bdf.vo.StatutVO;
+import fr.bdf.vo.cr.UserSport;
+import fr.bdf.vo.mga.creationColis.CreationColisVO;
+
+public class CrbChargementCndtActionImpl_java8 implements CrbChargementCndtAction {
+        
+    @Inject
+    @ApplicationProperty(key = "error.mga.crb.cndt.sessions.null")
+    String message_CNDT_SESSIONS_NULL;
+    
+    @Inject
+    @ApplicationProperty(key = "error.mga.crb.cndt.finalise")
+    String message_CNDT_FINALISE;
+    
+    @Inject
+    @ApplicationProperty(key = "error.mga.crb.cndt.var.colis")
+    String message_CNDT_VAR_COLIS;
+    
+    @Inject
+    @ApplicationProperty(key = "error.mga.crb.cndt.var")
+    String message_CNDT_VAR;
+    
+    @Inject
+    @ApplicationProperty(key = "error.mga.crb.cndt.rec")
+    String message_CNDT_REC;
+    
+    @Inject
+    @ApplicationProperty(key = "message.confirmation.mga.crb.finalisation.tri")
+    String message_CONF_FINALISATION;
+        
+    @Inject
+    @ApplicationProperty(key = "error.mga.prp.erreur.applicative")
+    String message_ERREUR_APLICATIVE;
+    
+    @Inject
+    private SportCRAction sportCRAction;
+    
+    private Logger log = Logger.getLogger(CrbChargementCndtActionImpl_java8.class);
+        
+    // Intégration dans les fonctions des variables utilisees simultanement dans l application
+    /** Identifiant de la mise en colis en cours définissant le périmètre (sessions de tri et réconciliations prises en compte) */
+    //  Long idMiseEnColisChargee;
+        /** Identifiant du conditionnement mono-coupure ou multicoupure en cours */
+    //  Long idCndtCharge;
+        // Données à calculer pour une insertion/màj globale en base (traitement transactionnel)
+    //  List<SessionMGABO> sessTriDeMeC;
+    //  List<ReconciliationBO> recDeMeC;
+    //  List<ControleDelestageBO> ctrlDlsts;
+        /** Liste des instances de conditionnement pour le suivi du conditionnement global par coupure */
+    //  List<ConditionnementBO> cndtsCrees;
+        /** Listes des instances de suivi de condtionnement pour le suivi du conditionnement par catégorie pour chaque coupure */
+    //  Map<CoupureCommun, List<SuiviConditionnementBO>> suiviCndtsCreesByCoupure;
+    
+        //par defaut tout conditionnement est possible
+    //  boolean isConditionnementNotPossible = false;
+    
+    
+    @Override
+    public CreationColisVO performReal (CreationColisVO creationColisVO, User user) {
+        
+        MiseEnColisVO mecVO = null;
+        // Réinitialisation des variables
+        Long idMiseEnColisChargee = null;
+        Long idCndtCharge = null;
+        List<SessionMGABO> sessTriDeMeC = null;
+        List<ReconciliationBO> recDeMeC = null;
+        List<ControleDelestageBO> ctrlDlsts = null;
+        List<ConditionnementBO> cndtsCrees = null;
+        List<SessionMGABO> sessTriDeMeCCoup=null; // qc 216
+        List<SessionMGABO> sessTriSansMec=null; //nouvelle fonctionnalité
+        List<SessionMGABO> sessTriAvecMec=null; //nouvelle fonctionnalité
+        Map<CoupureCommun, List<SuiviConditionnementBO>> suiviCndtsCreesByCoupure = null;
+        String msgConditionnementNotPossible="";
+        boolean isConditionnementNotPossible = false;
+        boolean isCdtNotPossible = false;
+        boolean verifierRJARJD = false;
+
+        
+        UserSport userSport = null;
+        
+        try {
+            userSport = sportCRAction.performUser(user);
+        } catch (IOException e2) {
+            e2.printStackTrace();
+            return null;
+        } catch (ServletException e2) {
+            e2.printStackTrace();
+            return null;
+        }
+        
+        creationColisVO.setStatutConditonnement(new StatutVO(CODE_STATUS_ERREUR,
+                "Une erreur inconnue s'est produite !",
+                StatutVO.typeMessageERROR));
+
+        try {
+            creationColisVO.initialiserConditionnement();
+        } catch (ParametreInvalideException e1) {
+            e1.printStackTrace();
+            creationColisVO.setStatutConditonnement(new StatutVO(CODE_STATUS_ERREUR,
+                    message_ERREUR_APLICATIVE,
+                    StatutVO.typeMessageERROR));
+            return creationColisVO;
+        }
+        //SPORT-162 Problème mémorisation type atelier difference NCF
+        LigneBO ligneBO = null;
+    	try {
+			ligneBO  = (LigneBO) getGCMPosteBS().trouverLigne(creationColisVO.getAtelierSelectionne().getNumero());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			creationColisVO.setStatutConditonnement(new StatutVO(CODE_STATUS_ERREUR,
+                    message_ERREUR_APLICATIVE,
+                    StatutVO.typeMessageERROR));
+            return creationColisVO;
+		}
+        
+        try {
+            if (ColisUtil.CODE_CTG_PRP.equals(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl())) {
+//                creationColisVO.setSsccVnr((String) request.getSession().getAttribute(CrbTraitementColisAjaxAction.SSCC_VNR));
+//                List<LotPrepareVO> listeLotsPRP
+//                 = (List<LotPrepareVO>) request.getSession().getAttribute(CrbTraitementColisAjaxAction.LISTE_LOTS_PRP);
+//                if(listeLotsPRP != null){
+//                    creationColisVO.setListLotsPrepares(listeLotsPRP);                  
+//                }
+
+                creationColisVO.setStatutConditonnement(new StatutVO(CODE_STATUS_CNDT_PRP,
+                        "",
+                        StatutVO.typeMessageSUCCESS));
+            } else {
+                
+                IAgentBO agentCndt = userSport.getUtilisateur();
+                
+                creationColisVO.getMiseEnColisEnCours().setIdAgent(agentCndt.getMatricule());
+                creationColisVO.getConditionnementEnCours().setIdAgent(agentCndt.getMatricule());
+                creationColisVO.getColisEnCours().setIdAgtCreation(agentCndt.getMatricule());
+                creationColisVO.getColisEnCours().setIdAgtScelle(agentCndt.getMatricule());
+                                
+                /* Chargement des informations sur les coupures et articles */
+                chargerArticles(creationColisVO);
+                chargerCoupures(creationColisVO);
+                
+                Date aujourdhui = new Date();
+                /* Recherche des sessions des postes liés à l'UA sélectionnée */
+                List<String> numsPoste = new ArrayList<String>();
+                List<RattachementBO> rattachements = getGCMPosteBS().trouverRattachementsEnCoursPourLigne(creationColisVO.getAtelierSelectionne().getNumero());
+                for (RattachementBO rattachement : rattachements) {
+                    numsPoste.add(rattachement.getNumeroPoste());
+                }
+                /*-------------------------------------------------------
+                Mise en colis PRODUCTION (Valides,Uses,Valides à retrier)
+                ---------------------------------------------------------*/
+                if (ColisUtil.CODE_CTG_VAL.equals(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()) || ColisUtil.CODE_CTG_USE.equals(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()) 
+                        || ColisUtil.CODE_CTG_VAR.equals(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl())) {
+
+                    // Indique si une mise en colis en cours a ete trouvee
+                    boolean miseEnColisEnCours = false;
+
+                    // Controle si l atelier est de type NCF 
+                    boolean isAteilierNCF = false;
+                    
+                    //SPORT-162
+                    if(ConstantesUtils.CODE_TYPE_FLUX_MGA_NCF.equals(ligneBO.getCodeTypeFluxMidef())){
+                        isAteilierNCF = true;
+                    }
+                    
+                    // Recherche des mises en colis en cours                    
+                    sessTriDeMeC = getSessionMGABS().trouverSessionsEtatMeC(numsPoste, aujourdhui, EtatConditionnement.EnCours);
+                    EtatConditionnement etatCndt = null;
+                    
+                    //QC 271 verification si la coupure en cours de conditionnement est en attente de mise en colis
+                    List<SessionMGABO> listeSessionsDuJourValidees = getSessionMGABS().recupSessionsMga(numsPoste, aujourdhui, null, true);
+                    if (!isCoupureEnCoursEnAttentePourMiseEnColis(listeSessionsDuJourValidees,creationColisVO)){
+                        creationColisVO.setStatutConditonnement(adapterMessageErreur(true, MAP_SESSIONS_KO, creationColisVO.getLibelleCoupureCndt()));
+                        return creationColisVO;
+                    }
+
+                    //QC 211 vérification si toutes les sessions pour cette coupures sont validées sinon message erreur
+                    if (!creationColisVO.isIgnorerSessionTestValidees() 
+                            && (ColisUtil.CODE_CTG_VAL.equals(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()) 
+                                    || ColisUtil.CODE_CTG_USE.equals(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()) 
+                                    || ColisUtil.CODE_CTG_VAR.equals(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl())) 
+                            && chargerSessionsDuJourAvcMeC(numsPoste, creationColisVO.getConditionnementEnCours().getCoupure()).isEmpty()){
+                        
+                        List<SessionMGABO> sessionsTest= chargerSessionsDuJourNV(numsPoste, creationColisVO.getConditionnementEnCours().getCoupure()); // listes des sessions pour la coupure
+                        for (int i =0; i<sessionsTest.size(); i++){
+                            if (sessionsTest.get(i).isSessionValidee()==false){ // si session pas validée on envoie un message d'erreur à la jsp
+                            
+                                creationColisVO.setStatutConditonnement(new StatutVO(CODE_STATUS_CNDT_SESSION_NON_VALIDEE,
+                                        "Des sessions dans votre atelier ne sont pas validées",
+                                        StatutVO.typeMessageWARNING));
+                                return creationColisVO;
+                            }
+                        }
+
+                    }
+                    
+                    /*----------------------------
+                    Pas de Mise en colis en cours
+                    -----------------------------*/
+                    if (sessTriDeMeC.isEmpty()) { // Pas de sessions dont la mise en colis est en cours
+
+                        //recherche de sessions du jour en attente de mise en colis
+                        sessTriDeMeC = chargerSessionsDuJourSansMeC(numsPoste, creationColisVO.getConditionnementEnCours().getCoupure());
+                        
+                        if (!sessTriDeMeC.isEmpty()) { // Sessions validées en attente de conditionnement, création de la mise en colis initiale
+                            // Si la categorie est VAR, on retourne un message indiquant que la mise en colis des bacs valides et uses doit etre faite avant les VAR 
+                            if (CategorieColis.ValeursARetrier.is(CategorieColis.getByCode(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()))) {
+                                if(!isAteilierNCF){
+                                    creationColisVO.setStatutConditonnement(adapterMessageErreur(isConditionnementNotPossible, MAP_CNDT_VAR_KO, creationColisVO.getLibelleCoupureCndt()));
+                                    return creationColisVO;
+                                }else{
+                                    // Pour les ateliers NCF, Il n y a pas de bac valides et uses, les conditionnements sont donc directement finalises avec zero billet conditionne
+                                    MiseEnColisBO mecNCF = creationColisVO.getMiseEnColisEnCours();
+                                    mecNCF.setCategorieColis(CategorieMiseEnColis.Production.getCode());
+                                    
+                                    // Creation de la mise en colis en cours + mise a jour des mise en colis des sessions du jour 
+                                    long idMiseEnColisNCF = getCrbTransactionsBS().ajouterMiseEnColisPRD(mecNCF, sessTriDeMeC, new ArrayList<ReconciliationBO>());
+
+                                    // Creation d un conditionnement avec zero billet valide
+                                    creerConditionnementInitialNCF(creationColisVO, idMiseEnColisNCF, sessTriDeMeC, mecNCF, CategorieColis.Valides, CategorieBillet.Valide);
+                                    // Creation d un conditionnement avec zero billet use
+                                    creerConditionnementInitialNCF(creationColisVO, idMiseEnColisNCF, sessTriDeMeC, mecNCF, CategorieColis.Uses, CategorieBillet.Use);
+                                    
+                                    // Chargement des sessions rattachees a la mise en colis des ateliers de type NCF
+                                    sessTriDeMeC = getSessionMGABS().trouverSessionsEtatMeC(numsPoste, aujourdhui, EtatConditionnement.EnCours);
+                                    miseEnColisEnCours = true;                                  
+                                }
+
+                            }
+                        } else {
+                            creationColisVO.setStatutConditonnement(adapterMessageErreur(isConditionnementNotPossible, MAP_SESSIONS_KO, creationColisVO.getLibelleCoupureCndt()));
+                            return creationColisVO;
+                        }
+                    } else {
+                        // Une mise en colis en cours a ete trouvee pour la coupure et le poste selectionne
+                        miseEnColisEnCours = true;
+                    }
+                    
+                    
+                    /*---------------------
+                    Mise en colis en cours
+                    ----------------------*/                    
+                    if(miseEnColisEnCours){                 
+                        //qc 216 test si pour la coupure une session sans mise en colis est présente, et si une session avec mise en colis en cours est présente, si les deux n'existent pas on envoie une erreur à la jsp
+                        sessTriSansMec=chargerSessionsDuJourSansMeC(numsPoste, creationColisVO.getConditionnementEnCours().getCoupure());
+                        sessTriAvecMec=chargerSessionsDuJourAvcMeC(numsPoste, creationColisVO.getConditionnementEnCours().getCoupure());
+                        if(sessTriSansMec.isEmpty()&& sessTriAvecMec.isEmpty()){
+                            creationColisVO.setStatutConditonnement(adapterMessageErreur(isConditionnementNotPossible, MAP_SESSIONS_KO, creationColisVO.getLibelleCoupureCndt()));
+                            return creationColisVO;
+                        }
+                        else {
+                            if (!sessTriSansMec.isEmpty() && sessTriAvecMec.isEmpty()){
+                                creationColisVO.setStatutConditonnement(new StatutVO(CODE_STATUS_ERREUR,
+                                        "Veuillez d'abord cloturer la session de mise en colis précédente issus de la production ",
+                                        StatutVO.typeMessageWARNING));
+                                return creationColisVO;
+                            }
+                        /*---------------------
+                        Mise en colis en cours
+                        ----------------------*/
+                        idMiseEnColisChargee = chargerMiseEnColis(sessTriDeMeC, idMiseEnColisChargee);
+                        //QC 197 Necessité de finaliser les VAR pour une coupure avant de passer à la coupure suivante dans une meme mise en colis
+                        List<ConditionnementByMiseEnColisVO> listConditionnementsByMiseEnColisEnCours = getMiseEnColisBS().queryConditionnementVarValMiseEnColis(idMiseEnColisChargee);
+                        List<String> listeCoupureAConditionner= new ArrayList<String>();
+                        //si coupure mono
+                        if(creationColisVO.getConditionnementEnCours().getCoupure()!=null){
+                            listeCoupureAConditionner.add(creationColisVO.getConditionnementEnCours().getCoupure().getLibelleCourt());
+                        }else{
+                            listeCoupureAConditionner.addAll(CoupureUtil.LIST_LIBELLE_MULTI_COUPURES);
+                        }
+                        
+                        log.info("coupure A Conditionner:"+listeCoupureAConditionner);
+                        
+                        //Si le conditionnement pour la coupure en cours est deja finalise?
+                        if (isCoupureAConditionnerDejaFinalise(listeCoupureAConditionner,listConditionnementsByMiseEnColisEnCours)){
+                            log.info(listeCoupureAConditionner+" deja finalise");
+                            creationColisVO.setStatutConditonnement(adapterMessageErreur(isConditionnementNotPossible, MAP_CNDT_FIN));
+                            return creationColisVO;
+                        }else{
+                            log.info(listeCoupureAConditionner+" non finalise");
+                            //verification si il y a des conditionnements de coupures (differentes de celles en cours) non finalises
+                            String autresConditionnementAFinaliser = conditionnementAFinaliser(listeCoupureAConditionner,listConditionnementsByMiseEnColisEnCours);
+                            if (!StringUtils.isEmpty(autresConditionnementAFinaliser)){
+                                isCdtNotPossible = true;
+                                msgConditionnementNotPossible = autresConditionnementAFinaliser;
+                            }
+                        }
+                        isConditionnementNotPossible=isCdtNotPossible;
+                        
+                        if(isCdtNotPossible){
+                            log.info(msgConditionnementNotPossible);
+                            creationColisVO.setStatutConditonnement(adapterMessageErreur(isConditionnementNotPossible, MAP_CNDT_VAR_KO, msgConditionnementNotPossible));
+                            return creationColisVO;
+                        }
+                        
+                        if (CategorieColis.ValeursARetrier.is(CategorieColis.getByCode(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()))
+                                 && !verifierConditionnementVAR(sessTriDeMeC, creationColisVO.getConditionnementEnCours().getCoupure(), idMiseEnColisChargee)) {
+                            if(!isAteilierNCF){
+                                creationColisVO.setStatutConditonnement(adapterMessageErreur(isConditionnementNotPossible, MAP_CNDT_VAR_KO, creationColisVO.getLibelleCoupureCndt()));
+                                return creationColisVO;
+                            }else{
+                                // Creation d un conditionnement avec zero billet valide
+                                creerConditionnementInitialNCF(creationColisVO, idMiseEnColisChargee, sessTriDeMeC, creationColisVO.getMiseEnColisEnCours(), CategorieColis.Valides, CategorieBillet.Valide);
+                                // Creation d un conditionnement avec zero billet use
+                                creerConditionnementInitialNCF(creationColisVO, idMiseEnColisChargee, sessTriDeMeC, creationColisVO.getMiseEnColisEnCours(), CategorieColis.Uses, CategorieBillet.Use);
+                                
+                            }       
+                        }
+                        
+                        // Vérification de la présence d'un conditionnement pour la catégorie Valides, Usés, Valeurs à Retrier
+                        ConditionnementBO conditionnement = chargerCndt(CategorieColis.getByCode(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()), creationColisVO.getConditionnementEnCours().getCoupure(), idMiseEnColisChargee);
+                            if(conditionnement != null){
+                                etatCndt = conditionnement.getEtat();
+                                idCndtCharge = conditionnement.getIdentifiant();                            
+                            }
+                        }
+                    }
+                    
+                    if (etatCndt == null) { // Conditionnement inexistant
+                        mecVO = calcConditionnementSessData(sessTriDeMeC, recDeMeC, ctrlDlsts, creationColisVO.getConditionnementEnCours(), creationColisVO.getArticleByCode().keySet(), idMiseEnColisChargee, 
+                                suiviCndtsCreesByCoupure, isAteilierNCF);
+                        cndtsCrees = mecVO.getCndtsCrees();
+                        idMiseEnColisChargee = mecVO.getIdMiseEnColisChargee();
+                        suiviCndtsCreesByCoupure = mecVO.getSuiviCndtsCreesByCoupure();
+                        creationColisVO.setStatutConditonnement(new StatutVO(CODE_STATUS_CNDT_TRI,
+                                "",
+                                StatutVO.typeMessageSUCCESS));
+                    } else {
+                        if (EtatConditionnement.EnCours.is(etatCndt)) { // Conditionnement en cours pour la sélection retrouvé
+                            // Chargement des colis
+                            List<ColisAtelierBO> colisConditionnes = getColisAtelierBS().trouverColisAtlsCndt(idCndtCharge);
+                            Collections.sort(colisConditionnes, ColisAtelierBO.CmpByOrdreCndt);
+                            for (ColisAtelierBO colis : colisConditionnes) getColisAtelierBS().chargerArticles(colis);                            
+                            
+                            // QC 761 : Ajout d'un message de confirmation à la finalisation des bacs valides et uses
+                            Map <String, Integer > mapQuantiteParArticle = new HashMap<String, Integer>();
+                            for (ColisAtelierBO colis : colisConditionnes) {
+                                getColisAtelierBS().chargerArticles(colis);
+                                if(colis.getArticles() != null && !colis.getArticles().isEmpty()){
+                                    for(ArticleColisAtlBO article : colis.getArticles()){
+                                        if(mapQuantiteParArticle.containsKey(article.getIdGTINArticle())){
+                                            // Si l article existe dans la map on fait la somme
+                                            mapQuantiteParArticle.put(article.getIdGTINArticle(), mapQuantiteParArticle.get(article.getIdGTINArticle())+article.getNbBillets());
+                                        }
+                                        else{
+                                            // Si l article n existe pas, on l ajoute
+                                            mapQuantiteParArticle.put(article.getIdGTINArticle(), article.getNbBillets());
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // QC 1099 : Trier la map par categorie et par coupure
+                            Map <String, String> mapQuantiteParArticleTriee = new HashMap<String, String>();
+                            Iterator<String> itListeArticles = mapQuantiteParArticle.keySet().iterator();
+                            while(itListeArticles.hasNext()){
+                                String key = itListeArticles.next();
+                                ArticleBO articleBO = getReferentielBS().trouverArticle(key);
+                                String codeTri = articleBO.getCodeCategorie()+""+articleBO.getCodeCoupure();
+                                if(articleBO.getCodeCategorie() < 10){
+                                    codeTri = "0"+codeTri;
+                                }
+                                mapQuantiteParArticleTriee.put(codeTri, mapQuantiteParArticle.get(key)+" * "+articleBO.getLibelle());
+                            }
+                            Map <String, String> sortedMap = new TreeMap(mapQuantiteParArticleTriee);
+                            
+                            // Creation du message de confirmation a partir de la map
+                            String msgConfirmation = "";
+                            Iterator<Entry<String, String>> itListeArticlesTriees = sortedMap.entrySet().iterator();
+                            while(itListeArticlesTriees.hasNext()){
+                                Entry<String, String> key = itListeArticlesTriees.next();
+                                msgConfirmation = msgConfirmation+"<br> "+key.getValue();
+                            }
+                                                        
+                            creationColisVO.getColisEnCours().setNumOrdreCndt(colisConditionnes.size() + 1);
+                            creationColisVO.setColisConditionnes(colisConditionnes);
+                            creationColisVO.setMessageConfFinlUseVal(MessageFormat.format(message_CONF_FINALISATION, msgConfirmation));
+                            creationColisVO.setStatutConditonnement(new StatutVO(CODE_STATUS_CNDT_TRI,
+                                    "",
+                                    StatutVO.typeMessageSUCCESS));
+                        } else if (etatCndt.isEtatFinalise()) {
+                            creationColisVO.setStatutConditonnement(adapterMessageErreur(isConditionnementNotPossible, MAP_CNDT_FIN));
+                        }
+                    }
+                    
+                                        
+                    // Transactions BD
+                    if (idMiseEnColisChargee == null) {
+                        creationColisVO.getMiseEnColisEnCours().setCategorieColis(CategorieMiseEnColis.Production.getCode());
+                        idMiseEnColisChargee = getCrbTransactionsBS().ajouterMiseEnColisPRD(creationColisVO.getMiseEnColisEnCours(), sessTriDeMeC, new ArrayList<ReconciliationBO>());
+                    }
+                    if (idCndtCharge == null) {
+                        idCndtCharge = getCrbTransactionsBS().ajouterConditionnements(idMiseEnColisChargee,
+                                                                  CategorieColis.getByCode(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()), cndtsCrees, suiviCndtsCreesByCoupure);
+                    }
+
+                    creationColisVO.getMiseEnColisEnCours().setIdentifiant(idMiseEnColisChargee);
+                    creationColisVO.getConditionnementEnCours().setIdMiseEnColis(idMiseEnColisChargee);
+                    creationColisVO.getConditionnementEnCours().setIdentifiant(idCndtCharge);
+                    creationColisVO.getColisEnCours().setIdConditionnement(idCndtCharge);
+                    // QC 248 : Controle si la session associee a la mise en colis est de type ETM ou non ETM 
+                    if(sessTriDeMeC != null && !sessTriDeMeC.isEmpty() && sessTriDeMeC.get(0).getTypeTraitement() != null && AUDIT_PROD_ETM.equals(sessTriDeMeC.get(0).getTypeTraitement().getCode())){
+                        creationColisVO.setSessionEtm(true);
+                    }
+                    
+                
+                }   
+                /*-------------------------------------------------------------------
+                Mise en colis EXPERTISES DES REJETS(Rejets authentiques et Atypiques)
+                ---------------------------------------------------------------------*/
+                else if(ColisUtil.CODE_CTG_RJA.equals(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()) || ColisUtil.CODE_CTG_ATY.equals(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl())){
+                    //Réinit des sscc suite à une création
+                    creationColisVO.initialiserColisEnCours();
+                    creationColisVO.setSsccColisVnr("");
+                    creationColisVO.setIsColisInconnu(false);
+                    
+                    int codeCategorieBillet = 0;
+                    String categMec = "";
+                    // Categorie des colis atypiques
+                    String codeColisAtyp = creationColisVO.getCodeAtypique();
+                    // Mono-coupure pour les rejets authentique et multi-coupure pour les atypiques
+                    String codeCoupureCndt = null;
+                    String codeCoupure = null;          
+                
+                    // Choix du type de colis en fonction de la categorie selectionnee (Rejet authentique, faux, mutile, faute)
+                    if(ColisUtil.CODE_CTG_RJA.equals(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl())){
+                        categMec = creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl();
+                        codeCategorieBillet = CategorieBillet.RejAuth.getCode();
+                        creationColisVO.getMiseEnColisEnCours().setCategorieColis(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl());
+                        // Choix de la coupure des rejets authentiques mono-coupure
+                        codeCoupureCndt = creationColisVO.getConditionnementEnCours().getCodeCoupure();
+                        if (codeCoupureCndt != null){
+                            codeCoupure = CoupureCommun.instanceByCode(Integer.parseInt(codeCoupureCndt)).instanceEquivalentS1().fetchCode();
+                        }
+                    }
+                    else if (ColisUtil.CODE_CTG_ATY.equals(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl())){  
+                        categMec = creationColisVO.getCodeAtypique();
+                        if (CategorieColis.Mutiles.getCode().equals(creationColisVO.getCodeAtypique())){
+                            codeCategorieBillet = CategorieBillet.Mutile.getCode();
+                        }
+                        else if (CategorieColis.Fautes.getCode().equals(creationColisVO.getCodeAtypique())){
+                            codeCategorieBillet = CategorieBillet.Faute.getCode();                          
+                        }else{
+                            codeCategorieBillet = CategorieBillet.Faux.getCode();                       
+                        }
+                        creationColisVO.getConditionnementEnCours().setCodeCtgColisAtl(codeColisAtyp);
+                        creationColisVO.getColisEnCours().setCodeCategorie(codeColisAtyp);
+                        creationColisVO.getMiseEnColisEnCours().setCategorieColis(codeColisAtyp);
+                    }
+                    
+                    
+                    //Recherche de sessions ETM contenants des audits pour les rejets authentiques
+                    if(ColisUtil.CODE_CTG_RJA.equals(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl())){
+                        sessTriDeMeC = getSessionMGABS().trouverSessionMGAs(numsPoste, aujourdhui, codeCoupure, null, true, false);
+                        if(sessTriDeMeC!=null && !sessTriDeMeC.isEmpty()){
+                            if (idMiseEnColisChargee==null){
+                                idMiseEnColisChargee = sessTriDeMeC.get(0).getIdMiseEnColis();
+                            }
+                        }
+                    }
+                    
+                    
+                    // Recherche des reconciliations validées faisant l'objet d'une mec en cours + les réconciliations validées non mis en colis
+                    recDeMeC = getReconciliationBS().trouverReconciliationsValidees(aujourdhui, creationColisVO.getAtelierSelectionne().getNumero(), null, categMec, EtatConditionnement.EnCours.getCode(), codeCoupure, null, codeCategorieBillet);
+                    if (recDeMeC!=null && !recDeMeC.isEmpty()){
+                        idMiseEnColisChargee = recDeMeC.get(0).getIdMiseEnColis(); //si pas de rec tagguées avec une mec alors idMiseEnColisChargee reste null                      
+                    }
+                    //Recherche des contrôles de délestages au statut controlé ou controlé avec différence, non taggués, ou taggués par une mise en colis en cours
+                    ctrlDlsts = new ArrayList<ControleDelestageBO>(); 
+                    ControleDelestageBO ctrlDlst = new ControleDelestageBO(null, null, creationColisVO.getAtelierSelectionne().getNumero(), aujourdhui);
+                    ctrlDlsts = getCtrlDelestageBS().trouverCtrlDelestages(ctrlDlst, null, true, EtatConditionnement.EnCours.getCode(), categMec, codeCoupure, false, codeCategorieBillet);
+                    if(ctrlDlsts!=null && !ctrlDlsts.isEmpty()){
+                        if (idMiseEnColisChargee==null){
+                            idMiseEnColisChargee = ctrlDlsts.get(0).getIdMiseEnColis();                     
+                        }
+                    }
+                    EtatConditionnement etatCndt = null;
+                    
+                    // pour les RJA, chercher une mise en colis existante pour d'autres coupures 
+                    if (idMiseEnColisChargee == null){
+                        List<MiseEnColisBO> listeMec =
+                        getMiseEnColisBS().trouverMiseEnColiss(EtatConditionnement.EnCours, creationColisVO.getAtelierSelectionne().getNumero(), new Date(), CategorieMiseEnColis.getByCode(categMec));
+                        if (listeMec !=null && !listeMec.isEmpty()){
+                            idMiseEnColisChargee = listeMec.get(0).getIdentifiant();
+                        }
+                    }
+                    if (idMiseEnColisChargee!=null){
+                        creationColisVO.getMiseEnColisEnCours().setIdentifiant(idMiseEnColisChargee);
+                        creationColisVO.getConditionnementEnCours().setIdMiseEnColis(idMiseEnColisChargee);
+                        ConditionnementBO conditionnement = chargerCndt(CategorieColis.getByCode(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()), creationColisVO.getConditionnementEnCours().getCoupure(), idMiseEnColisChargee);
+                        if(conditionnement != null){
+                            etatCndt = conditionnement.getEtat();
+                            idCndtCharge = conditionnement.getIdentifiant();                            
+                        }
+
+                    }
+                    
+                    
+                    if (CategorieColis.RejetsAuth.is(CategorieColis.getByCode(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()))) {
+                        mecVO = calcConditionnementSessData(sessTriDeMeC, recDeMeC, ctrlDlsts, creationColisVO.getConditionnementEnCours(), creationColisVO.getArticleByCode().keySet(), 
+                                idMiseEnColisChargee, suiviCndtsCreesByCoupure, false);
+                        cndtsCrees = mecVO.getCndtsCrees();
+                        idMiseEnColisChargee = mecVO.getIdMiseEnColisChargee();
+                        suiviCndtsCreesByCoupure = mecVO.getSuiviCndtsCreesByCoupure();
+                        
+                        //Si le conditionnement de la coupure en cours est finalisé alors la création n'est plus autorisé jusqu'à la finalisation de la mise en colis en cours
+                        if (etatCndt!=null && etatCndt.isEtatFinalise()) {
+                            creationColisVO.setStatutConditonnement(adapterMessageErreur(isConditionnementNotPossible, MAP_CNDT_FIN));
+                            return creationColisVO;
+                        }                       
+                        if (Util.estNulleOuVide(creationColisVO.getCategColisRA()))                           
+                            creationColisVO.setCategColisRA(CategorieColis.RejetsAuth.getCode());//initialisation du type de conditionnement par défaut
+
+                        creationColisVO.setStatutConditonnement(new StatutVO(CODE_STATUS_CNDT_TRI,
+                                "",
+                                StatutVO.typeMessageSUCCESS));
+                        
+                        verifierRJARJD = true;
+
+                    } else {
+                        sessTriDeMeC = new ArrayList<SessionMGABO>();
+                        mecVO = calcConditionnementRecData(sessTriDeMeC, recDeMeC, ctrlDlsts, cndtsCrees, creationColisVO.getConditionnementEnCours(), creationColisVO.getArticleByCode().keySet(), idMiseEnColisChargee, suiviCndtsCreesByCoupure);
+                        cndtsCrees= mecVO.getCndtsCrees();
+                        idMiseEnColisChargee = mecVO.getIdMiseEnColisChargee();
+                        suiviCndtsCreesByCoupure = mecVO.getSuiviCndtsCreesByCoupure();
+//                        forward = MAP_CNDT_ATY;
+                        creationColisVO.setStatutConditonnement(new StatutVO(CODE_STATUS_CNDT_TRI,
+                                "",
+                                StatutVO.typeMessageSUCCESS));
+
+                    }
+                    // si un conditionnement a déjà été créé et dans le cas des rejets authentiques une catégorie de conditionnement a été choisie
+                    if (etatCndt != null){
+                        // Chargement des colis
+                        List<ColisAtelierBO> colisConditionnes = getColisAtelierBS().trouverColisAtlsCndt(idCndtCharge, creationColisVO.getCategColisRA());
+                        Collections.sort(colisConditionnes, ColisAtelierBO.CmpByOrdreCndt);
+                        if (!CategorieColis.RejetsAuth.is(CategorieColis.getByCode(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()))){
+                            Map<String, Map<String, List<ArticleColisAtlBO>>> articleByColis = new LinkedHashMap <String, Map<String,List<ArticleColisAtlBO>>>();
+                            Map<String, Integer> nbBilletsByColis = new LinkedHashMap <String, Integer>();
+                            Map<String, Map<String, Integer>> nbBilletsByColisOrigine = new LinkedHashMap <String, Map<String, Integer>>();
+                            for (ColisAtelierBO colis : colisConditionnes) {
+                                nbBilletsByColis.put(colis.getIdSSCCBac(), 0);
+                                nbBilletsByColisOrigine.put(colis.getIdSSCCBac(), new TreeMap<String, Integer>());
+                                getColisAtelierBS().chargerArticles(colis);                         
+                                articleByColis.put(colis.getIdSSCCBac(), new TreeMap<String, List<ArticleColisAtlBO>>());
+                                String ssccOrigine = ColisBO.SSCC_INCONNU;
+                                for (ArticleColisAtlBO article : colis.getArticles()){
+                                    if (article.getSsccColisOrigine() != null){
+                                        ssccOrigine = article.getSsccColisOrigine();
+                                    }
+                                    if (!articleByColis.get(colis.getIdSSCCBac()).containsKey(ssccOrigine)){
+                                        articleByColis.get(colis.getIdSSCCBac()).put(ssccOrigine, new ArrayList<ArticleColisAtlBO>());
+                                        nbBilletsByColisOrigine.get(colis.getIdSSCCBac()).put(ssccOrigine, 0);
+                                    }
+                                    articleByColis.get(colis.getIdSSCCBac()).get(ssccOrigine).add(article);
+                                    if (CategorieColis.Faux.getCode().equals((creationColisVO.getCodeAtypique()))) {
+                                        nbBilletsByColisOrigine.get(colis.getIdSSCCBac()).put(ssccOrigine, nbBilletsByColisOrigine.get(colis.getIdSSCCBac()).get(ssccOrigine)+article.getNbBillets());
+                                        nbBilletsByColis.put(colis.getIdSSCCBac(), nbBilletsByColis.get(colis.getIdSSCCBac()) + article.getNbBillets());
+                                    } else {
+                                        nbBilletsByColisOrigine.get(colis.getIdSSCCBac()).put(ssccOrigine, nbBilletsByColisOrigine.get(colis.getIdSSCCBac()).get(ssccOrigine)+1);
+                                        nbBilletsByColis.put(colis.getIdSSCCBac(), nbBilletsByColis.get(colis.getIdSSCCBac()) + 1);
+                                    }
+                                }
+                            }
+                            creationColisVO.setArticleByColis(articleByColis);
+                            creationColisVO.setNbBilletsByColis(nbBilletsByColis);
+                            creationColisVO.setNbBilletsByColisOrigine(nbBilletsByColisOrigine);
+                        }else{
+                            for (ColisAtelierBO colis : colisConditionnes) getColisAtelierBS().chargerArticles(colis);
+                        }
+                        
+                        creationColisVO.getColisEnCours().setNumOrdreCndt(colisConditionnes.size() + 1);
+                        creationColisVO.setColisConditionnes(colisConditionnes);                       
+                    }                   
+                    
+                    // Transactions BD
+                    if (idMiseEnColisChargee == null) {
+                        creationColisVO.getMiseEnColisEnCours().setCategorieColis(categMec);
+                        idMiseEnColisChargee = new Long(0);
+                    }
+                    idMiseEnColisChargee = getCrbTransactionsBS().ajouterMiseEnColisRejets(creationColisVO.getMiseEnColisEnCours(), sessTriDeMeC, recDeMeC, ctrlDlsts, codeCoupureCndt);
+                    
+                    idCndtCharge = getCrbTransactionsBS().ajouterOuMajConditionnements(idMiseEnColisChargee, CategorieColis.getByCode(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()), cndtsCrees, suiviCndtsCreesByCoupure);
+                    
+                    //Récupération des informations pour l'ihm de création
+                    if (!CategorieColis.RejetsAuth.is(CategorieColis.getByCode(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()))){
+                        //Récupération des coupures actives
+                        List<CoupureBO> toutesCoupures = getGCMSportBS().trouverCoupuresActives();
+                        List<CoupureBO> coupuresAbsentes = new ArrayList<CoupureBO>();
+                    	coupuresAbsentes.addAll(toutesCoupures);
+                        Map<String, SuiviCndtsByCoupVO> mapSuiviByCoupBySSCC = new TreeMap<String, SuiviCndtsByCoupVO>();
+                        for (Entry<CoupureCommun, List<SuiviConditionnementBO>> entry : suiviCndtsCreesByCoupure.entrySet()){
+                            //pour une coupure commun, il y a au max 2 suiviConditionnements : 1 par série
+                            for (SuiviConditionnementBO suiviCndt : entry.getValue()){
+                                if (!mapSuiviByCoupBySSCC.containsKey(suiviCndt.getSsccColisOrigine())){
+                                    mapSuiviByCoupBySSCC.put(suiviCndt.getSsccColisOrigine(),  new SuiviCndtsByCoupVO());
+                                }                               
+                                mapSuiviByCoupBySSCC.get(suiviCndt.getSsccColisOrigine()).getSuiviCndtByCoup().put(suiviCndt.getCodeCoupure(), suiviCndt);
+                                //si catégorie mutilé ou fauté ==> enlever la coupure des coupures absentes
+                                if (codeCategorieBillet != CategorieBillet.Faux.getCode()){
+                                    
+                                }
+                            }
+                        }
+                        if (!mapSuiviByCoupBySSCC.containsKey(ColisBO.SSCC_INCONNU)){
+                            mapSuiviByCoupBySSCC.put(ColisBO.SSCC_INCONNU, new SuiviCndtsByCoupVO());
+                        }
+                        creationColisVO.setMapSuiviByCoupBySSCC(mapSuiviByCoupBySSCC);                        
+                        creationColisVO.setToutesCoupures(toutesCoupures);
+                        creationColisVO.setCoupuresAbsentes(coupuresAbsentes);
+                    }
+
+                    creationColisVO.getMiseEnColisEnCours().setIdentifiant(idMiseEnColisChargee);
+                    creationColisVO.getConditionnementEnCours().setIdMiseEnColis(idMiseEnColisChargee);
+                    creationColisVO.getConditionnementEnCours().setIdentifiant(idCndtCharge);
+                    creationColisVO.getColisEnCours().setIdConditionnement(idCndtCharge);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            creationColisVO.setStatutConditonnement(new StatutVO(CODE_STATUS_ERREUR,
+                    message_ERREUR_APLICATIVE,
+                    StatutVO.typeMessageERROR));
+        }
+        
+        //QC 128
+        //En cas de retour a la selection du type de rejet confirmation si la mise en colis contient des RJA et/ou RJA+RJD
+        if(verifierRJARJD){
+            int countRJAInMiseEnColis=0;
+            int countRJDInMiseEnColis=0;
+            try {
+                countRJAInMiseEnColis = getMiseEnColisBS().countCategorieConditionnementByMiseEnColis(idMiseEnColisChargee, "RJA");
+                countRJDInMiseEnColis = getMiseEnColisBS().countCategorieConditionnementByMiseEnColis(idMiseEnColisChargee, "RJD");
+            } catch (ObjetIncompletException e) {
+                // TODO Bloc catch auto-généré
+                e.printStackTrace();
+            } catch (PersistenceException e) {
+                // TODO Bloc catch auto-généré
+                e.printStackTrace();
+            }
+            log.info(countRJAInMiseEnColis+" RJA conditionnés pour mise en colis "+idMiseEnColisChargee);
+            log.info(countRJDInMiseEnColis+" RJD conditionnés pour mise en colis "+idMiseEnColisChargee);
+            int countRJARJDInMiseEnColis=countRJAInMiseEnColis + countRJDInMiseEnColis;
+            
+            //si il existe des RJA ou RJD conditionnés pour cette mise en colis alors on confimera avant de finaliser les rejets
+            if(countRJARJDInMiseEnColis>0){
+                creationColisVO.setRjaInMiseEncolis(true);
+            }
+        }
+        
+        if(ColisUtil.CODE_CTG_ATY.equals(creationColisVO.getCodeCategorieCndt()))
+            creationColisVO.initialiserSaisieBilletsByCoupure();
+		else
+			try {
+				creationColisVO.miseAjourNombreArticle();
+			} catch (PersistenceException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ObjetIncompletException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ObjetInconnuException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ParametreInvalideException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ParametreNulException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        creationColisVO.miseAjourOrdreCndt();
+        
+        return creationColisVO;
+    }
+    
+    /**
+     * Charge les sessions validées qui n'ont pas de mise en colis.
+     * Prend en compte les sessions multi-coupure du jour ainsi que les sessions mono de la coupure choisie
+     * @param coupure
+     * @return
+     * @throws PersistenceException 
+     * @throws ObjetIncompletException 
+     */
+    private List<SessionMGABO> chargerSessionsDuJourSansMeC(List<String> numsPoste, CoupureCommun coupure)
+    throws ObjetIncompletException, PersistenceException {
+        Date aujourdhui = new Date();
+        // QC 534 : Lorsqu'une MONO deno est selectionnee, ne pas retourner les sessions MULTI deno 
+        List<SessionMGABO> sessions = new ArrayList<SessionMGABO>();        
+        if (coupure != null) {
+            String codeEqS1 = coupure.instanceEquivalentS1().fetchCode();
+            sessions.addAll(getSessionMGABS().trouverSessionsMonoSansMeC(numsPoste, aujourdhui, codeEqS1));
+            String codeEqS2 = coupure.instanceEquivalentS2().fetchCode();
+            sessions.addAll(getSessionMGABS().trouverSessionsMonoSansMeC(numsPoste, aujourdhui, codeEqS2));
+        } else {
+            sessions = getSessionMGABS().trouverSessionsMultiSansMeC(numsPoste, aujourdhui);
+            Iterator<CoupureCommun> itCoupure = CoupureCommun.getMultiCoupures().iterator();
+            while (itCoupure.hasNext()) {
+                coupure = itCoupure.next();
+                String codeEqS1 = coupure.instanceEquivalentS1().fetchCode();
+                sessions.addAll(getSessionMGABS().trouverSessionsMonoSansMeC(numsPoste, aujourdhui, codeEqS1));
+                String codeEqS2 = coupure.instanceEquivalentS2().fetchCode();
+                sessions.addAll(getSessionMGABS().trouverSessionsMonoSansMeC(numsPoste, aujourdhui, codeEqS2));
+            }
+        }
+        return sessions;
+    }
+    
+    
+    /**
+     * Charge les sessions validées qui ont une mise en colis en cours
+     * Prend en compte les sessions multi-coupure du jour ainsi que les sessions mono de la coupure choisie
+     * @param coupure
+     * @return
+     * @throws PersistenceException 
+     * @throws ObjetIncompletException 
+     */
+    private List<SessionMGABO> chargerSessionsDuJourAvcMeC(List<String> numsPoste, CoupureCommun coupure)
+    throws ObjetIncompletException, PersistenceException {
+        Date aujourdhui = new Date();
+        List<SessionMGABO> sessions = new ArrayList<SessionMGABO>();
+        //List<SessionMGABO> sessions = getSessionMGABS().trouverSessionsMultiAvecMeC(numsPoste, aujourdhui, EtatConditionnement.EnCours);
+        if (coupure != null) {
+            String codeEqS1 = coupure.instanceEquivalentS1().fetchCode();
+            sessions.addAll(getSessionMGABS().trouverSessionsCoupureEtatMeC(numsPoste, aujourdhui,EtatConditionnement.EnCours, codeEqS1));
+            String codeEqS2 = coupure.instanceEquivalentS2().fetchCode();
+            sessions.addAll(getSessionMGABS().trouverSessionsCoupureEtatMeC(numsPoste, aujourdhui,EtatConditionnement.EnCours, codeEqS2));
+        } else {
+            Iterator<CoupureCommun> itCoupure = CoupureCommun.getMultiCoupures().iterator();
+            sessions.addAll(getSessionMGABS().trouverSessionsMultiAvecMeC(numsPoste, aujourdhui, EtatConditionnement.EnCours));
+            while (itCoupure.hasNext()) {
+                coupure = itCoupure.next();
+                String codeEqS1 = coupure.instanceEquivalentS1().fetchCode();
+                sessions.addAll(getSessionMGABS().trouverSessionsCoupureEtatMeC(numsPoste, aujourdhui,EtatConditionnement.EnCours, codeEqS1));
+                String codeEqS2 = coupure.instanceEquivalentS2().fetchCode();
+                sessions.addAll(getSessionMGABS().trouverSessionsCoupureEtatMeC(numsPoste, aujourdhui,EtatConditionnement.EnCours, codeEqS2));
+            }
+        }
+        return sessions;
+    }
+    
+    
+    private List<SessionMGABO> chargerSessionsDuJourNV(List<String> numsPoste, CoupureCommun coupure)
+    throws ObjetIncompletException, PersistenceException {
+        Date aujourdhui = new Date();
+        List<SessionMGABO> sessions = new ArrayList<SessionMGABO>();
+        if (coupure != null) {
+            String codeEqS1 = coupure.instanceEquivalentS1().fetchCode();
+            sessions.addAll(getSessionMGABS().recupSessionsMga(numsPoste, aujourdhui, codeEqS1, false));
+            String codeEqS2 = coupure.instanceEquivalentS2().fetchCode();
+            sessions.addAll(getSessionMGABS().recupSessionsMga(numsPoste, aujourdhui, codeEqS2, false));
+        } else {
+            Iterator<CoupureCommun> itCoupure = CoupureCommun.getMultiCoupures().iterator();
+            sessions.addAll(getSessionMGABS().recupSessionsMga(numsPoste, aujourdhui, "",false));
+            while (itCoupure.hasNext()) {
+                coupure = itCoupure.next();
+                String codeEqS1 = coupure.instanceEquivalentS1().fetchCode();
+                sessions.addAll(getSessionMGABS().recupSessionsMga(numsPoste, aujourdhui, codeEqS1,false));
+                String codeEqS2 = coupure.instanceEquivalentS2().fetchCode();
+                sessions.addAll(getSessionMGABS().recupSessionsMga(numsPoste, aujourdhui, codeEqS2, false));
+            }
+        }
+        return sessions;
+    }
+    
+    
+    
+    private Long chargerMiseEnColis(List<SessionMGABO> sessTriDeMeC, Long idMiseEnColisChargee) {
+        if (sessTriDeMeC != null && !sessTriDeMeC.isEmpty()) {
+            idMiseEnColisChargee = sessTriDeMeC.get(0).getIdMiseEnColis();
+        }
+        
+        return idMiseEnColisChargee;
+    }
+    
+    /**
+     * Chargement d'un conditionnement si existant<br/>
+     * Création d'un conditionnement rattaché à la mise en colis si inexistant<br/>
+     * Retourne null si le condtionnement est finalisé
+     * @param creationColisVO
+     * @param sessions
+     * @param idMiseEnColis
+     * @throws ObjetIncompletException 
+     * @throws PersistenceException 
+     * @throws PersistenceException 
+     * @throws ObjetIncompletException 
+     * @throws ParametreInvalideException 
+     * @throws OperationInterditeException 
+     * @throws ObjetInconnuException 
+     * @throws ObjetExistantException 
+     * @throws AttributException 
+     */
+    private ConditionnementBO chargerCndt(CategorieColis categorieCndt, CoupureCommun coupureCndt, Long idMiseEnColisChargee)
+    throws PersistenceException, ObjetIncompletException {
+        ConditionnementBO conditionnement;
+        // Tentative de chargement d'un conditionnement pour la catégorie et coupure sélectionnées
+        conditionnement = getCndtBS().trouverCndt(idMiseEnColisChargee, categorieCndt, coupureCndt);
+        if (conditionnement != null) {
+            return conditionnement;
+        }
+        return null;
+    }
+    
+    /**
+     * Calcul du nombre de billets attendus pour le conditionnement (valides, usés ou valeurs à retrier) de la coupure sélectionnée à partir des
+     * éléments des sessions de tris en cours, dans les instances <i>cndtsCrees</i> et <i>suiviCndtsCreesByCoupure</i> prévues à cet effet.<br>
+     * Pour les 'Rejets authentiques', calcul des billets issus des sessions de tri ETM, puis appel à <i>calcConditionnementRecData</i> pour le 
+     * calcul des billets issus des réconciliations de l'atelier.
+     * @param cndtSelect
+     * @param ctgsBilletsSelect
+     * @throws PersistenceException
+     * @throws ParametreInvalideException
+     * @throws ObjetIncompletException
+     * @throws ObjetInconnuException
+     * @throws OperationInterditeException
+     * @throws ObjetExistantException
+     * @throws AttributException
+     */
+    private  MiseEnColisVO calcConditionnementSessData(List<SessionMGABO> sessTriDeMeC, List<ReconciliationBO> recDeMeC, List<ControleDelestageBO> ctrlDlsts, 
+            ConditionnementBO cndtSelect, Set<Integer> ctgsBilletsSelect, Long idMiseEnColisChargee, Map<CoupureCommun, List<SuiviConditionnementBO>> suiviCndtsCreesByCoupure, boolean isNCF)
+    throws PersistenceException, ParametreInvalideException, 
+           ObjetIncompletException, ObjetInconnuException, OperationInterditeException, ObjetExistantException, AttributException {
+        
+        boolean isRejetsAuth = CategorieColis.RejetsAuth.is(cndtSelect.getCategorieColisAtl());
+        List<ConditionnementBO> cndtsCrees = new ArrayList<ConditionnementBO>();
+        suiviCndtsCreesByCoupure = new Hashtable<CoupureCommun, List<SuiviConditionnementBO>>();
+        
+        // Une seule instance regroupe le ou les conditionnements. Pour le mode monocoupure, les deux instances sont les mêmes :
+        if (cndtSelect.isMultiCoupures()) {
+            cndtsCrees.add(cndtSelect);
+        }
+        
+        /* Récupération des ids des sessions pour récupérer les résultats de tri dans les éléments  de  sessions.  Les *
+         * catégories de colis Valides, Usés et Rejets authentiques nécessitent un contrôle sur  le  type  de  session *
+         * (ETM & non ETM) pour interpréter les billets audits (valides et usés) en tant que  valides,  usés  ou  bien *
+         * rejets authentiques selon le cas. */
+        List<Integer> idSessions = new ArrayList<Integer>();
+        List<Integer> idsSessionsETM = new ArrayList<Integer>();
+        boolean verifSessionsETM = (isRejetsAuth || CategorieColis.ValeursARetrier.is(cndtSelect.getCategorieColisAtl()));
+        for (SessionMGABO session : sessTriDeMeC) {
+            int idSession = session.getId();
+            idSessions.add(idSession);
+            if (verifSessionsETM) {
+                int codeTraitement = Integer.valueOf(session.getTypeTraitement().getCode());
+                if (TypeTraitement.AuditProdETM.getCode() == codeTraitement) idsSessionsETM.add(idSession);
+            }
+        }
+        
+        // Récupération des catégories de billets et des valeurs faciales dans le cas multi-coupures
+        Set<Integer> ctgsBillets = new HashSet<Integer>();
+        if (!isRejetsAuth) {
+            ctgsBillets = ctgsBilletsSelect;
+        } else {
+            ctgsBillets.add(CategorieBillet.AuditVal.getCode());
+            ctgsBillets.add(CategorieBillet.AuditUse.getCode());
+        }
+        
+        // Listes des coupures du conditionnement
+        List<CoupureCommun> coupures = new ArrayList<CoupureCommun>();
+        if (!cndtSelect.isMultiCoupures()) {
+            coupures.add(cndtSelect.getCoupure());
+        } else {
+            coupures = CoupureCommun.getMultiCoupures();
+        }
+        
+        // Les valides et uses sortent par carton de 10.000 billets
+        Contenant contenant = Contenant.Sac;
+        if(isNCF){
+            // Pour les ateliers NCF, les valides et uses sortent par pochette de 1000 billets
+            contenant = Contenant.Pochette;
+        }
+        
+        for (CoupureCommun coupure : coupures) { // Une seule valeur faciale dans le cas d'un conditionnement mono-coupure
+            /* Calcul du total de billets pour la catégorie de colis sélectionnée, selon la coupure et selon la catégorie *
+             * à partir des résultas de tris sauvegardés dans les éléments de sessions.  Certaines catégories nécessitent *
+             * en plus un traitement particulier                                                                          */
+            int totalSessionsCoupure = 0, totalRejAuthETM = 0;
+            List<SuiviConditionnementBO> suivisCndt = new ArrayList<SuiviConditionnementBO>();
+            for (int codeCtgBillet : ctgsBillets) {
+                int totalSessionsCategorie = 0;
+                List<EltSessionMGABO> eltSessionsCtgsBillets = getEltSessionBS().trouverEltSessionMGAs(idSessions, coupure.getValeurFaciale(), codeCtgBillet);
+                // Calcul du total attendu pour les bacs valides et uses
+                if (!verifSessionsETM) {
+                    for (EltSessionMGABO eltSession : eltSessionsCtgsBillets) totalSessionsCategorie += eltSession.getCumulArticle();
+                } // Calcul du total attendu pour les bacs VAR
+                else {
+                    
+                    int totalTmp = 0;
+                    CategorieBillet ctgBillet = CategorieBillet.instanceByCode(codeCtgBillet);
+                    
+                    if (CategorieBillet.Valide.is(ctgBillet)) { // Récupération des reliquats de valides pour les VAR
+                        ConditionnementBO cndtValides
+                         = getCndtBS().trouverCndt(idMiseEnColisChargee, CategorieColis.Valides, coupure);
+                        totalTmp = cndtValides.getNbTotalAttendu() - cndtValides.getNbTotalConditionnes();
+                        //Pour les VAR, s'il y a un excédent détecté au cndtValides alors le nbre de valides attendus est 0
+                        if (CategorieColis.ValeursARetrier.is(cndtSelect.getCategorieColisAtl()) && totalTmp <0 ){
+                            totalTmp = 0;
+                        }
+                        totalSessionsCategorie += totalTmp;
+                        // Les sacs de valides sont retranchés du calcul de VAR sauf pour les ateliers de type NCF (QC 226)
+                        //QC 372 on ne fait plus de modulo à cette étape pour avoir les vrais chiffres dans le suivi des mises en colis
+                    } else if (CategorieBillet.Use.is(ctgBillet)) { // Récupération des reliquats d'usés pour les VAR
+                        ConditionnementBO cndtUses
+                         = getCndtBS().trouverCndt(idMiseEnColisChargee, CategorieColis.Uses, coupure);
+                        if (cndtUses != null) {
+                        // Un conditionnement d'usés n'existe que si les sessions contiennent des usés (contrôle fait au préalable du cndt VAR)
+                            totalTmp = cndtUses.getNbTotalAttendu() - cndtUses.getNbTotalConditionnes();
+                            //Pour les VAR, s'il y a un excédent détecté au cndtValides alors le nbre de valides attendus est 0
+                            if (CategorieColis.ValeursARetrier.is(cndtSelect.getCategorieColisAtl()) && totalTmp<0){
+                                totalTmp = 0;
+                            }                           
+                            totalSessionsCategorie += totalTmp;
+                            // Les sacs d'usés sont retranchés du calcul de VAR sauf pour les ateliers de type NCF (QC 226)
+                            //QC 372 on ne fait plus de modulo à cette étape pour avoir les vrais chiffres dans le suivi des mises en colis
+                        }
+                    } else if (CategorieBillet.AuditVal.is(ctgBillet) || CategorieBillet.AuditUse.is(ctgBillet)) {
+                        for (EltSessionMGABO eltSession : eltSessionsCtgsBillets) {
+                            int nbAuditsETM = 0;
+                            // Les audits issus d'ETM ne sont pas comptabilisés en audits mais en rejets authentiques
+                            if (idsSessionsETM.contains(eltSession.getIdSession())) {
+                                nbAuditsETM += eltSession.getCumulArticle();
+                                totalRejAuthETM += nbAuditsETM;
+                            }
+                            totalSessionsCategorie += eltSession.getCumulArticle() - nbAuditsETM;
+                        }
+                    }
+                }
+                suivisCndt.add(new SuiviConditionnementBO(0, codeCtgBillet, totalSessionsCategorie, 0));
+                totalSessionsCoupure += totalSessionsCategorie;
+            }
+            /* Création du conditionnement de la coupure en cours */
+            ConditionnementBO conditionnement = new ConditionnementBO(idMiseEnColisChargee != null ? idMiseEnColisChargee : 0,
+                                                        cndtSelect.getCategorieColisAtl().getCode(),
+                                                        coupure, EtatConditionnement.EnCours);
+            conditionnement.setIdAgent(cndtSelect.getIdAgent());
+            conditionnement.setNbTotalAttendu(!CategorieColis.RejetsAuth.is(cndtSelect.getCategorieColisAtl()) ? totalSessionsCoupure
+                                                                                                               : totalRejAuthETM);
+            cndtsCrees.add(conditionnement);
+            if (!isRejetsAuth) {
+                suiviCndtsCreesByCoupure.put(coupure, suivisCndt);
+            } else {
+                /* Conservation d'un seul suivi de conditionnement pour les Rejets Authentiques, contenant pour l'instant les billets ETM */
+                SuiviConditionnementBO suiviCndt = new SuiviConditionnementBO(0, CategorieBillet.RejAuth.getCode(), totalRejAuthETM, 0);
+                suiviCndt.setNbTotalAttendu(totalRejAuthETM);
+                suivisCndt = new ArrayList<SuiviConditionnementBO>();
+                suivisCndt.add(suiviCndt);
+                suiviCndtsCreesByCoupure.put(coupure, suivisCndt);
+            }
+        }
+        
+        MiseEnColisVO mecVO = new MiseEnColisVO();
+        mecVO.setCndtsCrees(cndtsCrees);
+        mecVO.setIdMiseEnColisChargee(idMiseEnColisChargee);
+        mecVO.setSuiviCndtsCreesByCoupure(suiviCndtsCreesByCoupure);
+        
+        if (isRejetsAuth){
+            mecVO = calcConditionnementRecData(sessTriDeMeC, recDeMeC, ctrlDlsts, cndtsCrees, cndtSelect, ctgsBilletsSelect, idMiseEnColisChargee, suiviCndtsCreesByCoupure);
+        }
+        
+        return  mecVO;
+    }
+    
+    /**
+     * Calcul du nombre de billets attendus pour le conditionnement (atypiques, rejets auhentiques) de la coupure sélectionnée à partir des résultats
+     * de réconciliations en cours, dans les instances <i>cndtsCrees</i> et <i>suiviCndtsCreesByCoupure</i> prévues à cet effet.<br>
+     * Pour les 'Rejets authentiques', ces instances avaient déjà été initialisées avec les valeurs des résultats de sessions de tri ETM.
+     * @param cndtSelect
+     * @param ctgsBilletsSelect
+     * @throws PersistenceException
+     * @throws ParametreInvalideException
+     * @throws ObjetIncompletException
+     * @throws ObjetInconnuException
+     * @throws OperationInterditeException
+     * @throws ObjetExistantException
+     * @throws AttributException
+     */
+    private MiseEnColisVO calcConditionnementRecData(List<SessionMGABO> sessTriDeMeC, List<ReconciliationBO> recDeMeC, List<ControleDelestageBO> ctrlDlsts, 
+            List<ConditionnementBO> cndtsCrees, ConditionnementBO cndtSelect, Set<Integer> ctgsBilletsSelect, Long idMiseEnColisChargee, Map<CoupureCommun, List<SuiviConditionnementBO>> suiviCndtsCreesByCoupure)
+    throws PersistenceException, ParametreInvalideException,
+           ObjetIncompletException, ObjetInconnuException, OperationInterditeException, ObjetExistantException, AttributException {
+
+        boolean isRejetsAuth = CategorieColis.RejetsAuth.is(cndtSelect.getCategorieColisAtl());
+        if (!isRejetsAuth) {
+            
+            cndtsCrees = new ArrayList<ConditionnementBO>();
+            suiviCndtsCreesByCoupure = new Hashtable<CoupureCommun, List<SuiviConditionnementBO>>();
+            // Une seule instance regroupe le ou les conditionnements. Pour le mode monocoupure, les deux instances sont les mêmes :
+            if (cndtSelect.isMultiCoupures()) cndtsCrees.add(cndtSelect);
+        }
+        if (isRejetsAuth
+             && (suiviCndtsCreesByCoupure == null || suiviCndtsCreesByCoupure.isEmpty())) {
+            // Il faut d'abord calculer les rejets authentiques ETM dans cas (voir ci-haut)
+            throw new ParametreInvalideException("Le calcul des rejets authentiques n'a pas été effectuté");
+        } else {
+            /* Récupération des ids des reconciliations */
+            List<Long> idReconciliations = new ArrayList<Long>();
+            for (ReconciliationBO reconciliation : recDeMeC) idReconciliations.add(reconciliation.getIdentifiant());
+            //java 8
+            recDeMeC.stream().forEach(str -> 
+            {
+            	idReconciliations.add(str.getIdentifiant());
+            });
+            //fin java 8
+            List<Long> idCtrlDlsts = new ArrayList<Long>();
+            for (ControleDelestageBO ctrlDlst : ctrlDlsts) idCtrlDlsts.add(ctrlDlst.getIdentifiant());  
+            List<CoupureCommun> coupures = new ArrayList<CoupureCommun>();
+            if (isRejetsAuth && !cndtSelect.isMultiCoupures()) {
+                coupures.add(cndtSelect.getCoupure());
+            } else if (isRejetsAuth){
+                coupures = CoupureCommun.getMultiCoupures();
+            } else{
+                coupures = CoupureCommun.getAllCoupures();
+            }
+            for (CoupureCommun coupure : coupures) {
+                /* Calcul du total de billets pour la catégorie de colis sélectionnée, selon la coupure et selon la catégorie */
+                int totalRecsCoupure = 0;
+                List<SuiviConditionnementBO> suivisCndt;
+                if (!isRejetsAuth) {
+                    suivisCndt = new ArrayList<SuiviConditionnementBO>();
+                } else {
+                    if (!suiviCndtsCreesByCoupure.containsKey(coupure)) continue;
+                    suivisCndt = suiviCndtsCreesByCoupure.get(coupure);
+                }
+                for (int codeCtgBillet : ctgsBilletsSelect) {
+                    int totalRecsCategorie = 0;
+                    List<ResultatTriBO> resultatTrisCtgBillets = new ArrayList<ResultatTriBO>();
+                    Map<String, List<ResultatTriBO>> mapResTrisBySSCC = new HashMap<String, List<ResultatTriBO>>();
+                    List<SuiviCtrlDelestageBO> suiviCtrlDlstCtgBillets  = new ArrayList<SuiviCtrlDelestageBO>();
+                    
+                    if (isRejetsAuth){
+                        resultatTrisCtgBillets = getResultatTriBS().trouverResultatTris(idReconciliations, coupure.getValeurFaciale(), codeCtgBillet);
+                    }else{
+                        mapResTrisBySSCC = getResultatTriBS().trouverResultatTrisBySSCCOrigine(recDeMeC, coupure.getValeurFaciale(), codeCtgBillet);
+                    }
+                    
+
+                    SuiviConditionnementBO suiviCndt = null;
+                    //Cumul des suiviCtrlDelestage par categorie et par coupure
+                    int totalClInconnuCategorieCoupS1 = 0, totalClInconnuCategorieCoupS2 = 0; 
+                    suiviCtrlDlstCtgBillets = getSuiviCtrlDelestageBS().trouverSuiviCtrlDelestages(idCtrlDlsts, coupure.getValeurFaciale(), codeCtgBillet);                 
+                    for (SuiviCtrlDelestageBO suiviCtrl : suiviCtrlDlstCtgBillets){
+                        if (ArticleUtil.getCodeCoupureByArticle(suiviCtrl.getGtinArticle()) == coupure.instanceEquivalentS1().getCode()){
+                            totalClInconnuCategorieCoupS1 += suiviCtrl.getTotalControle();
+                        }else{
+                            totalClInconnuCategorieCoupS2 += suiviCtrl.getTotalControle();
+                        }   
+                    }
+                    
+                    //java 8
+                    Map<String, List<ResultatTriBO>> mapResTrisBySSCC2 = new HashMap<String, List<ResultatTriBO>>();
+                    mapResTrisBySSCC2 = getResultatTriBS().trouverResultatTrisBySSCCOrigine(recDeMeC, coupure.getValeurFaciale(), codeCtgBillet);
+
+                    mapResTrisBySSCC2.entrySet()
+                    .stream()
+                    .filter(f0 -> !f0.equals(ColisBO.SSCC_INCONNU))
+                    .map(Map.Entry::getValue)
+                    .map(m2 -> m2
+                    		.stream()
+                    		.filter(
+                    				resultatTri -> ArticleUtil.getCodeCoupureByArticle(resultatTri.getIdGTINArticle())==coupure.instanceEquivalentS1().getCode()
+                    				)
+                    		//A faire en comparableFuture
+                    		.map(ResultatTriBO::getNbBillets)
+                    		//Fin a faire en comparableFuture
+                    		.collect(Collectors.toList())
+                    	)
+                     .forEach(System.out::println);
+                     //Fin java 8
+                    
+                    if (!isRejetsAuth) {                                                
+                        // Somme des valeurs faciales de toutes les categories                  
+                        for (Entry<String, List<ResultatTriBO>> entry : mapResTrisBySSCC.entrySet()){
+                            int totalRecsCategorieCoupureS1 = 0, totalRecsCategorieCoupureS2 = 0;
+                            resultatTrisCtgBillets = entry.getValue();
+                            if (!ColisBO.SSCC_INCONNU.equals(entry.getKey())){
+                                for (ResultatTriBO resultatTri : resultatTrisCtgBillets) {
+                                    if (ArticleUtil.getCodeCoupureByArticle(resultatTri.getIdGTINArticle()) == coupure.instanceEquivalentS1().getCode()){
+                                        totalRecsCategorieCoupureS1 += resultatTri.getNbBillets();
+                                    }else{
+                                        totalRecsCategorieCoupureS2 += resultatTri.getNbBillets();
+                                    }                       
+                                }                                                           
+                                totalRecsCategorie += totalRecsCategorieCoupureS1 + totalRecsCategorieCoupureS2;                                    
+                                suiviCndt = new SuiviConditionnementBO(0, coupure.instanceEquivalentS1().getCode(), codeCtgBillet, totalRecsCategorieCoupureS1, 0, entry.getKey());
+                                suivisCndt.add(suiviCndt);
+                                suiviCndt = new SuiviConditionnementBO(0, coupure.instanceEquivalentS2().getCode(), codeCtgBillet, totalRecsCategorieCoupureS2, 0, entry.getKey());
+                                suivisCndt.add(suiviCndt);                              
+                            }else{
+                                //récuperer les totaux des résultats de tri avec colis d'origine inconnu pour les additionner avec les suiviCtrlDlst 
+                                //avant de initialiser les suiviConditionnement
+                                for (ResultatTriBO resultatTri : resultatTrisCtgBillets) {
+                                    if (ArticleUtil.getCodeCoupureByArticle(resultatTri.getIdGTINArticle()) == coupure.instanceEquivalentS1().getCode()){
+                                        totalClInconnuCategorieCoupS1 += resultatTri.getNbBillets();
+                                    }else{
+                                        totalClInconnuCategorieCoupS2 += resultatTri.getNbBillets();
+                                    }                       
+                                }                           
+                            }
+                        }
+                        if (totalClInconnuCategorieCoupS1!=0 || totalClInconnuCategorieCoupS2 !=0){
+                            suiviCndt = new SuiviConditionnementBO(0, coupure.instanceEquivalentS1().getCode(), codeCtgBillet, totalClInconnuCategorieCoupS1, 0, ColisBO.SSCC_INCONNU);
+                            suivisCndt.add(suiviCndt);
+                            suiviCndt = new SuiviConditionnementBO(0, coupure.instanceEquivalentS2().getCode(), codeCtgBillet, totalClInconnuCategorieCoupS2, 0, ColisBO.SSCC_INCONNU);
+                            suivisCndt.add(suiviCndt);
+                            //Additionner les totaux obtenus pour colis inconnu avec le total de la catégorie
+                            totalRecsCategorie+= totalClInconnuCategorieCoupS1 + totalClInconnuCategorieCoupS2;
+                        }
+                        
+                    } else {
+                        // Somme des valeurs faciales de toutes les categories                  
+                        for (ResultatTriBO resultatTri : resultatTrisCtgBillets) {
+                            totalRecsCategorie += resultatTri.getNbBillets();
+                        }
+                        //Cumul des totaux provenant des controles de délestages avec celui des réconciliations.
+                        totalRecsCategorie += totalClInconnuCategorieCoupS1 + totalClInconnuCategorieCoupS2;
+                        suiviCndt = new SuiviConditionnementBO(0, codeCtgBillet, totalRecsCategorie, 0);
+                        int indSuivi = suivisCndt.indexOf(suiviCndt);
+                        suiviCndt = suivisCndt.get(indSuivi);
+                        Integer totAttendu = suiviCndt.getNbTotalAttendu();
+                        totAttendu += totalRecsCategorie;
+                        suiviCndt.setNbTotalAttendu(totAttendu);
+                    }
+                    totalRecsCoupure += totalRecsCategorie;
+                }
+                /* Création ou MàJ du conditionnement de la coupure en cours */
+                ConditionnementBO conditionnement = new ConditionnementBO(idMiseEnColisChargee != null ? idMiseEnColisChargee : 0,
+                                                            cndtSelect.getCategorieColisAtl().getCode(),
+                                                            coupure, EtatConditionnement.EnCours);
+                if (isRejetsAuth) {
+                    int indCndt = cndtsCrees.indexOf(conditionnement);
+                    conditionnement = cndtsCrees.get(indCndt);
+                    Integer totAttendu = conditionnement.getNbTotalAttendu();
+                    totAttendu += totalRecsCoupure;
+                    conditionnement.setNbTotalAttendu(totAttendu);
+                } else {
+                    conditionnement.setIdAgent(cndtSelect.getIdAgent());
+                    conditionnement.setNbTotalAttendu(totalRecsCoupure);
+                    cndtsCrees.add(conditionnement);
+                    suiviCndtsCreesByCoupure.put(coupure, suivisCndt);
+                }
+            }
+        }
+        
+        MiseEnColisVO mecVO = new MiseEnColisVO();
+        mecVO.setCndtsCrees(cndtsCrees);
+        mecVO.setIdMiseEnColisChargee(idMiseEnColisChargee);
+        mecVO.setSuiviCndtsCreesByCoupure(suiviCndtsCreesByCoupure);
+        return  mecVO;
+    }
+    
+    /**
+     * Vérifie si un conditionnement de valides à retrier peut être effectué
+     * @param coupure
+     * @return
+     * @throws PersistenceException
+     * @throws ObjetIncompletException
+     */
+    private boolean verifierConditionnementVAR(List<SessionMGABO> sessTriDeMeC, CoupureCommun coupure, Long idMiseEnColisChargee)
+    throws PersistenceException, ObjetIncompletException {
+        ConditionnementBO cndtValides
+         = getCndtBS().trouverCndt(idMiseEnColisChargee, CategorieColis.Valides, coupure);
+        if (cndtValides == null || EtatConditionnement.EnCours.is(cndtValides.getEtat())) {
+            return false;
+        }
+        ConditionnementBO cndtUses
+         = getCndtBS().trouverCndt(idMiseEnColisChargee, CategorieColis.Uses, coupure);
+        if (cndtUses == null) { // Pas de conditionnement d'usés requis s'il n'y a pas d'usés dans les résultats de tri
+            List<CoupureCommun> coupures = new ArrayList<CoupureCommun>();
+            if (coupure != null) {
+                coupures.add(coupure);
+            } else {
+                coupures = CoupureCommun.getMultiCoupures();
+            }
+            List<Integer> idSessions = new ArrayList<Integer>();
+            for (SessionMGABO session : sessTriDeMeC) idSessions.add(session.getId());
+            for (CoupureCommun coupureUses : coupures) {
+                List<EltSessionMGABO> eltSessionsCtgsBillets
+                 = getEltSessionBS().trouverEltSessionMGAs(idSessions, coupureUses.getValeurFaciale(), CategorieBillet.Use.getCode());
+                if (eltSessionsCtgsBillets.size() > 0) {
+                    return false;
+                }
+            }
+            return true;
+        } else if (EtatConditionnement.EnCours.is(cndtUses.getEtat())) {
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Fixe le message d'erreur correpondant pour l'affichage dans une pop-up après rechargement de la page
+     * @param request
+     * @param typeForward
+     */
+    private StatutVO adapterMessageErreur(boolean isConditionnementNotPossible, String typeForward, String... params) {
+        String applicationRessourceErr = "";
+        if (MAP_SESSIONS_KO.equals(typeForward)) {
+            applicationRessourceErr = message_CNDT_SESSIONS_NULL;
+        } else if (MAP_CNDT_FIN.equals(typeForward)) {
+            applicationRessourceErr = message_CNDT_FINALISE;
+        } else if (MAP_CNDT_VAR_KO.equals(typeForward)) {
+            if(isConditionnementNotPossible){
+                applicationRessourceErr = message_CNDT_VAR_COLIS;
+            }else{
+                applicationRessourceErr = message_CNDT_VAR;
+            }
+        } else if (MAP_REJETS_KO.equals(typeForward)) {
+            applicationRessourceErr = message_CNDT_REC;
+        }
+                
+        if(applicationRessourceErr.isEmpty())
+            return null;
+        else
+            return new StatutVO(CODE_STATUS_ERREUR,
+                    MessageFormat.format(applicationRessourceErr, params),
+                    StatutVO.typeMessageERROR);
+    }    
+/////// Données du fomulaire
+    /**
+     * Chargement des propriétés complètes des coupures (codes et libellés) dans les cas mono et multi-coupures
+     * @param creationColisVO
+     * @throws PersistenceException
+     * @throws ObjetIncompletException
+     * @throws ObjetInconnuException
+     * @throws ParametreInvalideException 
+     * @throws ParametreNulException 
+     */
+    private void chargerCoupures(CreationColisVO creationColisVO)
+    throws PersistenceException, ObjetIncompletException, ObjetInconnuException, ParametreInvalideException, ParametreNulException {
+        if (CategorieColis.Atypiques.is(CategorieColis.getByCode(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl())) 
+                && (creationColisVO.getConditionnementEnCours().getCoupure() != null)){
+            creationColisVO.getConditionnementEnCours().setCoupure(null);
+            if (!creationColisVO.getCodesCoupureES1().isEmpty()){
+                creationColisVO.getCodesCoupureES1().remove(0);
+                creationColisVO.getCodesCoupureES2().remove(0);
+            }
+        }
+        if (creationColisVO.getCodesCoupureES1().size() == 0 && creationColisVO.getCodesCoupureES2().size() == 0) {
+            if (CategorieColis.Atypiques.is(CategorieColis.getByCode(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl()))){
+                creationColisVO.addCodeCoupureES1(CoupureS1.euro5.fetchCode());
+                creationColisVO.addCodeCoupureES1(CoupureS1.euro10.fetchCode());
+                creationColisVO.addCodeCoupureES1(CoupureS1.euro20.fetchCode());
+                creationColisVO.addCodeCoupureES1(CoupureS1.euro50.fetchCode());
+                creationColisVO.addCodeCoupureES1(CoupureS2.euro5.fetchCode());
+                creationColisVO.addCodeCoupureES1(CoupureS2.euro10.fetchCode());
+                creationColisVO.addCodeCoupureES1(CoupureS2.euro20.fetchCode());
+                creationColisVO.addCodeCoupureES1(CoupureS2.euro50.fetchCode());
+            }
+            creationColisVO.addCodeCoupureES1(CoupureS1.euro100.fetchCode());
+            creationColisVO.addCodeCoupureES1(CoupureS1.euro200.fetchCode());
+            creationColisVO.addCodeCoupureES1(CoupureS1.euro500.fetchCode());
+            creationColisVO.addCodeCoupureES2(CoupureS2.euro100.fetchCode());
+            creationColisVO.addCodeCoupureES2(CoupureS2.euro200.fetchCode());
+            creationColisVO.addCodeCoupureES2(CoupureS2.euro500.fetchCode());
+        }
+        for (String codeCoupureES1 : creationColisVO.getCodesCoupureES1()) {
+            ICoupureBO coupure = getGCMSportBS().trouverCoupure(codeCoupureES1);
+            creationColisVO.addLibelleCoupureES1(coupure.getLibelleCourt());
+        }
+        for (String codeCoupureES2: creationColisVO.getCodesCoupureES2()) {
+            ICoupureBO coupure = getGCMSportBS().trouverCoupure(codeCoupureES2);
+            // QC 348, 391 : Controle que la coupure est bien active
+            if(!coupure.isDesactive()){
+                creationColisVO.addLibelleCoupureES2(coupure.getLibelleCourt());                
+            }
+
+        }
+    }
+    
+    /**
+     * Charge les catégories d'articles selon la catégorie de colis
+     * @param creationColisVO
+     */
+    private void chargerArticles(CreationColisVO creationColisVO) {
+        Map<Integer, String> articleByCode = new LinkedHashMap<Integer, String>();
+        List<CategorieBillet> categories = CategorieBillet.fetchCategoriesBilletsColisAtl(creationColisVO.getConditionnementEnCours().getCodeCtgColisAtl(), creationColisVO.getCodeAtypique());
+        for (CategorieBillet categorie : categories) {
+            articleByCode.put(categorie.getCode(), categorie.fetchLibelleAuPluriel());
+        }
+        creationColisVO.setArticleByCode(articleByCode);
+    }
+    
+    
+    /**
+     * Permet de déterminer si la coupure à conditionner est deja finalisée
+     * @param coupureEnCours
+     * @param listConditionnement
+     * @return true si la coupure est deja finalisée
+     */
+    private boolean isCoupureAConditionnerDejaFinalise(List<String> listeCoupureEnCours, List<ConditionnementByMiseEnColisVO> listConditionnement){
+        boolean isCoupureFinalise= false;
+        List<String>  coupureEnCoursFinalises=new ArrayList<String>();
+        if(listConditionnement!=null){
+            for(ConditionnementByMiseEnColisVO conditionnement:listConditionnement){
+                if(conditionnement!=null){
+                        //si chaque contionnement a effectuer est deja finalisé on le comptabilise
+                        if(listeCoupureEnCours.contains(conditionnement.getLibelleCoupure()) && conditionnement.getNbVarFinalises()==1){
+                            coupureEnCoursFinalises.add(conditionnement.getLibelleCoupure());
+                        }
+                }
+            }
+            log.info("coupure A Conditionner deja Finalises:"+coupureEnCoursFinalises);
+            //si toutes les coupures en cours sont finalises
+            Collections.sort(coupureEnCoursFinalises);
+            Collections.sort(listeCoupureEnCours);
+            if(coupureEnCoursFinalises.equals(listeCoupureEnCours)){
+                isCoupureFinalise=true;
+            }
+        }
+        return isCoupureFinalise;
+    }
+    
+    /**
+     * Permet de récupérer la liste des coupures non finalisées en dehors de la coupure à conditionner
+     * @param coupureEnCours
+     * @param listConditionnement
+     * @return String contenant la liste des coupures concatenées avec "et" sinon String vide si pas de coupures à finaliser
+     */
+    private String conditionnementAFinaliser(List<String> listeCoupureEnCours, List<ConditionnementByMiseEnColisVO> listConditionnement){
+        String conditionnementAFinaliser="";
+        List<String>  cdtAFinaliser=new ArrayList<String>();
+        if(listConditionnement!=null){
+            for(ConditionnementByMiseEnColisVO conditionnement:listConditionnement){
+                if(conditionnement!=null){
+                    //si il existe un conditionnement non finalisé ne faisant pas partie des conditionnements à effectuer
+                    if(!listeCoupureEnCours.contains(conditionnement.getLibelleCoupure()) && conditionnement.getNbVarFinalises()==0){
+                        conditionnementAFinaliser+=conditionnement.getLibelleCoupure()+" et ";
+                        cdtAFinaliser.add(conditionnement.getLibelleCoupure());
+                    }
+                }
+            }
+            //suppression du "et" en fin de chaine
+            conditionnementAFinaliser=StringUtils.chomp(conditionnementAFinaliser," et ");
+            //message MULTI por les multi coupures
+            if(cdtAFinaliser.size()>1){
+                conditionnementAFinaliser="MULTI";
+            }
+        }
+        return conditionnementAFinaliser;
+    }
+
+    /**
+     * Initialisation des conditionnement valides et uses a zero pour les ateliers de type NCF
+     * @param creationColisVO
+     * @param idMiseEnColisNCF
+     * @param sessTriDeMeC
+     * @param mecNCF
+     * @param categorieColis
+     * @param categorieBillet
+     * @throws Exception
+     */
+    private void creerConditionnementInitialNCF(CreationColisVO creationColisVO, Long idMiseEnColisNCF, List<SessionMGABO> sessTriDeMeC, MiseEnColisBO mecNCF, 
+            CategorieColis categorieColis, CategorieBillet categorieBillet) throws Exception{
+        
+        
+        // Conditionnement
+        ConditionnementBO conditionnementNCF = new ConditionnementBO(0, categorieColis.getCode(), creationColisVO.getConditionnementEnCours().getCoupure(), EtatConditionnement.EnCours);
+        Map<Integer, String> articleByCodeNCF = new LinkedHashMap<Integer, String>();
+        articleByCodeNCF.put(categorieBillet.getCode(), categorieBillet.fetchLibelleAuPluriel());
+        
+        // Calcul du conditionnement pour les ateliers NCF
+        MiseEnColisVO mecVoNCF = calcConditionnementSessData(sessTriDeMeC, null, null, conditionnementNCF, articleByCodeNCF.keySet(), null, null, true);
+        List<ConditionnementBO> listConditionnementNCF = mecVoNCF.getCndtsCrees();
+        for (ConditionnementBO cndtNCF : listConditionnementNCF){
+            cndtNCF.setEtat(EtatConditionnement.Finalise);
+            cndtNCF.setDateDebut(new Date());
+            cndtNCF.setDateFin(new Date());
+            cndtNCF.setAgentCndt(mecNCF.getAgent());                            
+        }
+        Map<CoupureCommun, List<SuiviConditionnementBO>> suiviCndtsCreesByCoupureNCF = mecVoNCF.getSuiviCndtsCreesByCoupure();
+        // Creation du conditionnement et du suivi de conditionnement en base
+        getCrbTransactionsBS().ajouterConditionnements(idMiseEnColisNCF, categorieColis, listConditionnementNCF, suiviCndtsCreesByCoupureNCF);
+
+        
+    }
+    
+    /**
+     * QC 271 interdiction de conditionnement de coupures non attendues
+     * recuperation de la liste des valeurs faciales attendues pour mise en colis et recherche de la valeur faciale en cours de conditionnement dans cette liste
+     * Si la valeur faciale en cours de conditionnement est trouvé alors conditionnement possible
+     * Sinon conditionement impossible
+     * RG: Toute coupure autre que la coupure objet du tri machine passe en rejets donc pas attendu pour mise en colis 
+     * 
+     * @param myListeSessionsMGAValidees
+     * @param myForm
+     * @return
+     */
+    public boolean isCoupureEnCoursEnAttentePourMiseEnColis(List<SessionMGABO> myListeSessionsMGAValidees, CreationColisVO creationColisVO){
+        boolean isEnAttentePourMiseEnColis = false;
+        List<ICoupureBO> listeCoupuresAttendusPourMiseEnColis = new ArrayList<ICoupureBO>();
+        List<Integer> listeValeursFacialesAttendusPourMiseEnColis= new ArrayList<Integer>();
+        List<Long> listeIdSessionsDujourValidees= new ArrayList<Long>();
+        
+        if (CollectionUtils.isNotEmpty(myListeSessionsMGAValidees)){
+            //construction liste des ID des sessions du jour validees
+            for(SessionMGABO sessionMGABO:myListeSessionsMGAValidees){
+                if(null != sessionMGABO){
+                    listeIdSessionsDujourValidees.add((long)sessionMGABO.getId());
+                }
+            }
+            log.info("Sessions attendues pour MEC: "+listeIdSessionsDujourValidees);
+            
+            //construction liste des coupures attendus pour mises en colis
+            try {
+                listeCoupuresAttendusPourMiseEnColis = getGCMSportBS().trouverCoupuresSessionsValidees(listeIdSessionsDujourValidees);
+            } catch (AccesBaseException e) {
+                e.printStackTrace();
+            } catch (AttributException e) {
+                e.printStackTrace();
+            } catch (PersistenceException e) {
+                e.printStackTrace();
+            } catch (ObjetIncompletException e) {
+                e.printStackTrace();
+            } catch (ObjetInconnuException e) {
+                e.printStackTrace();
+            }
+
+            //construction liste des valeurs faciales des coupures attendus pour mises en colis
+            if (CollectionUtils.isNotEmpty(listeCoupuresAttendusPourMiseEnColis)){
+                for(ICoupureBO coupureAttendu:listeCoupuresAttendusPourMiseEnColis){
+                    if(null != coupureAttendu){
+                        listeValeursFacialesAttendusPourMiseEnColis.add(coupureAttendu.getValeurFaciale());
+                    }
+                }
+                Collections.sort(listeValeursFacialesAttendusPourMiseEnColis);
+                log.info("Valeurs faciales attendues pour MEC: "+listeValeursFacialesAttendusPourMiseEnColis);
+
+                if (CollectionUtils.isNotEmpty(listeValeursFacialesAttendusPourMiseEnColis)){
+                    //cas des monocoupures: si la valeur faciale du conditionnement en cours ne fait reference à aucune valeur de sessions du jour validées on avorte
+                    if(creationColisVO.getConditionnementEnCours().getCoupure() != null){
+                        int valeurFaciale = creationColisVO.getConditionnementEnCours().getCoupure().getValeurFaciale();
+                        log.info("valeurs faciales en cours de MEC: "+valeurFaciale);
+                        if(listeValeursFacialesAttendusPourMiseEnColis.contains((valeurFaciale))){
+                            isEnAttentePourMiseEnColis = true;
+                        }
+                    //cas des multicoupures: si aucune valeur faciale de Multi ne fait reference à aucune valeur de sessions du jour validées on avorte
+                    } else {//if(creationColisVO.getConditionnementEnCours().getCoupure() == null){
+                        log.info("valeurs faciales en cours de MEC: "+CoupureUtil.LIST_VALEURS_FACIALES_MULTI_COUPURES);
+                        if(CollectionUtils.containsAny(listeValeursFacialesAttendusPourMiseEnColis,CoupureUtil.LIST_VALEURS_FACIALES_MULTI_COUPURES)){
+                            isEnAttentePourMiseEnColis = true;
+                        }
+                    }
+                }
+            }
+        }
+        return isEnAttentePourMiseEnColis;
+    }
+    
+    
+    private CrbTransactionsBS getCrbTransactionsBS() {
+        return BSFactoryFacade.getCrbTransactionsBS();
+    }
+    
+    private SessionMGABS getSessionMGABS() {
+        return (SessionMGABS) BSFactoryFacade.getSessionMGABS();
+    }
+    
+    private ConditionnementBS getCndtBS() {
+        return (ConditionnementBS) BSFactoryFacade.getConditionnementBS();
+    }
+    
+    private MiseEnColisBS getMiseEnColisBS() {
+        return (MiseEnColisBS) BSFactoryFacade.getMiseEnColisBS();
+    }
+    
+    private EltSessionBS getEltSessionBS() {
+        return (EltSessionBS) BSFactoryFacade.getEltSessionBS();
+    }
+    
+    private ColisAtelierBS getColisAtelierBS() {
+        return (ColisAtelierBS) BSFactoryFacade.getColisAtelierBS();
+    }
+    
+    private ReferentielBS getReferentielBS() {
+        return (ReferentielBS) BSFactoryFacade.getReferentielBS();
+    }
+    
+    private ReconciliationBS getReconciliationBS() {
+        return (ReconciliationBS) BSFactoryFacade.getReconciliationBS();
+    }
+    
+    private CtrlDelestageBS getCtrlDelestageBS() {
+        return (CtrlDelestageBS) BSFactoryFacade.getCtrlDelestageBS();
+    }
+    
+    private SuiviCtrlDelestageBS getSuiviCtrlDelestageBS() {
+        return (SuiviCtrlDelestageBS) BSFactoryFacade.getSuiviCtrlDelestageBS();
+    }
+    
+    private ResultatTriBS getResultatTriBS() {
+        return (ResultatTriBS) BSFactoryFacade.getResultatTriBS();
+    }
+    
+    private IGCMSportBS getGCMSportBS() {
+            return GCMSportFactoryBS.getInstance();
+    }
+
+    private IGCMPosteBS getGCMPosteBS() {
+        return GCMPosteFactoryBS.getInstance();
+    }    
+}

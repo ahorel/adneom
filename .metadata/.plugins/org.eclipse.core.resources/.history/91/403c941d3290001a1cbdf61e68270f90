@@ -1,0 +1,701 @@
+Message-ID: <1266032907.3860.1587743647327.JavaMail.sofacmgr@lxpr429a>
+Subject: Exported From Confluence
+MIME-Version: 1.0
+Content-Type: multipart/related; 
+	boundary="----=_Part_3859_1016358907.1587743647327"
+
+------=_Part_3859_1016358907.1587743647327
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-Location: file:///C:/exported.html
+
+<html xmlns:o=3D'urn:schemas-microsoft-com:office:office'
+      xmlns:w=3D'urn:schemas-microsoft-com:office:word'
+      xmlns:v=3D'urn:schemas-microsoft-com:vml'
+      xmlns=3D'urn:w3-org-ns:HTML'>
+<head>
+    <meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8=
+">
+    <title>Ignite - Client / Server</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:TargetScreenSize>1024x640</o:TargetScreenSize>
+            <o:PixelsPerInch>72</o:PixelsPerInch>
+            <o:AllowPNG/>
+        </o:OfficeDocumentSettings>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>90</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+                <!--
+        @page Section1 {
+            size: 8.5in 11.0in;
+            margin: 1.0in;
+            mso-header-margin: .5in;
+            mso-footer-margin: .5in;
+            mso-paper-source: 0;
+        }
+
+        table {
+            border: solid 1px;
+            border-collapse: collapse;
+        }
+
+        table td, table th {
+            border: solid 1px;
+            padding: 5px;
+        }
+
+        td {
+            page-break-inside: avoid;
+        }
+
+        tr {
+            page-break-after: avoid;
+        }
+
+        div.Section1 {
+            page: Section1;
+        }
+
+        /* Confluence print stylesheet. Common to all themes for print medi=
+a */
+/* Full of !important until we improve batching for print CSS */
+
+@media print {
+    #main {
+        padding-bottom: 1em !important; /* The default padding of 6em is to=
+o much for printouts */
+    }
+
+    body {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        font-size: 10pt;
+        line-height: 1.2;
+    }
+
+    body, #full-height-container, #main, #page, #content, .has-personal-sid=
+ebar #content {
+        background: #fff !important;
+        color: #000 !important;
+        border: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    a, a:link, a:visited, a:focus, a:hover, a:active {
+        color: #000;
+    }
+
+    #content h1,
+    #content h2,
+    #content h3,
+    #content h4,
+    #content h5,
+    #content h6 {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        page-break-after: avoid;
+    }
+
+    pre {
+        font-family: Monaco, "Courier New", monospace;
+    }
+
+    #header,
+    .aui-header-inner,
+    #navigation,
+    #sidebar,
+    .sidebar,
+    #personal-info-sidebar,
+    .ia-fixed-sidebar,
+    .page-actions,
+    .navmenu,
+    .ajs-menu-bar,
+    .noprint,
+    .inline-control-link,
+    .inline-control-link a,
+    a.show-labels-editor,
+    .global-comment-actions,
+    .comment-actions,
+    .quick-comment-container,
+    #addcomment {
+        display: none !important;
+    }
+
+    /* CONF-28544 cannot print multiple pages in IE */
+    #splitter-content {
+        position: relative !important;
+    }
+
+    .comment .date::before {
+        content: none !important; /* remove middot for print view */
+    }
+
+    h1.pagetitle img {
+        height: auto;
+        width: auto;
+    }
+
+    .print-only {
+        display: block;
+    }
+
+    #footer {
+        position: relative !important; /* CONF-17506 Place the footer at en=
+d of the content */
+        margin: 0;
+        padding: 0;
+        background: none;
+        clear: both;
+    }
+
+    #poweredby {
+        border-top: none;
+        background: none;
+    }
+
+    #poweredby li.print-only {
+        display: list-item;
+        font-style: italic;
+    }
+
+    #poweredby li.noprint {
+        display: none;
+    }
+
+    /* no width controls in print */
+    .wiki-content .table-wrap,
+    .wiki-content p,
+    .panel .codeContent,
+    .panel .codeContent pre,
+    .image-wrap {
+        overflow: visible !important;
+    }
+
+    /* TODO - should this work? */
+    #children-section,
+    #comments-section .comment,
+    #comments-section .comment .comment-body,
+    #comments-section .comment .comment-content,
+    #comments-section .comment p {
+        page-break-inside: avoid;
+    }
+
+    #page-children a {
+        text-decoration: none;
+    }
+
+    /**
+     hide twixies
+
+     the specificity here is a hack because print styles
+     are getting loaded before the base styles. */
+    #comments-section.pageSection .section-header,
+    #comments-section.pageSection .section-title,
+    #children-section.pageSection .section-header,
+    #children-section.pageSection .section-title,
+    .children-show-hide {
+        padding-left: 0;
+        margin-left: 0;
+    }
+
+    .children-show-hide.icon {
+        display: none;
+    }
+
+    /* personal sidebar */
+    .has-personal-sidebar #content {
+        margin-right: 0px;
+    }
+
+    .has-personal-sidebar #content .pageSection {
+        margin-right: 0px;
+    }
+
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}
+-->
+    </style>
+</head>
+<body>
+    <h1>Ignite - Client / Server</h1>
+    <div class=3D"Section1">
+        <h1 id=3D"Ignite-Client/Server-/*<![CDATA[*/div.rbtoc1587743647226{=
+padding:0px;}div.rbtoc1587743647226ul{list-style:disc;margin-left:0px;}div.=
+rbtoc1587743647226li{margin-left:0px;padding-left:0px;}/*]]>*/#Ignite-Clien=
+t/Server-IgniteClient#Ignite-Client/Server-Ignit"><style type=3D"text/css">=
+/*<![CDATA[*/
+div.rbtoc1587743647226 {padding: 0px;}
+div.rbtoc1587743647226 ul {list-style: disc;margin-left: 0px;}
+div.rbtoc1587743647226 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style>
+<div class=3D"toc-macro rbtoc1587743647226">=20
+<ul class=3D"toc-indentation">=20
+<li><a href=3D"#Ignite-Client/Server-"></a></li>=20
+<li><a href=3D"#Ignite-Client/Server-IgniteClient">Ignite Client</a></li>=
+=20
+<li><a href=3D"#Ignite-Client/Server-IgniteServer">Ignite Server</a>=20
+<ul class=3D"toc-indentation">=20
+<li><a href=3D"#Ignite-Client/Server-PullIgnitefromDockerhub">Pull Ignite f=
+rom Docker hub</a></li>=20
+<li><a href=3D"#Ignite-Client/Server-AddtheclientjartoIgnitelibsfolder">Add=
+ the client jar to Ignite libs folder</a></li>=20
+<li><a href=3D"#Ignite-Client/Server-ExecuteIgniteServer">Execute Ignite Se=
+rver</a></li>=20
+<li><a href=3D"#Ignite-Client/Server-ExecuteIgniteclient/servertest">Execut=
+e Ignite client/server test</a></li>=20
+</ul> </li>=20
+</ul>=20
+</div></h1>
+<h1 id=3D"Ignite-Client/Server-IgniteClient">Ignite Client</h1>
+<p>The following Java class sends a braodcast message to Ignite nodes and e=
+xecutes a simple compute consisting of counting string caracters excepting =
+spaces.</p>
+<p>Many other examples are available in this Git Hub repository: <a href=3D=
+"https://github.com/apache/ignite/tree/master/examples" class=3D"external-l=
+ink" rel=3D"nofollow">https://github.com/apache/ignite/tree/master/examples=
+</a></p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">public =
+class ComputeBroadcastExample {
+&nbsp;&nbsp;&nbsp; public static void main(String[] args) throws IgniteExce=
+ption {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; try (Ignite ignite =3D Ignition.=
+start(args[0])) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ignition=
+.setClientMode(true);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //Broadc=
+ast "hello" to all Ignite nodes
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hello(ig=
+nite);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; private static void hello(Ignite ignite) throws IgniteEx=
+ception {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Print out hello message on al=
+l nodes.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ClusterGroup serverGroup =3D ign=
+ite.cluster().forServers();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; IgniteCompute serverCompute =3D =
+ignite.compute(serverGroup);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; serverCompute.broadcast(() -&gt;=
+ {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.o=
+ut.println();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.o=
+ut.println("&gt;&gt;&gt; Hello Node! :)");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; });
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; private static void countCaracteres(Ignite ignite, Strin=
+g str) throws IgniteException&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ClusterGroup serverGroup =3D ign=
+ite.cluster().forServers();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; IgniteCompute serverCompute =3D =
+ignite.compute(serverGroup);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Collection&lt;Integer&gt; res =
+=3D serverCompute.apply(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp; new IgniteClosure&lt;String, Integer&gt;() {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private static final long serialVer=
+sionUID =3D 1L;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @Override
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public Integer apply(String word) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return word=
+.length();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp; },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp; Arrays.asList(str.split(" "))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; int sum =3D 0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for (int len : res)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sum +=3D=
+ len;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.out.println("Length of th=
+e sentence: "+ sum);
+&nbsp;&nbsp;&nbsp; }
+}</pre>=20
+</div>
+</div>
+<div class=3D"codehilite language-java">
+<pre>&nbsp;</pre>
+<pre><span>The maven <code>pom.xml</code> looks like this:</span></pre>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">&lt;pro=
+ject xmlns=3D"http://maven.apache.org/POM/4.0.0" xmlns:xsi=3D"http://www.w3=
+.org/2001/XMLSchema-instance" xsi:schemaLocation=3D"http://maven.apache.org=
+/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+&nbsp; &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+&nbsp; &lt;groupId&gt;org.belgadi.kamel&lt;/groupId&gt;
+&nbsp; &lt;artifactId&gt;ignite-maven-proj&lt;/artifactId&gt;
+&nbsp; &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+&nbsp; &lt;dependencies&gt;
+&nbsp;&nbsp;&nbsp; &lt;dependency&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;groupId&gt;org.apache.ignite=
+&lt;/groupId&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;artifactId&gt;ignite-core&lt=
+;/artifactId&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;version&gt;2.1.0&lt;/version=
+&gt;
+&nbsp;&nbsp;&nbsp; &lt;/dependency&gt;
+&nbsp;&nbsp;&nbsp; &lt;dependency&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;groupId&gt;org.apache.ignite=
+&lt;/groupId&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;artifactId&gt;ignite-spring&=
+lt;/artifactId&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;version&gt;2.1.0&lt;/version=
+&gt;
+&nbsp;&nbsp;&nbsp; &lt;/dependency&gt;
+&nbsp; &lt;/dependencies&gt;
+&lt;/project&gt;</pre>=20
+</div>
+</div>
+<p>&nbsp;</p>
+</div>
+<p>Ignite client uses a xml config file <code>example-cache-client.xml</cod=
+e> which looks like this:</p>
+<p>More explanations on Ignite XML config are available on this site: <a hr=
+ef=3D"https://apacheignite.readme.io/docs/cluster-config" class=3D"external=
+-link" rel=3D"nofollow">https://apacheignite.readme.io/docs/cluster-config<=
+/a></p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">&lt;?xm=
+l version=3D"1.0" encoding=3D"UTF-8"?&gt;
+&lt;beans xmlns=3D"http://www.springframework.org/schema/beans"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xmlns:xsi=3D"http://www.w3.org/2001/XM=
+LSchema-instance"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xsi:schemaLocation=3D"
+&nbsp;http://www.springframework.org/schema/beans
+&nbsp;http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+&nbsp;&nbsp;&nbsp; &lt;bean id=3D"ignite.cfg" class=3D"org.apache.ignite.co=
+nfiguration.IgniteConfiguration"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property name=3D"clientMode"=
+ value=3D"true"/&gt;
+...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;bean class=3D"org.apache.ignite=
+.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;propert=
+y name=3D"addresses"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=
+&nbsp;&nbsp; &lt;list&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;value&gt;224.0.0.1:47500..47509&lt=
+;/value&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=
+&nbsp;&nbsp; &lt;/list&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/proper=
+ty&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/bean&gt;
+...
+&lt;/beans&gt;
+&nbsp;</pre>=20
+</div>
+</div>
+<p>Notice that the used Spi is <code>Multicast</code>. The node is declared=
+ as client: <code>&lt;property name=3D"clientMode" value=3D"true"/&gt;</cod=
+e>.</p>
+<p>Build the project with maven:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">mvn ins=
+tall dependency:copy-dependencies</pre>=20
+</div>
+</div>
+<h1 id=3D"Ignite-Client/Server-IgniteServer">Ignite Server</h1>
+<h3 id=3D"Ignite-Client/Server-PullIgnitefromDockerhub">Pull Ignite from Do=
+cker hub</h3>
+<p>&nbsp;</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">docker =
+pull apacheignite/ignite:latest</pre>=20
+</div>
+</div>
+<div class=3D"codehilite language-shell">
+<h3 id=3D"Ignite-Client/Server-AddtheclientjartoIgnitelibsfolder">Add the c=
+lient jar to Ignite libs folder</h3>
+</div>
+<p>Copy the resulting client jar into Ignite Server libs folder. Write the =
+following <code>Dockerfile</code> and save it into the Docker build folder:=
+</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">&nbsp;
+FROM apacheignite/ignite:2.1.0
+COPY ignite-maven-proj-0.0.1-SNAPSHOT.jar /opt/ignite/apache-ignite-fabric-=
+2.1.0-bin/libs/ </pre>=20
+</div>
+</div>
+<p>&nbsp;</p>
+<p>Build the new Docker image which includes the client jar file and tag it=
+ <code>apacheignite/ignite:with-lib</code>:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">docker =
+build -t apacheignite/ignite:with-lib .</pre>=20
+</div>
+</div>
+<h3 id=3D"Ignite-Client/Server-ExecuteIgniteServer">Execute Ignite Server</=
+h3>
+<p>Write the following <code>docker-compose.yml</code> file:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">version=
+: '3.3'
+services:   myignite:
+image: apacheignite/ignite:with-lib
+network_mode: "host"
+environment:
+CONFIG_URI: http://192.168.0.7:9000/ignite/example_ignite_server.xml
+JVM_OPTS: -Xms2g -Xmx2g -server -XX:+AggressiveOpts -XX:MaxPermSize=3D256m<=
+/pre>=20
+</div>
+</div>
+<p>&nbsp;</p>
+<div class=3D"codehilite language-shell">
+<p>&nbsp;</p>
+<div class=3D"confluence-information-macro confluence-information-macro-tip=
+">
+<span class=3D"aui-icon aui-icon-small aui-iconfont-approve confluence-info=
+rmation-macro-icon"></span>
+<div class=3D"confluence-information-macro-body">
+<p>The CONFIG_URI env variable points to a Minio S3&nbsp;URL. More d=C3=A9t=
+ails about running and installing Minio is decribed in the following tutori=
+als: <a href=3D"/confluence/pages/viewpage.action?pageId=3D514327158">Minio=
+ S3 - Client / Server</a> and <a class=3D"unresolved" href=3D"#">Minio Clie=
+nt</a>.</p>
+</div>
+</div>
+<p>We use the newly built image tagged <code>apacheignite/ignite:with-lib</=
+code></p>
+</div>
+<p>The Ignite server config file looks like this:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">&lt;bea=
+ns xmlns=3D"http://www.springframework.org/schema/beans"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xmlns:xsi=3D"http://www.w3.org/2001/XM=
+LSchema-instance"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xsi:schemaLocation=3D"
+&nbsp;http://www.springframework.org/schema/beans
+&nbsp;http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+&nbsp;&nbsp;&nbsp; &lt;bean id=3D"ignite.cfg" class=3D"org.apache.ignite.co=
+nfiguration.IgniteConfiguration"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property name=3D"cacheConfig=
+uration"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;list=
+&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp; &lt;bean class=3D"org.apache.ignite.configuration.CacheConf=
+iguration"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property name=3D"name" value=3D=
+"default"/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property name=3D"atomicityMode"=
+ value=3D"ATOMIC"/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property name=3D"backups" value=
+=3D"1"/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp; &lt;/bean&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/lis=
+t&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/property&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;!-- Explicitly configure TCP=
+ discovery SPI to provide list of initial nodes. --&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property name=3D"discoverySp=
+i"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;bean=
+ class=3D"org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp; &lt;property name=3D"ipFinder"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;bean class=3D"org.apache.ignite=
+.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;propert=
+y name=3D"addresses"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=
+&nbsp;&nbsp; &lt;list&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;value&gt;224.0.0.1:47500..47509&lt=
+;/value&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=
+&nbsp;&nbsp; &lt;/list&gt;
+...
+&lt;/beans&gt;</pre>=20
+</div>
+</div>
+<div class=3D"confluence-information-macro confluence-information-macro-tip=
+">
+<span class=3D"aui-icon aui-icon-small aui-iconfont-approve confluence-info=
+rmation-macro-icon"></span>
+<div class=3D"confluence-information-macro-body">
+<p>Notice that the Ignite server and client&nbsp;are both listening on mult=
+icast IP address.</p>
+<p>To show multicast address of your interface:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">ip madd=
+r show</pre>=20
+</div>
+</div>
+<div class=3D"codehilite language-shell">
+<p>This will display the following result:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">&nbsp;2=
+:  eth0
+link  01:00:5e:00:00:01
+link  33:33:00:00:00:01
+link  33:33:ff:8a:3b:bc
+inet  224.0.0.1
+linet6 ff02::1:ff8a:3bbc
+inet6 ff02::1
+inet6 ff01::1
+
+&nbsp;</pre>=20
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>&nbsp;</p>
+<div class=3D"codehilite language-shell">
+<p><span>Now, run the Ignite service on the same directory as the <code>doc=
+ker-compose.yml</code>:</span></p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">docker-=
+compose up</pre>=20
+</div>
+</div>
+<p>&nbsp;</p>
+<p>The Docker compose file above, may be replaced by the followind command =
+line:</p>
+<div class=3D"codehilite language-shell">
+<p>&nbsp;</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">docker =
+run -d --net=3Dhost -e "CONFIG_URI=3Dhttp://192.168.0.7:9000/ignite/example=
+_ignite_server.xml" -e "JVM_OPTS=3D-Xms2g -Xmx2g -server -XX:+AggressiveOpt=
+s -XX:MaxPermSize=3D256m" apacheignite/ignite:with-lib</pre>=20
+</div>
+</div>
+<p>&nbsp;</p>
+</div>
+</div>
+<div class=3D"codehilite language-shell">
+<h3 id=3D"Ignite-Client/Server-ExecuteIgniteclient/servertest">Execute Igni=
+te client/server test</h3>
+</div>
+<p>Unzip the archived client file created above into the server node and ex=
+ecute the client as a stanalone Java application:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">java -X=
+ms512m -Xmx512m -cp dependency/*:ignite-maven-proj-0.0.1-SNAPSHOT.jar Compu=
+teBroadcastExample example-cache-client.xml</pre>=20
+</div>
+</div>
+<div class=3D"codehilite language-shell">
+<pre><span>&nbsp;</span></pre>
+</div>
+<p>The resulting output in Ignite stdout server node including the broadcas=
+t message sent by the Ignite client:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">myignit=
+e_1  | [14:51:33] Ignite node started OK (id=3D5c25c919)
+myignite_1  | [14:51:33] Topology snapshot [ver=3D1, servers=3D1, clients=
+=3D0, CPUs=3D1, heap=3D2.0GB]
+myignite_1  | [14:44:16] Topology snapshot [ver=3D2, servers=3D1, clients=
+=3D1, CPUs=3D1, heap=3D2.5GB]
+myignite_1  |
+myignite_1  | &gt;&gt;&gt; Hello Node! :)
+</pre>=20
+</div>
+</div>
+<div class=3D"codehilite language-shell">
+<pre>&nbsp;</pre>
+</div>
+<p>&nbsp;</p>
+<div class=3D"confluence-information-macro confluence-information-macro-tip=
+">
+<span class=3D"aui-icon aui-icon-small aui-iconfont-approve confluence-info=
+rmation-macro-icon"></span>
+<div class=3D"confluence-information-macro-body">
+<p>Notice <strong><code>clients=3D1</code></strong> when the client is exec=
+uted.</p>
+</div>
+</div>
+<p>The resulting output in Ignite client stdout:</p>
+<div class=3D"code panel pdl" style=3D"border-width: 1px;">
+<div class=3D"codeContent panelContent pdl">=20
+<pre class=3D"syntaxhighlighter-pre" data-syntaxhighlighter-params=3D"brush=
+: java; gutter: false; theme: Confluence" data-theme=3D"Confluence">[16:51:=
+41] Ignite node started OK (id=3D1e105a4b)
+[16:51:41] Topology snapshot [ver=3D2, servers=3D1, clients=3D1, CPUs=3D1, =
+heap=3D2.5GB]
+Length of the sentence: 20
+[16:51:42] Ignite node stopped OK [uptime=3D00:00:00:339]&nbsp;</pre>=20
+</div>
+</div>
+<div class=3D"codehilite language-shell">
+<pre>&nbsp;</pre>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+    </div>
+</body>
+</html>
+------=_Part_3859_1016358907.1587743647327--

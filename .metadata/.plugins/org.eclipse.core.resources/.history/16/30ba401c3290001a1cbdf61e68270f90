@@ -1,0 +1,115 @@
+package fr.bdf.mga.bo;
+
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
+
+import fr.bdf.mga.ref.CoupureS1;
+import fr.bdf.mga.ref.CoupureS2;
+import fr.bdf.mga.util.ResultatTriUtil;
+import fr.bdf.sport.bo.exceptions.ParametreInvalideException;
+import fr.bdf.sport.bo.exceptions.ParametreNulException;
+
+public class ResultatTriBO_java8
+implements IResultatTriBO_java8 {
+	
+	private int nbBillets;
+	private ArticleBO article;
+	private long identifiant;
+	private Long idLotMGA;
+	private Long idReconciliation;
+
+// Constructeurs
+	public ResultatTriBO_java8(long identifiant, int nbBillets, String idGTINArticle,
+			   Long idLotMGA, Long idReconciliation)
+	throws ParametreInvalideException, ParametreNulException {
+		this(nbBillets, idGTINArticle, idLotMGA, idReconciliation);
+		setIdentifiant(identifiant);
+	}
+	
+	public ResultatTriBO_java8(int nbBillets, String idGTINArticle,
+			   Long idLotMGA, Long idReconciliation)
+	throws ParametreInvalideException, ParametreNulException {
+		this(nbBillets, idGTINArticle);
+		ResultatTriUtil.verifierIdentifiants(idLotMGA, idReconciliation);
+		if (idLotMGA != null) {
+			setIdLotMGA(idLotMGA);
+		}
+		if (idReconciliation != null) {
+			setIdReconciliation(idReconciliation);
+		}
+	}
+	
+	public ResultatTriBO_java8(int nbBillets, String idGTINArticle)
+	throws ParametreInvalideException {
+		setNbBillets(nbBillets);
+		setIdGTINArticle(idGTINArticle);
+	}
+	
+// Getters & Setters
+	public int getNbBillets() {
+		return nbBillets;
+	}
+	public void setNbBillets(int nbBillets)
+	throws ParametreInvalideException {
+		ResultatTriUtil.verifierNbBillets(nbBillets);
+		this.nbBillets = nbBillets;
+	}
+	
+	public ArticleBO getArticle() {
+		return article;
+	}
+	public void setArticle(ArticleBO article) {
+		this.article = article;
+	}
+	
+	public String getIdGTINArticle() {
+		if (this.article == null) return null;
+		return this.article.getIdGTIN();
+	}
+	public void setIdGTINArticle(String idGTINArticle) {
+		this.article = new ArticleBO(idGTINArticle);
+	}
+	
+	public void setIdentifiant(long identifiant) {
+		this.identifiant = identifiant;
+	}
+	public long getIdentifiant() {
+		return identifiant;
+	}
+	
+	public void setIdLotMGA(long idLotMGA) {
+		this.idLotMGA = idLotMGA;
+	}
+	public Long getIdLotMGA() {
+		return idLotMGA;
+	}
+	
+	public void setIdReconciliation(long idReconciliation) {
+		this.idReconciliation = idReconciliation;
+	}
+	public Long getIdReconciliation() {
+		return idReconciliation;
+	}
+	
+	public static void filtreResultatTriByValFacCateg(List<ResultatTriBO_java8> resultatTris, int valeurFaciale, int categorie){
+		final int valFac = valeurFaciale;
+		final int categ = categorie;		
+		CollectionUtils.filter(resultatTris, new Predicate() {
+			@Override
+			public boolean evaluate(Object o) {	
+				ResultatTriBO_java8 res = (ResultatTriBO_java8) o;
+				ArticleBO article = res.getArticle();
+				int valeurFacialeArticle = 0;
+				if (CoupureS1.getByCode(article.getCodeCoupure())!=null){
+					valeurFacialeArticle = CoupureS1.getByCode(article.getCodeCoupure()).getValeurFaciale();
+				}else if (CoupureS2.getByCode(article.getCodeCoupure())!=null){
+					valeurFacialeArticle = CoupureS2.getByCode(article.getCodeCoupure()).getValeurFaciale();
+				}
+				return (valeurFacialeArticle == valFac && article.getCodeCategorie() == categ);
+			}			
+		});
+	}
+	
+}

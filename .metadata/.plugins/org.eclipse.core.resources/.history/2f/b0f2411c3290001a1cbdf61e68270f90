@@ -1,0 +1,254 @@
+package fr.bdf.sport.bo;
+
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+import fr.bdf.mga.bo.ResultatTriBO;
+import fr.bdf.sport.bo.exceptions.ParametreInvalideException;
+import fr.bdf.sport.bo.exceptions.ParametreNulException;
+
+public interface IEtatControleNaeBO_java8{
+	
+	/**
+	 * Returns the code ua.
+	 * @return String
+	 */
+	public String getUa() ;
+	
+	/**
+	 * Sets the code ua.
+	 * @param broyes The ua to set
+	 */
+	public void setUa(String ua) ;
+	
+	/**
+	 * Returns the numeroLigne.
+	 * @return String
+	 */
+	public String getLigne() ;
+	
+	/**
+	 * Sets the numeroLigne.
+	 * @param numeroLigne The numeroLigne to set
+	 */
+	public void setLigne(String numeroLigne) 
+		throws ParametreNulException, ParametreInvalideException;
+	
+
+	/**
+	 * Returns the es1Coupure .
+	 * @return String
+	 */
+	public String getEs1coupure();
+	
+	/**
+	 * Sets the es1Coupure .
+	 * @param es1Coupure  The es1Coupure  to set
+	 */
+	public void setEs1coupure(String codeCoupure )
+		throws ParametreNulException, ParametreInvalideException;
+
+	/**
+	 * Returns the es2Coupure .
+	 * @return String
+	 */
+	public String getEs2coupure();
+	
+	/**
+	 * Sets the es2Coupure .
+	 * @param es2Coupure  The es2Coupure  to set
+	 */
+	public void setEs2coupure(String codeCoupure )
+		throws ParametreNulException, ParametreInvalideException;
+
+
+	/**
+	 * Sets the es1valides.
+	 * @param broyes The valides to set
+	 */
+	public long getEs1valides() ;
+	
+	/**
+	 * Sets the es1valides.
+	 * @param broyes The valides to set
+	 */
+	public void setEs1valides(long es1valides); 
+	
+	/**
+	 * Returns the es1broyes.
+	 * @return long
+	 */
+	public long getEs1broyes();
+
+	
+	/**
+	 * Sets the es1broyes.
+	 * @param broyes The broyes to set
+	 */
+	public void setEs1broyes(long broyes) ;
+
+	/**
+	 * Returns the es1annules.
+	 * @return long
+	 */
+	public long getEs1annules();
+	
+	/**
+	 * Sets the es1annules.
+	 * @param broyes The 1annules to set
+	 */		
+	public void setEs1annules(long es1annules);
+	
+	/**
+	 * Returns the Es1douteux.
+	 * @return long
+	 */
+	public long getEs1douteux();
+	
+	/**
+	 * Sets the Es1douteux.
+	 * @param broyes The Es1douteux to set
+	 */		
+	public void setEs1douteux(long es1douteux);
+
+	/**
+	 * Returns the es1audites.
+	 * @return long
+	 */
+	public long getEs1audites();
+	
+	/**
+	 * Sets the es2audites.
+	 * @param es2audites The es2audites to set
+	 */	
+	
+	public void setEs1audites(long es1audites);
+	
+	/**
+	 * Returns the DateCreationSession.
+	 * @return Date
+	 */
+	public Date getDateCreationSession() ;
+
+	/**
+	 * Sets the DateCreationSession.
+	 * @param dateCreationSession The DateCreationSession to set
+	 */
+	public void setDateCreationSession(Date dateEdition);
+	
+	
+	/**
+	 * Sets the es2valides.
+	 * @param broyes The valides to set
+	 */
+	public long getEs2valides() ;
+	
+	/**
+	 * Sets the es2valides.
+	 * @param broyes The valides to set
+	 */
+	public void setEs2valides(long es1valides); 
+	
+	/**
+	 * Returns the es2broyes.
+	 * @return long
+	 */
+	public long getEs2broyes();
+	
+	/**
+	 * Sets the es2broyes.
+	 * @param broyes The broyes to set
+	 */
+	public void setEs2broyes(long broyes) ;
+
+	/**
+	 * Returns the es2annules.
+	 * @return long
+	 */
+	public long getEs2annules();
+		
+	/**
+	 * Sets the es2annules.
+	 * @param es2annules The annules to set
+	 */		
+	public void setEs2annules(long es2annules);
+
+	/**
+	 * Returns the communAnnules.
+	 * @return long
+	 */
+	public long getCommunAnnules();
+	
+	/**
+	 * Sets the communAnnules.
+	 * @param communAnnules The communAnnules to set
+	 */	
+	public void setCommunAnnules(long communAnnules) ;	
+	
+	/**
+	 * Returns the Es2douteux.
+	 * @return long
+	 */
+	public long getEs2douteux();
+	
+	/**
+	 * Sets the Es2douteux.
+	 * @param broyes The Es2douteux to set
+	 */	
+	
+	public void setEs2douteux(long es2douteux);
+
+	/**
+	 * Returns the es2audites.
+	 * @return long
+	 */
+	public long getEs2audites();
+	
+	/**
+	 * Sets the es2audites.
+	 * @param es2audites The es2audites to set
+	 */	
+	
+	public void setEs2audites(long es2audites);
+	
+	/**
+	 * Returns the sessionId
+	 * @return String
+	 */
+	public String getSessionId();
+
+	/**
+	 * Returns the modeTraitement.
+	 * @return int
+	 */
+	public int getModeTraitement();
+
+	/**
+	 * Sets the modeTraitement.
+	 * @param modeTraitement The modeTraitement to set
+	 */	
+	public void setModeTraitement(int modeTraitement);
+	
+	/**
+	 * Returns the modeRejet.
+	 * @return int
+	 */
+	public int getModeRejet() ;
+
+	/**
+	 * Sets the modeRejet.
+	 * @param modeRejet The modeRejet to set
+	 */	
+	public void setModeRejet(int modeRejet);
+	
+	
+	public List<ResultatTriBO> getResultatsTri();
+	
+	//java 8
+	public List<CompletableFuture<ResultatTriBO>> getResultatsTriAsync(IEtatControleNaeBO_java8 etatControleNaeBO);
+	//fin java 8
+
+	public void setResultatsTri(List<ResultatTriBO> resultatsTri);
+	
+}

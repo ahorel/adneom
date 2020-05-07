@@ -1,0 +1,16 @@
+package main.java;
+
+public class DiscountCode {
+
+	public  int percentage;
+
+	public DiscountCode(String string) {
+		// TODO Auto-generated constructor stub
+	}
+
+	public static DiscountCode valueOf(String string) {
+		return new DiscountCode(string);
+	}
+	
+
+}

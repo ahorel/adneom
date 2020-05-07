@@ -1,0 +1,1512 @@
+package fr.bdf.sport.info2.batch;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import fr.bdf.sport.info2.mft.Mft;
+import fr.bdf.sport.info2.resources.LogManager;
+import fr.bdf.sport.info2.resources.LogManagerFactory;
+import fr.bdf.sport.info2.Fichier.GestionFichier;
+
+import fr.bdf.sport.info2.common.util.ConnexionBase;
+import fr.bdf.sport.info2.common.util.DateUtil;
+
+import fr.bdf.mga.bo.ArticleColisAtlBO;
+import fr.bdf.mga.bo.ColisAtelierBO;
+import fr.bdf.mga.bo.ConditionnementBO;
+import fr.bdf.mga.bo.MiseEnColisBO;
+import fr.bdf.mga.bo.ResultatTriBO;
+import fr.bdf.mga.ds.ArticleColisAtlDS;
+import fr.bdf.mga.ds.ColisAtelierDS;
+import fr.bdf.mga.ds.ConditionnementDS;
+import fr.bdf.mga.ds.DSFactoryFacade;
+import fr.bdf.mga.ds.MiseEnColisDS;
+import fr.bdf.mga.ref.CategorieBillet;
+import fr.bdf.mga.ref.CategorieColis;
+import fr.bdf.mga.ref.CategorieMiseEnColis;
+import fr.bdf.mga.ref.CoupureS1;
+import fr.bdf.mga.ref.CoupureS2;
+import fr.bdf.sport.bo.IAgentBO;
+import fr.bdf.sport.bo.IArretBO;
+import fr.bdf.sport.bo.IMachineBO;
+import fr.bdf.sport.bo.IModeTraitementBO;
+import fr.bdf.sport.bo.ISession4Info2BO;
+import fr.bdf.sport.bo.ISessionBO;
+import fr.bdf.sport.bo.ITypeArretBO;
+import fr.bdf.sport.bo.ITypeMachineBO;
+import fr.bdf.sport.bo.ITypeTraitementBO;
+import fr.bdf.sport.bo.ModeTraitementBO;
+import fr.bdf.sport.bo.Session4Info2BO;
+import fr.bdf.sport.bo.exceptions.ParametreInvalideException;
+import fr.bdf.sport.bs.GCMSportFactoryBS;
+import fr.bdf.sport.bs.IGCMSportBS;
+import fr.bdf.sport.bs.exceptions.ObjetIncompletException;
+import fr.bdf.sport.bs.exceptions.ObjetInconnuException;
+import fr.bdf.sport.bs.exceptions.PersistenceException;
+import fr.bdf.sport.db.exceptions.AccesBaseException;
+import fr.bdf.sport.db.exceptions.AttributException;
+import fr.bdf.sport.db.exceptions.EnregistrementInconnuException;
+import fr.bdf.sport.ds.GCMSportFactoryDS;
+import fr.bdf.sport.ds.IGCMSportDS;
+import fr.bdf.sport.transaction.ITransaction;
+import fr.bdf.sport.transaction.TransactionSQL;
+import fr.bdf.sport.util.ConstantesES2;
+import fr.bdf.sport.util.CoupureUtil;
+import fr.bdf.sport.util.Util;
+
+/**
+ * MainClass
+ */
+public class MainClass {
+   
+   /**
+    * Action
+    */
+   private static String action;
+   
+   /**
+    * R?pertoire de travail
+    */
+   private static File repertoire;
+   
+   /**
+    * R?pertoire mft
+    */
+   private static File repertoireMft;
+   
+   /**
+    * R?pertoire mft
+    */
+   private static File procEnvoiMft;
+   
+   /**
+	* chemin du fichier de propriete contenant les identifiants de la bdd
+	*/
+   private static String bddProperties;   
+   
+   /**
+ 	* chemin du fichier de propriete contenant les informations sur la route mft
+ 	*/
+  private static String mftProperties;
+  
+  /**
+	* mois
+	*/
+  private static String mois; 
+  /**
+	* annee
+	*/
+  private static String annee;
+ 
+   /**
+	* Constante sinifiant un succes
+	*/
+   public static final int SUCCES = 0;
+   
+   /**
+	* Constante sinifiant un echec
+	*/
+   public static final int ECHEC = 1;
+   
+   /**
+    * Constantes pour l'export CSV
+    */
+   public static final String SEP_CSV = ";";
+   public static final String FIN_LIGNE = "\r\n";
+ 
+   /**
+	* Logger
+	*/
+   private static LogManager logger = LogManagerFactory.getInstance().getLogManager(MainClass.class);
+    
+   // ************************************************
+   // Constructeur
+   // ************************************************
+   
+   /**
+    * Constructeur
+    */
+	public MainClass() {
+		super();
+	}	
+
+   public static void main(String[] args) {
+		Date start = new Date();
+		int ret = MainClass.ECHEC;
+		
+		try {
+			//Lance le traitement
+			MainClass.usage();
+			MainClass main = MainClass.getInstance(args);
+			ret = main.traitement();
+		} 
+		catch(Exception e) {
+			logger.log(LogManagerFactory.FATAL,e);
+			ret = MainClass.ECHEC;
+		} 
+		catch (Throwable t) {
+			//Une erreur est survenue
+			logger.log(LogManagerFactory.FATAL,t);
+			ret = MainClass.ECHEC;
+		}
+		
+		Date fin = new Date();
+		long delta = fin.getTime() - start.getTime();
+		logger.log(LogManagerFactory.INFO,"Temps : " + delta + " ms");
+			
+		//retourne un code Erreur/Succes
+		System.exit(ret);
+	}
+	
+	// ************************************************
+	// Traitement
+	// ************************************************
+   
+	/**
+	 * Lancement des diff?rents exports
+	 * @return 0 en cas de succes, 1 sinon
+	 */
+	private int traitement() {
+		int ret = MainClass.ECHEC;
+		
+		boolean continu = true;
+		int nbSessionExportees = 0;
+		int nbSessionNonExportees = 0;
+		int cpt = 1;
+		String ZERO = "0000";
+		
+		try	{
+		// ---------------------------------- connection ? la base -----------------------------------
+			logger.log(LogManagerFactory.INFO,"ETAPE " + cpt + " : Connection Base de données --------------------");
+			ConnexionBase con = ConnexionBase.getInstance();
+			ITransaction trans = new TransactionSQL(con.getConnexion());
+			cpt++;
+						
+		// ---------------------------------- r?cup?ration des Types Arr?t -----------------------------------
+			logger.log(LogManagerFactory.INFO,"ETAPE " + cpt + " : Recuperation des Types Arrét  --------------------");
+			List listeTypeArret = getGCMSportDS().trouverTypeArretTous(0, 1, trans);
+			cpt++;
+						
+		// ---------------------------------- récupération des Agents --------------------------------------------
+			logger.log(LogManagerFactory.INFO,"ETAPE " + cpt + " : Recuperation des Agents  --------------------");
+			List listeAgent = getGCMSportDS().trouverListeAgents(trans);
+			cpt++;
+						
+		// ---------------------------------- récupération des Machines -----------------------------------------
+			logger.log(LogManagerFactory.INFO,"ETAPE " + cpt + " : Recuperation des Machines  --------------------");
+			List listeMachine = getGCMSportDS().trouverListeMachines(trans);
+			cpt++;
+			
+		// ---------------------------------- récupération des Types Machines ---------------------------------------
+			logger.log(LogManagerFactory.INFO,"ETAPE " + cpt + " : Recuperation des Types de machine  --------------------");
+			List listeTypeMachine = getGCMSportDS().trouverListeTypeMachines(trans);
+			cpt++;	
+			
+		// ---------------------------------- CET ---- récupération des arrets des sessions non supprimées pour Info2 ------
+		// ---------------------------------- CET Il a été établi que toute la table Arret sera exportée ----
+			logger.log(LogManagerFactory.INFO,"ETAPE " + cpt + " : Recuperation des Arrets des sessions --------------------");
+//			List listeArretSessionNonSuppr = getGCMSportDS().trouverArretsPourSessions(listeSession, trans);
+			List listeArretSession = getGCMSportDS().trouverArretsPourSessions(trans);
+			cpt++;
+						
+		// ---------------------------------- récupération des sessions supprimées pour Info2 --------------------------
+			logger.log(LogManagerFactory.INFO,"ETAPE " + cpt + " : Recuperation des sessions supprimées --------------------");
+			List listeSessionSuppr = getGCMSportDS().trouverSessionsSupprimeesInfo2(trans);
+			cpt++;
+			
+		// ---------------------------------- récupération des sessions non supprimées pour Info2 -------------------
+			logger.log(LogManagerFactory.INFO,"ETAPE " + cpt + " : Recuperation des sessions non supprimées --------------------");
+			List listeSession = getGCMSportDS().trouverSessionsModifieesInfo2(trans);
+			cpt++;
+			
+			logger.log(LogManagerFactory.INFO, "Nombre de sessions GPAO trouvées : " + listeSession.size() + " non supprimées ");
+
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
+			SimpleDateFormat sdf3 = new SimpleDateFormat("HHmmss");
+			SimpleDateFormat sdft = new SimpleDateFormat("HH:mm:ss");
+			NumberFormat nf = NumberFormat.getInstance();
+			nf.setMaximumIntegerDigits(2);
+			nf.setMinimumIntegerDigits(2);
+			
+			
+			// ---------------------------------- récupération des sessions MGA pour Info2 -------------------
+			logger.log(LogManagerFactory.INFO,"ETAPE " + cpt + " : Recuperation des sessions MGA --------------------");			
+			List<ISession4Info2BO> listeSessionsMGA = new ArrayList<ISession4Info2BO>();
+			Map<String, List<ISession4Info2BO>> mapSessionsMGAByAtelier = new HashMap<String, List<ISession4Info2BO>>();
+			Map<Integer, Map<Integer, Integer>> nbBilletsByCtgByCoup = new HashMap<Integer, Map<Integer,Integer>>();
+			
+			Iterator<Date> itSessionsByDate = null;
+			Iterator<String> itSessionsbyAtelier = null;
+			
+			Map<Date, Map<String, List<ISession4Info2BO>>> mapSessionsMGAByDateAtelier = recupererSessionsMGA(trans);
+			if(mapSessionsMGAByDateAtelier!=null){
+				itSessionsByDate = mapSessionsMGAByDateAtelier.keySet().iterator();
+				Date dateSession = null;
+				while(itSessionsByDate.hasNext()){
+					dateSession = itSessionsByDate.next();					
+					mapSessionsMGAByAtelier = mapSessionsMGAByDateAtelier.get(dateSession);
+					itSessionsbyAtelier = mapSessionsMGAByAtelier.keySet().iterator();
+					while (itSessionsbyAtelier.hasNext()){
+						String numeroLigne = itSessionsbyAtelier.next();
+						//Recuperer les bacs de VAR créés à la date et dans l'atelier en cours
+						recupererColisVARByDateAtelier(nbBilletsByCtgByCoup, dateSession, numeroLigne, trans);
+						//Récuperer les bacs de RJD créés à la date et dans l'atelier en cours
+						recupererColisRJDByDateAtelier(nbBilletsByCtgByCoup, dateSession, numeroLigne, trans);
+						listeSessionsMGA = mapSessionsMGAByAtelier.get(numeroLigne);
+						Collections.sort(listeSessionsMGA, Session4Info2BO.CmpByDebutValFac);
+						if (nbBilletsByCtgByCoup!= null && !nbBilletsByCtgByCoup.isEmpty()){
+							for(int location = listeSessionsMGA.size()-1; location>=0; location--){
+								if (nbBilletsByCtgByCoup.containsKey(Integer.parseInt(listeSessionsMGA.get(location).getEs1CodeCoupure()))
+										|| nbBilletsByCtgByCoup.containsKey(Integer.parseInt(listeSessionsMGA.get(location).getEs2CodeCoupure()))){
+									retrancherVar(listeSessionsMGA.get(location), nbBilletsByCtgByCoup);
+								}
+								if(nbBilletsByCtgByCoup.isEmpty()){
+									break;
+								}
+							}
+							if(nbBilletsByCtgByCoup.isEmpty()){
+								logger.log(LogManagerFactory.INFO, "Toutes les valeurs à retrier et les rejets à détruire enregistrés à la date du " +
+										sdf.format(dateSession)+ " dans l'atelier "+ numeroLigne +" ont bien été pris en compte");
+							}else{
+								//Réinitialisation pour l'atelier suivant
+								nbBilletsByCtgByCoup.clear();
+								logger.log(LogManagerFactory.WARN, "Attention - Certaines valeurs à retrier ou rejets à détruire enregistrés à la date du " +
+										sdf.format(dateSession)+ " dans l'atelier "+ numeroLigne +" n'ont pas été pris en compte");
+							}
+						}
+					}
+					
+				}
+							
+				if (listeSession == null){
+					listeSession = new ArrayList<ISession4Info2BO>();
+				}
+				itSessionsByDate = mapSessionsMGAByDateAtelier.keySet().iterator();				
+				while(itSessionsByDate.hasNext()){
+					dateSession = itSessionsByDate.next();
+					itSessionsbyAtelier = mapSessionsMGAByDateAtelier.get(dateSession).keySet().iterator();
+					while(itSessionsbyAtelier.hasNext()){
+						listeSession.addAll(mapSessionsMGAByDateAtelier.get(dateSession).get(itSessionsbyAtelier.next()));
+					}
+				}
+				Collections.sort(listeSession, Session4Info2BO.CmpByIdValFac);
+			}
+			cpt++;
+			
+			
+			
+		// ---------------------------------- r?cup?ration des Types de traitement pour Info2 -------------------
+			logger.log(LogManagerFactory.INFO,"ETAPE " + cpt + " : Recuperation des types de traitement --------------------");
+			List listeTypeTraitement = getGCMSportDS().trouverTypeTraitementTousInfo2(0, 1, trans);
+			cpt++;				
+						
+		// ---------------------------------- CET ---- r?cup?ration des arrets des sessions supprim?es pour Info2 --------
+		// ---------------------------------- CET Il a ?t? ?tabli que toute la table Arret sera export?e ----
+		//	logger.log(LogManagerFactory.INFO,"ETAPE " + cpt + " : Recuperation des Arrets des sessions supprim?es --------------------");
+		//	List listeArretSessionSuppr = getGCMSportDS().trouverArretsPourSessions(listeSessionSuppr, trans);
+		//	cpt++;
+			
+			logger.log(LogManagerFactory.INFO, "Nombre total de sessions trouvées : " + listeSession.size() + " non supprimées et "  +listeSessionSuppr.size()+ " supprimées");
+
+			
+
+			// --------------------------------------------------- ecriture des lignes d'export INFO2
+			logger.log(LogManagerFactory.INFO,"ETAPE " + cpt + " : Création des fichiers de sortie -------------------");
+			cpt++;
+			
+			// -------------------------------------------- Génération du ficher d'export pour les Agents
+			GestionFichier lignesExportAgent = new GestionFichier(repertoire + File.separator + "SPP_AGENT.txt");
+			lignesExportAgent.creerFichier();
+			
+			// --------- Traitement des Agents
+			String entete_Agent = "MATRICULE;NOM;PRENOM;DF_ACTIVITE";
+			StringBuffer bufA = new StringBuffer();
+			bufA.append(entete_Agent);
+			bufA.append(FIN_LIGNE);
+			lignesExportAgent.ecrireLigne(bufA.toString());
+			for (Iterator it = listeAgent.iterator(); it.hasNext(); ){
+				IAgentBO agentBO = (IAgentBO) it.next();
+				try {
+				    	StringBuffer buf = new StringBuffer();
+						boolean erreur = false;						
+						buf.append(Util.convertirNullEnVide(agentBO.getMatricule())+";");				
+						buf.append(Util.convertirNullEnVide(agentBO.getNom())+";");
+						buf.append(Util.convertirNullEnVide(agentBO.getPrenom()));
+						if (("0".equals(agentBO.getStatutActivite()))&&(agentBO.getDateFinActivite()!=null))
+						    buf.append(";"+ sdf.format(agentBO.getDateFinActivite()));							
+						buf.append(FIN_LIGNE);
+						if(erreur == false)
+						    lignesExportAgent.ecrireLigne(buf.toString());
+					} catch (Exception e){
+						nbSessionNonExportees++;
+						logger.log(LogManagerFactory.FATAL, "Erreur pour agent : " + agentBO.getMatricule());
+						logger.log(LogManagerFactory.FATAL, e);
+					}
+			}			
+			lignesExportAgent.fermerFichier();	
+			// ---------------- Fin de traitement des Agents
+			
+			// -------------------- Génération du ficher d'export pour les Machines
+			GestionFichier lignesExportMachine = new GestionFichier(repertoire + File.separator + "SPP_MACHINE.txt");
+			lignesExportMachine.creerFichier();
+			// -------- Traitement des Machines
+			String entete_Machine = "NUMEROMACHINE;POSTE;CODETYPEMACHINE;MISE_EN_SERVICE;LIBELLE;NUMEROSERIE";
+			StringBuffer bufM = new StringBuffer();
+			bufM.append(entete_Machine);
+			bufM.append(FIN_LIGNE);	
+			lignesExportMachine.ecrireLigne(bufM.toString());
+			for (Iterator it = listeMachine.iterator(); it.hasNext(); ){
+				IMachineBO machineBO = (IMachineBO) it.next();
+				try {
+						StringBuffer buf = new StringBuffer();
+						boolean erreur = false;					
+						buf.append(machineBO.getNumero()+";");
+						buf.append(Util.convertirNullEnVide(machineBO.getNumeroPoste())+";");
+						buf.append(Util.convertirNullEnVide(machineBO.getCodeType())+";");
+						if (machineBO.getDateMiseEnService()!=null)
+						    buf.append(Util.convertirNullEnVide(sdf.format(machineBO.getDateMiseEnService()))+";");
+						else
+						    buf.append(";");
+						buf.append(Util.convertirNullEnVide(machineBO.getLibelle())+";");						
+						buf.append(Util.convertirNullEnVide(machineBO.getNumeroSerie()));												
+						buf.append(FIN_LIGNE);
+						if(erreur == false)
+						    lignesExportMachine.ecrireLigne(buf.toString());			
+					} catch (Exception e){
+						nbSessionNonExportees++;
+						logger.log(LogManagerFactory.FATAL, "Erreur pour machine : " + machineBO.getNumero());
+						logger.log(LogManagerFactory.FATAL, e);
+					}
+			}			
+			lignesExportMachine.fermerFichier();
+			// --------------------- Fin de traitement des Machines			
+						
+			// -------------------------- Génération du ficher d'export pour les Types Machines
+			GestionFichier lignesExportTypeMachine = new GestionFichier(repertoire + File.separator + "SPP_TYPE_MACHINE.txt");
+			lignesExportTypeMachine.creerFichier();
+			// Traitement des Type Machines
+		    String entete_TypeMachine = "CODETYPEMACHINE;TYPECONSTRUCTEUR;CONSTRUCTEUR;TYPEMATERIEL";
+		    StringBuffer bufT = new StringBuffer();
+		    bufT.append(entete_TypeMachine);
+			bufT.append(FIN_LIGNE);	
+			lignesExportTypeMachine.ecrireLigne(bufT.toString());
+			for (Iterator it = listeTypeMachine.iterator(); it.hasNext(); ){
+				ITypeMachineBO typeMachineBO = (ITypeMachineBO) it.next();
+				try {
+						StringBuffer buf = new StringBuffer();
+						boolean erreur = false;
+						buf.append(Util.convertirNullEnVide(typeMachineBO.getCode())+";");
+						buf.append(Util.convertirNullEnVide(typeMachineBO.getTypeConstructeur())+";");
+						buf.append(Util.convertirNullEnVide(typeMachineBO.getConstructeur())+";");
+						buf.append(Util.convertirNullEnVide(typeMachineBO.getTypeMateriel()));						
+						buf.append(FIN_LIGNE);
+						if(erreur == false)
+						    lignesExportTypeMachine.ecrireLigne(buf.toString());
+					} catch (Exception e){
+						nbSessionNonExportees++;
+						logger.log(LogManagerFactory.FATAL, "Erreur pour type machine : " + typeMachineBO.getCode());
+						logger.log(LogManagerFactory.FATAL, e);
+					}
+			}			
+			lignesExportTypeMachine.fermerFichier();			
+			// ------------------ Fin de traitement des Types Machines
+						
+			// -------------------- Génération du ficher d'export pour les Sessions
+			logger.log(LogManagerFactory.INFO,"ETAPE " + cpt + " : Création du fichier de sortie pour les sessions -------------------");
+			cpt++;
+			List sessionsTraitees = new ArrayList();				
+			GestionFichier lignesExportSession = new GestionFichier(repertoire + File.separator + "SPP_SESSION.txt");
+			
+			lignesExportSession.creerFichier();
+			
+			final String MODE_1 = String.valueOf(ConstantesES2.CODE_MODE_TRAITEMENT_M1);
+			final String MODE_2 = String.valueOf(ConstantesES2.CODE_MODE_TRAITEMENT_M2);
+			// ---------------------- Traitement des sessions non supprim?es
+			// ----------------- CET --- reecriture de l'entete
+//			String entete_Session = "SESSION_ID;EFFECTUELE;NUMORDRE;OPERATEUR;POSTE;COUPURE;TYPETRAITEMENT;VALIDES;ANNULES;BROYES;DOUTEUX;CASE_AUDIT;BIT;STATUT;CODE_UA";
+			String entete_Session = "SPP_SESSION_ID;SPP_VALEUR_FACIALE;SPP_EFFECTUELE;SPP_NUMORDRE;SPP_OPERATEUR;SPP_POSTE;SPP_COUPURE_ES1;SPP_COUPURE_ES2;SPP_MODE_REJET;SPP_MODE_TRI;" +
+			"SPP_TYPETRAITEMENT;SPP_H_DEB_SESSION;SPP_H_FIN_SESSION;SPP_DUREE_SESSION;" +
+            "SPP_VALIDES_ES1;SPP_VALIDES_ES2;SPP_ANNULES_ES1;SPP_ANNULES_ES2;SPP_BROYES_ES1;SPP_BROYES_ES2;SPP_DOUTEUX_ES1;SPP_DOUTEUX_ES2;" +
+            "SPP_CASE_AUDIT_ES1;SPP_CASE_AUDIT_ES2;SPP_BIT_ES1;SPP_BIT_ES2;SPP_TPS_NON_FONC;SPP_STATUT;SPP_NB_ARRETS;SPP_CODE_UA";
+			StringBuffer bufS = new StringBuffer();
+			bufS.append(entete_Session);
+			bufS.append(FIN_LIGNE);	
+			lignesExportSession.ecrireLigne(bufS.toString());
+			for (Iterator it = listeSession.iterator(); it.hasNext(); ){
+			// ---- CET ----
+			//ISessionBO sessionBO = (ISessionBO) it.next();
+				ISession4Info2BO session4Info2BO = (ISession4Info2BO) it.next();
+				try {						
+				    	StringBuffer buf = new StringBuffer();
+				    	boolean erreur = false;						
+				    	String codeUA = session4Info2BO.getCodeUa();														
+						buf.append(String.valueOf(session4Info2BO.getIdentifiant())+";");	
+						if (MODE_1.equals(session4Info2BO.getCodeModeTraitement()) ) {
+							CoupureS1 coupure = CoupureS1.getByCode(Integer.parseInt(session4Info2BO.getEs1CodeCoupure()));
+							buf.append(coupure == null? 0+";" : String.valueOf(coupure.getValeurFaciale())+";");
+						}else{
+							CoupureS2 coupure = CoupureS2.getByCode(Integer.parseInt(session4Info2BO.getEs2CodeCoupure()));
+							buf.append(coupure == null? 0+";" : String.valueOf(coupure.getValeurFaciale())+";");
+						}
+						if(session4Info2BO.getPoste().getRattachementADate(session4Info2BO.getDate())!=null)
+						{
+						    buf.append(sdf.format(session4Info2BO.getDate())+";");
+							codeUA = session4Info2BO.getPoste().getRattachementADate(session4Info2BO.getDate()).getLigne().getCodeUA();														
+						}
+						else
+						{
+							logger.log(LogManagerFactory.INFO, "Pas de rattachement associé : " + session4Info2BO.getIdentifiant()+" - "+session4Info2BO.getDate() + " - " + session4Info2BO.getPoste().getNumero());
+							erreur = true;
+						}
+						buf.append(session4Info2BO.getNumeroOrdre()+";");
+						buf.append(session4Info2BO.getMatriculeOperateur()+";");
+						buf.append(session4Info2BO.getNumeroPoste()+";");				
+						
+
+												
+						if (MODE_2.equals(session4Info2BO.getCodeModeTraitement())) {
+							buf.append(""+";");
+						} else {
+							buf.append(session4Info2BO.getEs1CodeCoupure()+";");
+						}
+						if (MODE_1.equals(session4Info2BO.getCodeModeTraitement()) ) {
+							buf.append(""+";");
+						} else {
+							buf.append(session4Info2BO.getEs2CodeCoupure()+";");
+						}
+						
+						buf.append(session4Info2BO.getModeRejet()+";");
+						buf.append(session4Info2BO.getModeTraitementLibCourt()+";");
+						buf.append(session4Info2BO.getCodeTypeTraitement()+";");
+						buf.append(sdft.format(session4Info2BO.getDebut())+";");
+						buf.append(sdft.format(session4Info2BO.getFin())+";");
+						buf.append(DateUtil.diffDates(session4Info2BO.getDebut(), session4Info2BO.getFin())+";");
+						buf.append(session4Info2BO.getEs1Valides()+";");
+						buf.append(session4Info2BO.getEs2Valides()+";");
+						buf.append(session4Info2BO.getEs1Annules()+";");
+						buf.append(session4Info2BO.getEs2Annules()+";");
+						buf.append(session4Info2BO.getEs1Broyes()+";");
+						buf.append(session4Info2BO.getEs2Broyes()+";");
+						buf.append(session4Info2BO.getEs1Douteux()+";");
+						buf.append(session4Info2BO.getEs2Douteux()+";");
+						buf.append(session4Info2BO.getEs1Audit()+";");	
+						buf.append(session4Info2BO.getEs2Audit()+";");						
+						buf.append(session4Info2BO.getEs1Bit()+";");						
+						buf.append(session4Info2BO.getEs2Bit()+";");	
+						buf.append(session4Info2BO.getTpsNonFonc()+";");
+						buf.append(((session4Info2BO.getExportInfo2() > 0)? "modification" : "ajout")+";");
+						buf.append(session4Info2BO.getNbArrets()+";");
+						buf.append(codeUA);
+						buf.append(FIN_LIGNE);
+						if(erreur == false)	{
+						    lignesExportSession.ecrireLigne(buf.toString());
+							nbSessionExportees++;
+						}						
+						sessionsTraitees.add(""+session4Info2BO.getIdentifiant());
+					} catch (Exception e){
+						nbSessionNonExportees++;
+						logger.log(LogManagerFactory.FATAL, "Erreur pour la session non supprimée de tri:" + session4Info2BO.getIdentifiant()+" - "+session4Info2BO.getDate() + " - " + session4Info2BO.getPoste().getNumero());
+						logger.log(LogManagerFactory.FATAL, e);
+					}
+			}
+			// -------------- Fin de traitement des sessions non supprim?es	
+			
+			// ------------- Traitement des sessions supprim?es
+			for (Iterator it = listeSessionSuppr.iterator(); it.hasNext(); ){
+				ISession4Info2BO session4Info2BO = (ISession4Info2BO) it.next();
+				try {//Seules les sessions ayant d?j? fait l'objet d'un premier export avant suppression, seront export?es avec le flag de suppression
+						StringBuffer buf = new StringBuffer();
+						boolean erreur = false;						
+						String codeUA = "";
+						buf.append(String.valueOf(session4Info2BO.getIdentifiant())+";");		
+						if (MODE_1.equals(session4Info2BO.getCodeModeTraitement()) ) {
+							CoupureS1 coupure = CoupureS1.getByCode(Integer.parseInt(session4Info2BO.getEs1CodeCoupure()));
+							buf.append(coupure == null? 0+";" : String.valueOf(coupure.getValeurFaciale())+";");							
+						}else{
+							CoupureS2 coupure = CoupureS2.getByCode(Integer.parseInt(session4Info2BO.getEs2CodeCoupure()));
+							buf.append(coupure == null? 0+";" : String.valueOf(coupure.getValeurFaciale())+";");
+						}
+						if(session4Info2BO.getPoste().getRattachementADate(session4Info2BO.getDate())!=null){
+						    buf.append(sdf.format(session4Info2BO.getDate())+";");
+							codeUA = session4Info2BO.getPoste().getRattachementADate(session4Info2BO.getDate()).getLigne().getCodeUA();
+						} else {
+							logger.log(LogManagerFactory.INFO, "Pas de rattachement associé : " + session4Info2BO.getIdentifiant()+" - "+session4Info2BO.getDate() + " - " + session4Info2BO.getPoste().getNumero());
+							erreur = true;
+						}
+						
+						// ES2 - JBD - 13/09/2012 : correction format sessions supprim?es
+						// TODO : c'est pas ici qu'il faut agir mais plut?t dans l'ear (SessionDAOOracle.QRY_SELECT_SESSION_SUPPR_POUR_INFO2)
+						if (session4Info2BO.getNumeroOrdre() > 200) {
+							buf.append(session4Info2BO.getNumeroOrdre()-100+";");
+						} else {
+							buf.append(session4Info2BO.getNumeroOrdre()+";");
+						}
+							
+						buf.append(session4Info2BO.getMatriculeOperateur()+";");
+						//buf.append(sessionBO.getPoste().getMachine().getNumero()+";");
+						buf.append(session4Info2BO.getNumeroPoste()+";");
+
+						
+						if ((ConstantesES2.ZERO.compareTo(session4Info2BO.getEs1CodeCoupure()) == 0 )
+							&& ("2".compareTo(session4Info2BO.getCodeModeTraitement()) == 0) ) {
+							buf.append(""+";");
+						} else {
+							buf.append(session4Info2BO.getEs1CodeCoupure()+";");
+						}
+						if ( (ConstantesES2.ZERO.compareTo(session4Info2BO.getEs2CodeCoupure()) == 0) 
+								&& ("1".compareTo(session4Info2BO.getCodeModeTraitement()) == 0) ) {
+							buf.append(""+";");
+						} else {
+							buf.append(session4Info2BO.getEs2CodeCoupure()+";");
+						}
+						
+						buf.append(session4Info2BO.getModeRejet()+";");
+						
+						// ES2 - JBD - 13/09/2012 : correction format sessions supprim?es
+						//buf.append(session4Info2BO.getModeTraitement()+";");
+						buf.append(session4Info2BO.getModeTraitementLibCourt()+";");
+						
+						buf.append(session4Info2BO.getCodeTypeTraitement()+";");
+						
+						// ES2 - JBD - 13/09/2012 : correction format sessions supprim?es
+						//buf.append(session4Info2BO.getDebut()+";");
+						//buf.append(session4Info2BO.getFin()+";");
+						//buf.append(session4Info2BO.getDuree()+";");
+						buf.append(sdft.format(session4Info2BO.getDebut())+";");
+						buf.append(sdft.format(session4Info2BO.getFin())+";");
+						buf.append(DateUtil.diffDates(session4Info2BO.getDebut(), session4Info2BO.getFin())+";");
+						
+						buf.append(session4Info2BO.getEs1Valides()+";");
+						buf.append(session4Info2BO.getEs2Valides()+";");
+						buf.append(session4Info2BO.getEs1Annules()+";");
+						buf.append(session4Info2BO.getEs2Annules()+";");
+						buf.append(session4Info2BO.getEs1Broyes()+";");
+						buf.append(session4Info2BO.getEs2Broyes()+";");
+						buf.append(session4Info2BO.getEs1Douteux()+";");
+						buf.append(session4Info2BO.getEs2Douteux()+";");
+						buf.append(session4Info2BO.getEs1Audit()+";");	
+						buf.append(session4Info2BO.getEs2Audit()+";");						
+						buf.append(session4Info2BO.getEs1Bit()+";");						
+						buf.append(session4Info2BO.getEs2Bit()+";");	
+						buf.append(session4Info2BO.getTpsNonFonc()+";");
+						buf.append("supprimé"+";");
+						buf.append(session4Info2BO.getNbArrets()+";");
+						buf.append(codeUA);
+						buf.append(FIN_LIGNE);
+						if(erreur == false){
+						    lignesExportSession.ecrireLigne(buf.toString());
+							nbSessionExportees++;
+						}						
+						sessionsTraitees.add(""+session4Info2BO.getIdentifiant());
+					} catch (Exception e){
+						nbSessionNonExportees++;
+						logger.log(LogManagerFactory.FATAL, "Erreur pour la session supprimée de tri:" + session4Info2BO.getIdentifiant()+" - "+session4Info2BO.getDate() + " - " + session4Info2BO.getPoste().getNumero());
+						logger.log(LogManagerFactory.FATAL, e);
+					}
+			}
+			// ---------------- Fin de traitement des sessions supprim?es
+			lignesExportSession.fermerFichier();
+			// --------------------------------------- Fin de traitement des sessions
+			
+			// ------ CET ---- Traitement des Types Arrets
+			GestionFichier lignesExportTypeArret = new GestionFichier(repertoire + File.separator + "SPP_CODE_TYPE_ARRET.txt");
+			lignesExportTypeArret.creerFichier();
+			// Traitement des Type Machines
+		    String entete_TypeARRET = "CODETYPEARRET;LIBELLE;COMMENTAIRE;CATEGORIE";
+		    StringBuffer bufTA = new StringBuffer();
+		    bufTA.append(entete_TypeARRET);
+			bufTA.append(FIN_LIGNE);	
+			lignesExportTypeArret.ecrireLigne(bufTA.toString());
+			for (Iterator it = listeTypeArret.iterator(); it.hasNext(); ){
+				ITypeArretBO typeArretBO = (ITypeArretBO) it.next();
+				try {
+						StringBuffer buf = new StringBuffer();
+						boolean erreur = false;
+						buf.append(Util.convertirNullEnVide(Util.convertirNullEnVide(typeArretBO.getCode())+";"));
+						buf.append(Util.convertirNullEnVide(Util.convertirNullEnVide(typeArretBO.getLibelle())+";"));
+						buf.append(Util.convertirNullEnVide(Util.convertirNullEnVide(typeArretBO.getCommentaire())+";"));
+						buf.append(Util.convertirNullEnVide(Util.convertirNullEnVide(typeArretBO.getCategorie())));						
+						buf.append(FIN_LIGNE);
+						if(erreur == false)
+						    lignesExportTypeArret.ecrireLigne(buf.toString());
+					} catch (Exception e){
+						nbSessionNonExportees++;
+						logger.log(LogManagerFactory.FATAL, "Erreur pour type machine : " + typeArretBO.getCode());
+						logger.log(LogManagerFactory.FATAL, e);
+					}
+			}
+			lignesExportTypeArret.fermerFichier();
+			// ------------ Fin Traitement des Types Arrets
+			
+			// ------ CET ---- Traitement des Arrets 
+			GestionFichier lignesExportArret = new GestionFichier(repertoire + File.separator + "SPP_ARRET_SESSION.txt");
+			lignesExportArret.creerFichier();
+			// Traitement des Type Machines
+		    String entete_ARRET = "SESSION_ID;ARRET_ID;TYPE;TEMPSARRETPRODUCTION;REFERENCEBONMAINTENANCE";
+		    StringBuffer bufAR = new StringBuffer();
+		    bufAR.append(entete_ARRET);
+		    bufAR.append(FIN_LIGNE);	
+			lignesExportArret.ecrireLigne(bufAR.toString());
+			// ---- CET --- des sessions nonsuppr
+			for (Iterator it = listeArretSession.iterator(); it.hasNext(); ){
+				IArretBO arretBO = (IArretBO) it.next();
+				try {
+						StringBuffer buf = new StringBuffer();
+						boolean erreur = false;
+						buf.append(arretBO.getIdentifiantSession()+";");
+						buf.append(arretBO.getIdentifiant()+";");
+						buf.append(Util.convertirNullEnVide(arretBO.getCodeTypeArret())+";");
+						buf.append(arretBO.getTempsArretProduction()).append(";");	
+						buf.append(Util.convertirNullEnVide(arretBO.getReferenceBonMaintenance()));						
+						buf.append(FIN_LIGNE);
+						if(erreur == false)
+						    lignesExportArret.ecrireLigne(buf.toString());
+					} catch (Exception e){
+						nbSessionNonExportees++;
+						logger.log(LogManagerFactory.FATAL, "Erreur pour arret session non supprimee : " + arretBO.getIdentifiant());
+						logger.log(LogManagerFactory.FATAL, e);
+					}
+			}
+			// ---- CET --- des sessions suppr
+			// ---------------------------------- CET Il a ?t? ?tabli que toute la table Arret sera export?e ----
+			/*
+			for (Iterator it = listeArretSessionSuppr.iterator(); it.hasNext(); ){
+				IArretBO arretBO = (IArretBO) it.next();
+				try {
+						StringBuffer buf = new StringBuffer();
+						boolean erreur = false;
+						buf.append(arretBO.getIdentifiantSession()+";");
+						buf.append(arretBO.getIdentifiant()+";");
+						buf.append(Util.convertirNullEnVide(arretBO.getTypeArret().getCode())+";");
+						buf.append(arretBO.getTempsArretProduction());	
+						buf.append(Util.convertirNullEnVide(arretBO.getReferenceBonMaintenance()));						
+						buf.append(FIN_LIGNE);
+						if(erreur == false)
+						    lignesExportArret.ecrireLigne(buf.toString());
+					} catch (Exception e){
+						nbSessionNonExportees++;
+						logger.log(LogManagerFactory.FATAL, "Erreur pour arret session supprimee : " + arretBO.getIdentifiant());
+						logger.log(LogManagerFactory.FATAL, e);
+					}
+			}
+			*/
+			lignesExportArret.fermerFichier();
+			// --- Fin Traitement des Arrets Session
+			
+			// ------ CET ---- Traitement des Types Traitement
+			GestionFichier lignesExportTypeTraitement = new GestionFichier(repertoire + File.separator + "SPP_TYPE_TRAITEMENT.txt");
+			lignesExportTypeTraitement.creerFichier();
+			// Traitement des Type Traitement
+		    String entete_TypeTraitement = "SPP_TYPETRAITEMENT;SPP_LIBELLE_COURT";
+		    StringBuffer bufTT = new StringBuffer();
+		    bufTT.append(entete_TypeTraitement);
+			bufTT.append(FIN_LIGNE);	
+			lignesExportTypeTraitement.ecrireLigne(bufTT.toString());
+			for (Iterator it = listeTypeTraitement.iterator(); it.hasNext(); ){
+				ITypeTraitementBO typeTraitementBO = (ITypeTraitementBO) it.next();
+				try {
+						StringBuffer buf = new StringBuffer();
+						boolean erreur = false;
+						buf.append(Integer.valueOf(typeTraitementBO.getCode().trim()).intValue()+";");
+						buf.append(Util.convertirNullEnVide(Util.convertirNullEnVide(typeTraitementBO.getLibelle())));					
+						buf.append(FIN_LIGNE);
+						if(erreur == false)
+						    lignesExportTypeTraitement.ecrireLigne(buf.toString());
+					} catch (Exception e){
+						logger.log(LogManagerFactory.FATAL, "Erreur pour type Traitement : " + typeTraitementBO.getCode());
+						logger.log(LogManagerFactory.FATAL, e);
+					}
+			}
+			lignesExportTypeTraitement.fermerFichier();
+			// ------------ Fin Traitement des Types Traitement
+						
+			logger.log(LogManagerFactory.INFO, "Nombre de sessions exportées : " + nbSessionExportees);
+			logger.log(LogManagerFactory.INFO, "Nombre de sessions ecartées : " + nbSessionNonExportees);
+  			// Creation d'un buffer pour la lecture des fichiers
+			String[] filenames = new String[]{repertoire + File.separator + "SPP_AGENT.txt", 
+			        						  repertoire + File.separator + "SPP_MACHINE.txt",
+			        						  repertoire + File.separator + "SPP_TYPE_MACHINE.txt",
+			        						  repertoire + File.separator + "SPP_SESSION.txt",
+			        						  repertoire + File.separator + "SPP_CODE_TYPE_ARRET.txt",
+			        						  repertoire + File.separator + "SPP_ARRET_SESSION.txt",
+			        						  repertoire + File.separator + "SPP_TYPE_TRAITEMENT.txt"
+			        						 };			
+			//Creation du fichier zip			    
+		    String outFilename = repertoire + File.separator + "INFO2_"+ sdf2.format(new Date()) +"_" + sdf3.format(new Date()) + ".tar.gz";
+			byte[] buf = new byte[10240];
+			try { 			    
+			    ZipOutputStream out = new ZipOutputStream(new FileOutputStream(outFilename));
+			    // Compression des fichiers
+			    logger.log(LogManagerFactory.INFO, "Compression des fichiers ... ");
+			    for (int i=0; i<filenames.length; i++) {
+			        FileInputStream in = new FileInputStream(filenames[i]);	
+			        ZipEntry entry = new ZipEntry(filenames[i].substring((repertoire+File.separator).length())); 			        
+			        out.putNextEntry(entry);			        
+			        int len;
+			        while ((len = in.read(buf)) > 0) {
+			            out.write(buf, 0, len);
+			        }			        
+			        out.closeEntry();
+			        in.close();
+			        File source = new File(filenames[i]);
+			        try{//suppression des fichiers apr?s compression	
+			            source.delete();
+			        }catch(Exception e){
+						logger.log(LogManagerFactory.FATAL, "Impossible de supprimer le fichier : " + filenames[i].toString());
+						logger.log(LogManagerFactory.FATAL, e);  
+			        }
+			    }			    
+			    out.close();			    
+			    logger.log(LogManagerFactory.INFO, "Fichier compressé : "+ outFilename);			    
+			} catch (IOException e) {
+				logger.log(LogManagerFactory.FATAL, "Impossible de compresser les fichiers");
+				logger.log(LogManagerFactory.FATAL, e);
+			}			
+			// Demande de transfert Pacific et mise à jour des sessions 
+			File fichierZip = new File(outFilename);			
+			if (fichierZip.exists()){			    		    
+			    //Sollicitation du service Pacific			
+				logger.log(LogManagerFactory.INFO, "Demande de transfert Mft ...");
+				Mft mft = Mft.getInstance();
+				if (mft.executerTransfert(outFilename)){
+					logger.log(LogManagerFactory.INFO, "Le transfert MFT s'est correctement effectué");					
+					//Mise ? jour des sessions export?es
+				    if (nbSessionExportees !=0){
+					    logger.log(LogManagerFactory.INFO, "UPDATE des sessions");
+					    //Mise ? jour des sessions non supprim?es export?es
+						updateSessions(sessionsTraitees, trans);					
+						//Mise ? jour des sessions supprim?es export?es
+						for (Iterator it = listeSessionSuppr.iterator(); it.hasNext(); ){
+						    ISessionBO sessionBO = (ISessionBO) it.next();
+						    getGCMSportDS().modifierSessionSupprEtatInfo2(String.valueOf(sessionBO.getIdentifiant()),trans);					
+						}
+					}						
+				}
+				else {
+					continu = false;
+				}				
+			} else {
+			    logger.log(LogManagerFactory.FATAL, "Impossible de trouver le fichier compressé : "+ outFilename);
+			}
+			//Lancement de la demande de transfert
+			if(continu==true){
+				ret = MainClass.SUCCES;
+			}
+		}
+		catch (Exception e){
+			logger.log(LogManagerFactory.ERROR,e);
+		}	finally {
+			ConnexionBase.getInstance().closeConnexion();
+		}			
+		return ret;
+	}
+	
+	/**
+	 * Pour une session INFO2, on déduit les valeurs à retrier et les rejets à détruire des valides, usés ou douteux de chaque coupure (selon la série) de la session 
+	 * s'il existe des VAR pour les coupures de la session dans listeArtVARBO passée en paramètre. 
+	 * Chaque valeur déduite d'une session est déduite également de la map des VAR.   
+	 * @param session4Info2BO
+	 * @param listeArtVARBO
+	 * @throws ParametreInvalideException
+	 */
+	private void retrancherVar(ISession4Info2BO session4Info2BO,
+			Map<Integer, Map<Integer, Integer>> listeArtVARBO) throws ParametreInvalideException {		
+		//QC 200 retrait des RJD de la liste des coupures à retrancher (Attention: Pour rajouter les RJD verifier separation entre RA et RJD) 
+		List<Integer> listeCategorieVAR = new ArrayList<Integer>(Arrays.asList(CategorieBillet.Valide.getCode(),
+				CategorieBillet.AuditVal.getCode(), CategorieBillet.Use.getCode(), CategorieBillet.AuditUse.getCode()));
+		int codeCoupure = Integer.parseInt(session4Info2BO.getEs1CodeCoupure());
+		if (listeArtVARBO.containsKey(codeCoupure)){
+			for (int var = 0; var <listeCategorieVAR.size(); var++){
+			if (listeArtVARBO.containsKey(codeCoupure) && listeArtVARBO.get(codeCoupure).containsKey(listeCategorieVAR.get(var))){
+				calculVAREtRJDParCodeCoupureEtCategorie(session4Info2BO,listeArtVARBO, codeCoupure, listeCategorieVAR.get(var) );
+			}}		
+		}
+		
+			
+		codeCoupure = Integer.parseInt(session4Info2BO.getEs2CodeCoupure());
+		if (listeArtVARBO.containsKey(codeCoupure)){
+			for (int var = 0; var <listeCategorieVAR.size(); var++){
+			if (listeArtVARBO.containsKey(codeCoupure) && listeArtVARBO.get(codeCoupure).containsKey(listeCategorieVAR.get(var))){
+				calculVAREtRJDParCodeCoupureEtCategorie(session4Info2BO,listeArtVARBO, codeCoupure, listeCategorieVAR.get(var) );
+			}}		
+		}
+	}
+	
+	/**
+	 * Cette méthode retranche les valeurs à retrier et les rejets à détruire : valide et audit valide des valides, usé et audit usé des usés et les rejets authentiques des douteux.
+	 * Les valides et usés de la session ainsi que la map des VAR passées en paramètre sont mis à jour.
+	 * @param session4Info2BO
+	 * @param listeArtVARBO
+	 * @param codeCoupure
+	 * @param categorie
+	 * @throws ParametreInvalideException
+	 */
+	private void calculVAREtRJDParCodeCoupureEtCategorie(ISession4Info2BO session4Info2BO,
+			Map<Integer, Map<Integer, Integer>> listeArtVARBO, int codeCoupure, int categorie) throws ParametreInvalideException {	
+		int nbBilletADeduire = listeArtVARBO.get(codeCoupure).get(categorie);
+		boolean isES1 = codeCoupure < CoupureUtil.CODE_5_EUR_S2;
+		if (listeArtVARBO.get(codeCoupure).containsKey(categorie)){
+			long difference = 0;
+			if (isES1 && (categorie == CategorieBillet.Valide.getCode() || categorie == CategorieBillet.AuditVal.getCode())){
+				difference = session4Info2BO.getEs1Valides()- nbBilletADeduire;
+			} else if(isES1 && (categorie == CategorieBillet.Use.getCode() || categorie == CategorieBillet.AuditUse.getCode())){
+				difference = session4Info2BO.getEs1Annules()- nbBilletADeduire;
+			} else if(isES1 && (categorie == CategorieBillet.RejAuth.getCode())){
+				difference = session4Info2BO.getEs1Douteux()- nbBilletADeduire;
+			} else if(!isES1 && (categorie == CategorieBillet.Valide.getCode() || categorie == CategorieBillet.AuditVal.getCode())){
+				difference = session4Info2BO.getEs2Valides()- nbBilletADeduire;
+			} else if(!isES1 && (categorie == CategorieBillet.Use.getCode() || categorie == CategorieBillet.AuditUse.getCode())){
+				difference = session4Info2BO.getEs2Annules()- nbBilletADeduire;
+			} else if(!isES1 && (categorie == CategorieBillet.RejAuth.getCode())){
+				difference = session4Info2BO.getEs2Douteux()- nbBilletADeduire;
+			} 
+			
+			if (difference>=0){
+				if (isES1 && (categorie == CategorieBillet.Valide.getCode() || categorie == CategorieBillet.AuditVal.getCode())){
+					session4Info2BO.setEs1Valides(difference);
+				} else if(isES1 && (categorie == CategorieBillet.Use.getCode() || categorie == CategorieBillet.AuditUse.getCode())){
+					session4Info2BO.setEs1Annules(difference);
+				} else if(isES1 && (categorie == CategorieBillet.RejAuth.getCode())){
+					session4Info2BO.setEs1Douteux(difference);
+				}  else if(!isES1 && (categorie == CategorieBillet.Valide.getCode() || categorie == CategorieBillet.AuditVal.getCode())){
+					session4Info2BO.setEs2Valides(difference);
+				} else if(!isES1 && (categorie == CategorieBillet.Use.getCode() || categorie == CategorieBillet.AuditUse.getCode())){
+					session4Info2BO.setEs2Annules(difference);
+				} else if(!isES1 && (categorie == CategorieBillet.RejAuth.getCode())){
+					session4Info2BO.setEs2Douteux(difference);
+				} 				
+				listeArtVARBO.get(codeCoupure).put(categorie, 0);
+			}else{
+				if (isES1 && (categorie == CategorieBillet.Valide.getCode() || categorie == CategorieBillet.AuditVal.getCode())){
+					session4Info2BO.setEs1Valides(0);
+				} else if(isES1 && (categorie == CategorieBillet.Use.getCode() || categorie == CategorieBillet.AuditUse.getCode())){
+					session4Info2BO.setEs1Annules(0);
+				} else if(isES1 && (categorie == CategorieBillet.RejAuth.getCode())){
+					session4Info2BO.setEs1Douteux(0);
+				} else if(!isES1 && (categorie == CategorieBillet.Valide.getCode() || categorie == CategorieBillet.AuditVal.getCode())){
+					session4Info2BO.setEs2Valides(0);
+				} else if(!isES1 && (categorie == CategorieBillet.Use.getCode() || categorie == CategorieBillet.AuditUse.getCode())){
+					session4Info2BO.setEs2Annules(0);
+				} else if(!isES1 && (categorie == CategorieBillet.RejAuth.getCode())){
+					session4Info2BO.setEs2Douteux(0);
+				} 			
+				listeArtVARBO.get(codeCoupure).put(categorie, new Long(-difference).intValue());					
+			}
+			if(listeArtVARBO.get(codeCoupure).get(categorie) == 0){
+				listeArtVARBO.get(codeCoupure).remove(categorie);
+			}
+			if (listeArtVARBO.get(codeCoupure).isEmpty()){
+				listeArtVARBO.remove(codeCoupure);
+			}
+		}
+	}
+
+	/**
+	 * Cette méthode récupère les colis ateliers de valeurs à retrier créés à la date et dans l'atelier passés en paramètres
+	 * Vérifie s'il existe des sessions MGA déjà exportés vers info2 à la date passée en paramètre avant de lancer la recherche de colis
+	 * @param dateTri
+	 * @param numeroLigne
+	 * @param trans
+	 * @return
+	 * @throws AccesBaseException
+	 * @throws AttributException
+	 */
+	private void recupererColisVARByDateAtelier(Map<Integer, Map<Integer, Integer>> listeVARBO, Date dateTri, String numeroLigne, ITransaction trans) throws AccesBaseException, AttributException{
+		List<ArticleColisAtlBO> articlesColisClientBO = new ArrayList<ArticleColisAtlBO>();
+		Map<Integer, Integer> listeVarByCat = null;
+		List<ColisAtelierBO> colissAtl = null;
+		Iterator<ColisAtelierBO> itColisAtl = null;
+		ColisAtelierBO colisAtl = null;
+		Iterator<ArticleColisAtlBO> itArtColisAtl = null;
+		ArticleColisAtlBO artColisAtl = null;
+		Iterator<MiseEnColisBO> itMecBO = null;
+		Iterator<ConditionnementBO> itCondBO = null;
+		if (listeVARBO == null) listeVARBO = new HashMap<Integer, Map<Integer,Integer>>();
+		
+		//s'il s'agit du premier export INFO2 à la date en param alors on récupère les VAR pour les retrancher
+		if (!getGCMSportDS().existeSessionMGAExporteeInfo2ParDate(dateTri, trans)){			
+			//On récupère les mise en colis faites à la date et dans l'atelier en paramètres
+			List<MiseEnColisBO> listeMecBO = getMiseEnColisDS().trouverMiseEnColiss(null, numeroLigne, dateTri, trans);
+			MiseEnColisBO mecBO = null;
+			if (listeMecBO != null){
+				itMecBO = listeMecBO.iterator();
+				while (itMecBO.hasNext()){
+					mecBO = itMecBO.next();
+					if (mecBO.getCategorieColis() != null && !CategorieMiseEnColis.Production.getCode().equals(mecBO.getCategorieColis())) continue;
+					List<ConditionnementBO> listeCondBO = null;
+					// Pour chaque mise en colis, on récupère les conditionnements associés pour exploiter que les VAR
+					listeCondBO = getConditionnementDS().trouverConditionnements(mecBO.getIdentifiant(), trans);
+					if (listeCondBO != null && !listeCondBO.isEmpty()){
+						itCondBO = listeCondBO.iterator();
+						while (itCondBO.hasNext()){			
+							ConditionnementBO  condBO = itCondBO.next();
+							if (CategorieColis.ValeursARetrier.equals(condBO.getCategorieColisAtl()))	{
+								colissAtl = getColisAtelierDS().trouverColisAtlsCndt(condBO.getIdentifiant(), trans);
+								if (colissAtl!=null && !colissAtl.isEmpty()){
+									itColisAtl = colissAtl.iterator();
+									// Cumul des articles de tous les colis ateliers par code coupure et code catégorie
+									while (itColisAtl.hasNext()){
+										colisAtl = itColisAtl.next();
+										logger.log(LogManagerFactory.INFO," Calcul VAR : Colis "+ colisAtl.getIdSSCCBac());
+										articlesColisClientBO = getArticleColisAtlDS().trouverArticleColisAtls(colisAtl.getIdentifiant(), trans);
+										if (articlesColisClientBO!=null){
+											itArtColisAtl = articlesColisClientBO.iterator();
+											while(itArtColisAtl.hasNext()){
+												artColisAtl = itArtColisAtl.next();												
+												if (!listeVARBO.containsKey(artColisAtl.getArticle().getCodeCoupure())){
+													listeVarByCat = new HashMap<Integer, Integer>();
+													listeVarByCat.put(artColisAtl.getArticle().getCodeCategorie(), artColisAtl.getNbBillets());																						
+												}else{
+													listeVarByCat = listeVARBO.get(artColisAtl.getArticle().getCodeCoupure());
+													if (listeVarByCat.containsKey(artColisAtl.getArticle().getCodeCategorie())){
+														listeVarByCat.put(artColisAtl.getArticle().getCodeCategorie(), 
+																listeVarByCat.get(artColisAtl.getArticle().getCodeCategorie())+artColisAtl.getNbBillets());
+													}else{
+														listeVarByCat.put(artColisAtl.getArticle().getCodeCategorie(), artColisAtl.getNbBillets());
+													}									
+												}
+												listeVARBO.put(artColisAtl.getArticle().getCodeCoupure(), listeVarByCat);								 												
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}	
+		}		
+	}
+	
+	/**
+	 * Cette méthode récupère les colis ateliers de valeurs à retrier créés à la date et dans l'atelier passés en paramètres
+	 * Vérifie s'il existe des sessions MGA déjà exportés vers info2 à la date passée en paramètre avant de lancer la recherche de colis
+	 * @param dateTri
+	 * @param numeroLigne
+	 * @param trans
+	 * @return
+	 * @throws AccesBaseException
+	 * @throws AttributException
+	 */
+	private void recupererColisRJDByDateAtelier(Map<Integer, Map<Integer, Integer>> listeRJDBO, Date dateTri, String numeroLigne, ITransaction trans) throws AccesBaseException, AttributException{
+		List<ArticleColisAtlBO> articlesColisBO = new ArrayList<ArticleColisAtlBO>();
+		Map<Integer, Integer> listeBilletByCat = null;
+		List<ColisAtelierBO> colissAtl = null;
+		Iterator<ColisAtelierBO> itColisAtl = null;
+		ColisAtelierBO colisAtl = null;
+		Iterator<ArticleColisAtlBO> itArtColisAtl = null;
+		ArticleColisAtlBO artColisAtl = null;
+		Iterator<MiseEnColisBO> itMecBO = null;
+		Iterator<ConditionnementBO> itCondBO = null;
+		if (listeRJDBO == null) listeRJDBO = new HashMap<Integer, Map<Integer,Integer>>();
+		
+		//s'il s'agit du premier export INFO2 à la date en param alors on récupère les RJD pour les retrancher
+		if (!getGCMSportDS().existeSessionMGAExporteeInfo2ParDate(dateTri, trans)){			
+			//On récupère les mise en colis faites à la date et dans l'atelier en paramètres
+			List<MiseEnColisBO> listeMecBO = getMiseEnColisDS().trouverMiseEnColiss(null, numeroLigne, dateTri, trans);
+			MiseEnColisBO mecBO = null;
+			if (listeMecBO != null){
+				itMecBO = listeMecBO.iterator();
+				while (itMecBO.hasNext()){
+					mecBO = itMecBO.next();
+					if (!CategorieMiseEnColis.RejetsAuth.getCode().equals(mecBO.getCategorieColis())) continue;
+					List<ConditionnementBO> listeCondBO = null;
+					// Pour chaque mise en colis, on récupère les conditionnements associés pour exploiter que les VAR
+					listeCondBO = getConditionnementDS().trouverConditionnements(mecBO.getIdentifiant(), trans);
+					if (listeCondBO != null && !listeCondBO.isEmpty()){
+						itCondBO = listeCondBO.iterator();
+						while (itCondBO.hasNext()){			
+							ConditionnementBO  condBO = itCondBO.next();							
+							colissAtl = getColisAtelierDS().trouverColisAtlsCndt(condBO.getIdentifiant(), trans);
+							if (colissAtl!=null && !colissAtl.isEmpty()){
+								itColisAtl = colissAtl.iterator();
+								// Cumul des articles de tous les colis ateliers par code coupure et code catégorie
+								while (itColisAtl.hasNext()){
+									colisAtl = itColisAtl.next();
+									if (CategorieColis.RejetsADetruire.getCode().equals(colisAtl.getCodeCategorie()))	{
+										logger.log(LogManagerFactory.INFO," Calcul RJD : Colis "+ colisAtl.getIdSSCCBac());
+										articlesColisBO = getArticleColisAtlDS().trouverArticleColisAtls(colisAtl.getIdentifiant(), trans);
+										if (articlesColisBO!=null){
+											itArtColisAtl = articlesColisBO.iterator();
+											while(itArtColisAtl.hasNext()){
+												artColisAtl = itArtColisAtl.next();												
+												if (!listeRJDBO.containsKey(artColisAtl.getArticle().getCodeCoupure())){
+													listeBilletByCat = new HashMap<Integer, Integer>();
+													listeBilletByCat.put(artColisAtl.getArticle().getCodeCategorie(), artColisAtl.getNbBillets());																						
+												}else{
+													listeBilletByCat = listeRJDBO.get(artColisAtl.getArticle().getCodeCoupure());
+													if (listeBilletByCat.containsKey(artColisAtl.getArticle().getCodeCategorie())){
+														listeBilletByCat.put(artColisAtl.getArticle().getCodeCategorie(), 
+																listeBilletByCat.get(artColisAtl.getArticle().getCodeCategorie())+artColisAtl.getNbBillets());
+													}else{
+														listeBilletByCat.put(artColisAtl.getArticle().getCodeCategorie(), artColisAtl.getNbBillets());
+													}									
+												}
+												listeRJDBO.put(artColisAtl.getArticle().getCodeCoupure(), listeBilletByCat);								 												
+											}
+										}
+									}
+								}
+							}
+							
+						}
+					}
+				}
+			}	
+		}		
+	}
+	
+	/**
+	 * Cette méthode récupère les sessions MGA éligibles à l'export INFO2, regroupées par date et numéro atelier. <br> 
+	 * Elle calcule également le mode de traitement pour chaque session en fonction de ses résultats de tri
+	 * @param trans
+	 * @return
+	 * @throws ParametreInvalideException
+	 * @throws AccesBaseException
+	 * @throws AttributException
+	 * @throws PersistenceException
+	 * @throws ObjetIncompletException
+	 * @throws ObjetInconnuException
+	 */
+	private Map<Date, Map<String, List<ISession4Info2BO>>> recupererSessionsMGA(ITransaction trans) throws ParametreInvalideException, AccesBaseException, AttributException, PersistenceException, ObjetIncompletException, ObjetInconnuException{
+		
+		//Debut AHO
+
+		//Code java 8
+		
+		//Déclaration des variables 
+		List<ISession4Info2BO> sessionsMGA_java_8 = getGCMSportDS().trouverSessionsMGAModifieesInfo2(trans);
+
+		Map<Date, Map<String, List<ISession4Info2BO>>> mapSessionsParAtelierDate_java8 = new HashMap<Date, Map<String, List<ISession4Info2BO>>>();
+		Map<String, List<ISession4Info2BO>> mapSessionsParAtelier_java8 = null;
+		List<ISession4Info2BO> sessionsTmp_java8 = null;
+		Map<Integer, List<ISession4Info2BO>> mapSessionsTraites_java8 = null;
+		Boolean existeValidesES1_java8 = false;
+		Boolean existeArtMachineSerie1_java8 = false;
+		Boolean existeArtMachineSerie2_java8 = false;
+		ISession4Info2BO session4Info2BO_java8 = null;
+		ResultatTriBO resultatBO_java8 = null;
+		Integer modeTraitement_java8 = ConstantesES2.CODE_MODE_TRAITEMENT_M4;
+		Integer dernierIdSession_java8 = null;
+		Iterator<ISession4Info2BO> it_java8 = sessionsMGA_java_8.iterator();
+		List<ResultatTriBO> listeResTri_java8;
+		Iterator<ResultatTriBO> itResTri_java8;
+		
+		//Récupération des sessions MGA sous forme de listes List<ISession4Info2BO>
+		List<ISession4Info2BO> sessionsMGA_java8 = getGCMSportDS().trouverSessionsMGAModifieesInfo2(trans);
+		
+		//Récuperation des 4 modetraitementbo pour récupérer le libellé 
+		//Le resultat est retourné sous forme de Map<Integer, IModeTraitementBO>
+		
+		Map<Integer, IModeTraitementBO> mapModeTraitement_java8 = new HashMap<Integer, IModeTraitementBO>();
+		for (int mode=1; mode<=4; mode++){
+			mapModeTraitement_java8.put(mode,(ModeTraitementBO)
+					getGCMSportDS().trouverModeTraitement(String.valueOf(mode),trans));
+		}
+		//Définition des conditions à utiliser dans les stream
+		Predicate<ISession4Info2BO> conditionNotNull = x -> x != null;
+		Predicate<ISession4Info2BO> conditionGetIdentifiant = x -> !mapSessionsTraites_java8.containsKey(x.getIdentifiant());
+		
+		//Déclaration du stream principal 
+		Stream<ISession4Info2BO> filteredISessionInfo2BOStream = sessionsMGA_java8.stream()
+		//.filter((Objects::nonNull))
+		.filter(conditionNotNull.or(conditionGetIdentifiant).and(conditionNotNull))
+		;
+		
+		Stream<ISession4Info2BO> mapSessionsTraites_java8IsNull = filteredISessionInfo2BOStream
+				.filter(x -> x == null);
+		
+		Stream<ISession4Info2BO> dernierIdSession_java8IsNotNull = filteredISessionInfo2BOStream
+				.filter(x -> dernierIdSession_java8 != null);
+		
+		mapSessionsTraites_java8IsNotNull.forEach(i -> mapSessionsTraites_java8 = new HashMap<Integer, List<ISession4Info2BO>>());
+		dernierIdSession_java8IsNotNull.forEach(i -> 
+		{
+			if (!existeArtMachineSerie2_java8){ // - Mode M1 : si tous les billets de la série 2 sont rejetés. ==> Pas de billets valides, broyes, usés, audités de la serie 2
+				modeTraitement_java8 = ConstantesES2.CODE_MODE_TRAITEMENT_M1;				
+			} else if (!existeArtMachineSerie1_java8){ //- Mode M2 : si tous les billets de la série 1 sont rejetés. 
+				modeTraitement_java8 = ConstantesES2.CODE_MODE_TRAITEMENT_M2;
+			} else if (existeValidesES1_java8){
+				modeTraitement_java8 = ConstantesES2.CODE_MODE_TRAITEMENT_M3; // - Mode M3 : si aucun des modes M1 et M2 n’est identifié et tous les billets valides sont de la série 2. 
+			} else {
+				modeTraitement_java8 = ConstantesES2.CODE_MODE_TRAITEMENT_M4; // - Mode M4 : si aucun des autres modes n’est identifié. 
+			}
+			//Mise à jour du codemodetraitement
+			sessionsTmp_java8 = (ArrayList<ISession4Info2BO>)mapSessionsTraites_java8.get(dernierIdSession_java8);					
+			for (int cmp = 0; cmp< sessionsTmp_java8.size(); cmp++){
+				sessionsTmp_java8.get(cmp).setCodeModeTraitement(String.valueOf(modeTraitement_java8));
+				sessionsTmp_java8.get(cmp).setModeTraitementLibCourt(mapModeTraitement_java8.get(modeTraitement_java8).getLibelleCourt());
+				//Ajout des sessions dans mapSessionsParDate 
+				if (!mapSessionsParAtelierDate_java8.containsKey(sessionsTmp_java8.get(cmp).getDate())){
+					mapSessionsParAtelier_java8 = new HashMap<String, List<ISession4Info2BO>>();
+					mapSessionsParAtelier_java8.put(sessionsTmp_java8.get(cmp).getNumeroLigne(),new ArrayList<ISession4Info2BO>(Arrays.asList(sessionsTmp_java8.get(cmp))));							
+					mapSessionsParAtelierDate_java8.put(sessionsTmp_java8.get(cmp).getDate(), mapSessionsParAtelier_java8);
+				}else{
+					if (mapSessionsParAtelierDate_java8.get(sessionsTmp_java8.get(cmp).getDate()).containsKey(sessionsTmp_java8.get(0).getNumeroLigne())){																 
+						mapSessionsParAtelierDate_java8.get(sessionsTmp_java8.get(cmp).getDate()).get(sessionsTmp_java8.get(0).getNumeroLigne()).add(sessionsTmp_java8.get(cmp));
+					}else{
+						mapSessionsParAtelierDate_java8.get(sessionsTmp_java8.get(cmp).getDate()).put(sessionsTmp_java8.get(0).getNumeroLigne(),new ArrayList<ISession4Info2BO>(Arrays.asList(sessionsTmp_java8.get(cmp))));
+					}
+				}
+			}
+		});
+		//Code java 7
+		List<ISession4Info2BO> sessionsMGA_java7 = getGCMSportDS().trouverSessionsMGAModifieesInfo2(trans);
+		Map<Date, Map<String, List<ISession4Info2BO>>> mapSessionsParAtelierDate_java7 = new HashMap<Date, Map<String, List<ISession4Info2BO>>>();
+		Map<String, List<ISession4Info2BO>> mapSessionsParAtelier_java7 = null;
+		List<ISession4Info2BO> sessionsTmp_java7 = null;
+		Map<Integer, List<ISession4Info2BO>> mapSessionsTraites_java7 = null;
+		Boolean existeValidesES1_java7 = false;
+		Boolean existeArtMachineSerie1_java7 = false;
+		Boolean existeArtMachineSerie2_java7 = false;
+		ISession4Info2BO session4Info2BO_java7 = null;
+		ResultatTriBO resultatBO_java7 = null;
+		Integer modeTraitement_java7 = ConstantesES2.CODE_MODE_TRAITEMENT_M4;
+		Integer dernierIdSession_java7 = null;
+		Iterator<ISession4Info2BO> it_java7 = sessionsMGA_java7.iterator();
+		List<ResultatTriBO> listeResTri_java7;
+		Iterator<ResultatTriBO> itResTri_java7;
+		
+		//Récuperation des 4 modetraitementbo pour récupérer le libellé
+		Map<Integer, IModeTraitementBO> mapModeTraitement_java7 = new HashMap<Integer, IModeTraitementBO>();
+		for (int mode=1; mode<=4; mode++){
+			mapModeTraitement_java7.put(mode,(ModeTraitementBO)
+					getGCMSportDS().trouverModeTraitement(String.valueOf(mode),trans));
+		}
+
+		while(it_java7.hasNext())
+		{
+			session4Info2BO_java7 = it_java7.next();
+			if (mapSessionsTraites_java7==null || (mapSessionsTraites_java7!=null && !mapSessionsTraites_java7.containsKey(session4Info2BO_java7.getIdentifiant()))){
+				if (mapSessionsTraites_java7 == null){
+					mapSessionsTraites_java7 = new HashMap<Integer, List<ISession4Info2BO>>();
+				} 
+				else if (dernierIdSession_java7!=null){
+					if (!existeArtMachineSerie2_java7){ // - Mode M1 : si tous les billets de la série 2 sont rejetés. ==> Pas de billets valides, broyes, usés, audités de la serie 2
+						modeTraitement_java7 = ConstantesES2.CODE_MODE_TRAITEMENT_M1;				
+					} else if (!existeArtMachineSerie1_java7){ //- Mode M2 : si tous les billets de la série 1 sont rejetés. 
+						modeTraitement_java7 = ConstantesES2.CODE_MODE_TRAITEMENT_M2;
+					} else if (existeValidesES1_java7){
+						modeTraitement_java7 = ConstantesES2.CODE_MODE_TRAITEMENT_M3; // - Mode M3 : si aucun des modes M1 et M2 n’est identifié et tous les billets valides sont de la série 2. 
+					} else {
+						modeTraitement_java7 = ConstantesES2.CODE_MODE_TRAITEMENT_M4; // - Mode M4 : si aucun des autres modes n’est identifié. 
+					}
+					//Mise à jour du codemodetraitement
+					sessionsTmp_java7 = (ArrayList<ISession4Info2BO>)mapSessionsTraites_java7.get(dernierIdSession_java7);					
+					for (int cmp = 0; cmp< sessionsTmp_java7.size(); cmp++){
+						sessionsTmp_java7.get(cmp).setCodeModeTraitement(String.valueOf(modeTraitement_java7));
+						sessionsTmp_java7.get(cmp).setModeTraitementLibCourt(mapModeTraitement_java7.get(modeTraitement_java7).getLibelleCourt());
+						//Ajout des sessions dans mapSessionsParDate 
+						if (!mapSessionsParAtelierDate_java7.containsKey(sessionsTmp_java7.get(cmp).getDate())){
+							mapSessionsParAtelier_java7 = new HashMap<String, List<ISession4Info2BO>>();
+							mapSessionsParAtelier_java7.put(sessionsTmp_java7.get(cmp).getNumeroLigne(),new ArrayList<ISession4Info2BO>(Arrays.asList(sessionsTmp_java7.get(cmp))));							
+							mapSessionsParAtelierDate_java7.put(sessionsTmp_java7.get(cmp).getDate(), mapSessionsParAtelier_java7);
+						}else{
+							if (mapSessionsParAtelierDate_java7.get(sessionsTmp_java7.get(cmp).getDate()).containsKey(sessionsTmp_java7.get(0).getNumeroLigne())){																 
+								mapSessionsParAtelierDate_java7.get(sessionsTmp_java7.get(cmp).getDate()).get(sessionsTmp_java7.get(0).getNumeroLigne()).add(sessionsTmp_java7.get(cmp));
+							}else{
+								mapSessionsParAtelierDate_java7.get(sessionsTmp_java7.get(cmp).getDate()).put(sessionsTmp_java7.get(0).getNumeroLigne(),new ArrayList<ISession4Info2BO>(Arrays.asList(sessionsTmp_java7.get(cmp))));
+							}
+						}
+					}
+					
+				}
+				//Réinitialisation des compteurs 
+				existeValidesES1 = false;
+				existeArtMachineSerie1 = false;
+				existeArtMachineSerie2 = false;
+				mapSessionsTraites.put(session4Info2BO.getIdentifiant(), new ArrayList<ISession4Info2BO>());
+			}
+			listeResTri = session4Info2BO.getResultatsTri();			
+			if (listeResTri!=null){
+				itResTri = listeResTri.iterator();
+				while(itResTri.hasNext()){
+					resultatBO= itResTri.next();
+					if (categoriesTriMachine.contains(resultatBO.getArticle().getCodeCategorie())){ // Tri machine différent des rejets qui sont saisis manuellement
+						if (resultatBO.getArticle().getCodeCoupure() < CoupureUtil.CODE_5_EUR_S2){ // Serie 1
+							existeArtMachineSerie1 = true;
+						}else{ //Serie 2												
+							existeArtMachineSerie2 = true;
+						}						
+					}
+					if ((resultatBO.getArticle().getCodeCategorie() == CategorieBillet.Valide.getCode() || resultatBO.getArticle().getCodeCategorie() == CategorieBillet.AuditVal.getCode()) 
+											&& resultatBO.getArticle().getCodeCoupure() < CoupureUtil.CODE_5_EUR_S2){
+							existeValidesES1 = true;
+					}
+				}				
+			}
+			
+			mapSessionsTraites.get(session4Info2BO.getIdentifiant()).add(session4Info2BO);
+			dernierIdSession = session4Info2BO.getIdentifiant(); 
+		}
+		//Fin AHO
+		
+		List<ISession4Info2BO> sessionsMGA = getGCMSportDS().trouverSessionsMGAModifieesInfo2(trans);
+		Map<Date, Map<String, List<ISession4Info2BO>>> mapSessionsParAtelierDate = new HashMap<Date, Map<String, List<ISession4Info2BO>>>();
+		Map<String, List<ISession4Info2BO>> mapSessionsParAtelier = null;
+		List<ISession4Info2BO> sessionsTmp = null;
+		Map<Integer, List<ISession4Info2BO>> mapSessionsTraites = null;
+		Boolean existeValidesES1 = false;
+		Boolean existeArtMachineSerie1 = false;
+		Boolean existeArtMachineSerie2 = false;
+		ISession4Info2BO session4Info2BO = null;
+		ResultatTriBO resultatBO = null;
+		Integer modeTraitement = ConstantesES2.CODE_MODE_TRAITEMENT_M4;
+		Integer dernierIdSession = null;
+		Iterator<ISession4Info2BO> it = sessionsMGA.iterator();		
+		List<ResultatTriBO> listeResTri;
+		Iterator<ResultatTriBO> itResTri;
+		List<Integer> categoriesTriMachine = new ArrayList<Integer>(
+				Arrays.asList(CategorieBillet.Valide.getCode(), CategorieBillet.Use.getCode(), 
+						CategorieBillet.Broye.getCode(), CategorieBillet.AuditVal.getCode(), CategorieBillet.AuditUse.getCode()));
+		
+		
+		//Récuperation des 4 modetraitementbo pour récupérer le libellé
+		Map<Integer, IModeTraitementBO> mapModeTraitement = new HashMap<Integer, IModeTraitementBO>();
+		for (int mode=1; mode<=4; mode++){
+			mapModeTraitement.put(mode,(ModeTraitementBO)
+					getGCMSportDS().trouverModeTraitement(String.valueOf(mode),trans));
+		}
+		
+		while (it.hasNext()){
+			session4Info2BO = it.next();
+			if (mapSessionsTraites==null || (mapSessionsTraites!=null && !mapSessionsTraites.containsKey(session4Info2BO.getIdentifiant()))){
+				if (mapSessionsTraites == null){
+					mapSessionsTraites = new HashMap<Integer, List<ISession4Info2BO>>();
+				} 
+				else if (dernierIdSession!=null){
+					if (!existeArtMachineSerie2){ // - Mode M1 : si tous les billets de la série 2 sont rejetés. ==> Pas de billets valides, broyes, usés, audités de la serie 2
+						modeTraitement = ConstantesES2.CODE_MODE_TRAITEMENT_M1;				
+					} else if (!existeArtMachineSerie1){ //- Mode M2 : si tous les billets de la série 1 sont rejetés. 
+						modeTraitement = ConstantesES2.CODE_MODE_TRAITEMENT_M2;
+					} else if (existeValidesES1){
+						modeTraitement = ConstantesES2.CODE_MODE_TRAITEMENT_M3; // - Mode M3 : si aucun des modes M1 et M2 n’est identifié et tous les billets valides sont de la série 2. 
+					} else {
+						modeTraitement = ConstantesES2.CODE_MODE_TRAITEMENT_M4; // - Mode M4 : si aucun des autres modes n’est identifié. 
+					}
+					//Mise à jour du codemodetraitement
+					sessionsTmp = (ArrayList<ISession4Info2BO>)mapSessionsTraites.get(dernierIdSession);					
+					for (int cmp = 0; cmp< sessionsTmp.size(); cmp++){
+						sessionsTmp.get(cmp).setCodeModeTraitement(String.valueOf(modeTraitement));
+						sessionsTmp.get(cmp).setModeTraitementLibCourt(mapModeTraitement.get(modeTraitement).getLibelleCourt());
+						//Ajout des sessions dans mapSessionsParDate 
+						if (!mapSessionsParAtelierDate.containsKey(sessionsTmp.get(cmp).getDate())){
+							mapSessionsParAtelier = new HashMap<String, List<ISession4Info2BO>>();
+							mapSessionsParAtelier.put(sessionsTmp.get(cmp).getNumeroLigne(),new ArrayList<ISession4Info2BO>(Arrays.asList(sessionsTmp.get(cmp))));							
+							mapSessionsParAtelierDate.put(sessionsTmp.get(cmp).getDate(), mapSessionsParAtelier);
+						}else{
+							if (mapSessionsParAtelierDate.get(sessionsTmp.get(cmp).getDate()).containsKey(sessionsTmp.get(0).getNumeroLigne())){																 
+								mapSessionsParAtelierDate.get(sessionsTmp.get(cmp).getDate()).get(sessionsTmp.get(0).getNumeroLigne()).add(sessionsTmp.get(cmp));
+							}else{
+								mapSessionsParAtelierDate.get(sessionsTmp.get(cmp).getDate()).put(sessionsTmp.get(0).getNumeroLigne(),new ArrayList<ISession4Info2BO>(Arrays.asList(sessionsTmp.get(cmp))));
+							}
+						}
+					}
+					
+				}
+				//Réinitialisation des compteurs 
+				existeValidesES1 = false;
+				existeArtMachineSerie1 = false;
+				existeArtMachineSerie2 = false;
+				mapSessionsTraites.put(session4Info2BO.getIdentifiant(), new ArrayList<ISession4Info2BO>());
+			}
+			listeResTri = session4Info2BO.getResultatsTri();			
+			if (listeResTri!=null){
+				itResTri = listeResTri.iterator();
+				while(itResTri.hasNext()){
+					resultatBO= itResTri.next();
+					if (categoriesTriMachine.contains(resultatBO.getArticle().getCodeCategorie())){ // Tri machine différent des rejets qui sont saisis manuellement
+						if (resultatBO.getArticle().getCodeCoupure() < CoupureUtil.CODE_5_EUR_S2){ // Serie 1
+							existeArtMachineSerie1 = true;
+						}else{ //Serie 2												
+							existeArtMachineSerie2 = true;
+						}						
+					}
+					if ((resultatBO.getArticle().getCodeCategorie() == CategorieBillet.Valide.getCode() || resultatBO.getArticle().getCodeCategorie() == CategorieBillet.AuditVal.getCode()) 
+											&& resultatBO.getArticle().getCodeCoupure() < CoupureUtil.CODE_5_EUR_S2){
+							existeValidesES1 = true;
+					}
+				}				
+			}
+			
+			mapSessionsTraites.get(session4Info2BO.getIdentifiant()).add(session4Info2BO);
+			dernierIdSession = session4Info2BO.getIdentifiant();
+			
+		}
+		if (dernierIdSession!=null){
+			if (!existeArtMachineSerie2){ // - Mode M1 : si tous les billets de la série 2 sont rejetés. ==> Pas de billets valides, broyes, usés, audités de la serie 2
+				modeTraitement = ConstantesES2.CODE_MODE_TRAITEMENT_M1;				
+			} else if (!existeArtMachineSerie1){ //- Mode M2 : si tous les billets de la série 1 sont rejetés. 
+				modeTraitement = ConstantesES2.CODE_MODE_TRAITEMENT_M2;
+			} else if (existeValidesES1){
+				modeTraitement = ConstantesES2.CODE_MODE_TRAITEMENT_M3; // - Mode M3 : si aucun des modes M1 et M2 n’est identifié et tous les billets valides sont de la série 2. 
+			} else {
+				modeTraitement = ConstantesES2.CODE_MODE_TRAITEMENT_M4; // - Mode M4 : si aucun des autres modes n’est identifié. 
+			}
+			//Mise à jour du codemodetraitement
+			sessionsTmp = mapSessionsTraites.get(dernierIdSession);
+			for (int cmp = 0; cmp< sessionsTmp.size(); cmp++){
+				sessionsTmp.get(cmp).setCodeModeTraitement(String.valueOf(modeTraitement));
+				sessionsTmp.get(cmp).setModeTraitementLibCourt(mapModeTraitement.get(modeTraitement).getLibelleCourt());
+				//Ajout des sessions dans mapSessionsParDate 
+				if (!mapSessionsParAtelierDate.containsKey(sessionsTmp.get(cmp).getDate())){
+					mapSessionsParAtelier = new HashMap<String, List<ISession4Info2BO>>();
+					mapSessionsParAtelier.put(sessionsTmp.get(cmp).getNumeroLigne(),new ArrayList<ISession4Info2BO>(Arrays.asList(sessionsTmp.get(cmp))));							
+					mapSessionsParAtelierDate.put(sessionsTmp.get(cmp).getDate(), mapSessionsParAtelier);
+				}else{
+					if (mapSessionsParAtelierDate.get(sessionsTmp.get(cmp).getDate()).containsKey(sessionsTmp.get(0).getNumeroLigne())){																 
+						mapSessionsParAtelierDate.get(sessionsTmp.get(cmp).getDate()).get(sessionsTmp.get(0).getNumeroLigne()).add(sessionsTmp.get(cmp));
+					}else{
+						mapSessionsParAtelierDate.get(sessionsTmp.get(cmp).getDate()).put(sessionsTmp.get(0).getNumeroLigne(),new ArrayList<ISession4Info2BO>(Arrays.asList(sessionsTmp.get(cmp))));
+					}
+				}
+			}
+			
+		}
+				
+		return mapSessionsParAtelierDate;
+	}
+	
+	/** Mettre a jour l'ensemble des sessions traitees, une par une.
+	 * @throws AccesBaseException
+	 * @throws EnregistrementInconnuException
+	 * @throws AttributException
+	 * */
+	private void updateSessions(List sessionsTraitees, ITransaction trans) 
+		throws AccesBaseException, AttributException, EnregistrementInconnuException
+	{
+		for (int i=0; i<sessionsTraitees.size(); i++)
+		{
+			String session = (String)sessionsTraitees.get(i);
+			getGCMSportDS().modifierSessionEtatInfo2(session, trans);
+		}
+	}
+	
+	/**
+	 * methode static permetant de recuperer une instance de MainClass initialise les données static de MainClass
+	 * @param args arguments de la ligne de commande
+	 * @return instance de MainClass
+	 * @throws Exception
+	 */
+	public static MainClass getInstance(String[] args) throws Exception {
+		try {
+			setRepertoire(args[0]);
+			setRepertoireMft(args[1]);
+			setProcEnvoiMft(args[2]);
+			setBddProperties(args[3]);
+			setMftProperties(args[4]);
+
+		} catch (Exception e){
+			throw e;
+		}
+		return new MainClass();
+	}
+	
+	/**
+	 * Usage
+	 */
+	public static void usage() {
+		System.out.println("--- SPORT Export INFO2 ------------------------------------"
+				+ "\n Usage:"
+				+ "\n   arg1 : Chemin du répertoire MFT"
+				+ "\n   arg2 : Chemin du shell d'envoi MFT"
+				+ "\n   arg3 : Nom du fichier des propriétés de la base de données"
+				+ "\n   arg4 : Nom du fichier des propriétés des paramètres MFT"
+				+ "\n----------------------------------------------------");
+	}
+	
+	protected IGCMSportDS getGCMSportDS(){
+		return GCMSportFactoryDS.getInstance();	
+	}
+	
+	protected IGCMSportBS getGCMSportBS(){
+		return GCMSportFactoryBS.getInstance();	
+	}
+	
+	protected ColisAtelierDS getColisAtelierDS() {
+		return (ColisAtelierDS) DSFactoryFacade.getColisAtelierDS();
+	}
+	
+	protected ArticleColisAtlDS getArticleColisAtlDS() {
+		return (ArticleColisAtlDS) DSFactoryFacade.getArticleColisAtlDS();
+	}
+	
+	protected ConditionnementDS getConditionnementDS() {
+		return (ConditionnementDS) DSFactoryFacade.getConditionnementDS();
+	}
+	
+	protected MiseEnColisDS getMiseEnColisDS() {
+		return (MiseEnColisDS) DSFactoryFacade.getMiseEnColisDS();
+	}
+
+	// ************************************************
+	// Getters et Setters
+	// ************************************************
+  
+	public static String getAction() {
+		return action;
+	}
+	public static void setAction(String action) {
+		MainClass.action = action;
+	}
+	public static String getBddProperties() {
+		return bddProperties;
+	}
+	public static void setBddProperties(String string) {
+	   bddProperties = string;
+	}
+	public static String getMftProperties() {
+		return mftProperties;
+	}
+	public static void setMftProperties(String string) {
+		mftProperties = string;
+	}
+	public static String getRepertoire() {
+		return repertoire.getAbsolutePath();
+	}
+	public static void setRepertoire(String string) {
+		repertoire = new File(string);
+	}
+	public static String getAnnee() {
+		return annee;
+	}
+	public static void setAnnee(String annee) {
+		MainClass.annee = annee;
+	}
+	public static String getMois() {
+		return mois;
+	}
+	public static void setMois(String mois) {
+		MainClass.mois = mois;
+	}	
+	public static File getRepertoireMft() {
+		return repertoireMft;
+	}
+	public static void setRepertoireMft(String string) {
+		MainClass.repertoireMft = new File (string);
+	}
+	public static String getProcEnvoiMft() {
+		return procEnvoiMft.getAbsolutePath();
+	}
+	public static void setProcEnvoiMft(String string) {
+		procEnvoiMft = new File(string);
+	}
+}

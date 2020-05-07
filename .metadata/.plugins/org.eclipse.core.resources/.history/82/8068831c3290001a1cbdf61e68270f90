@@ -1,0 +1,350 @@
+Message-ID: <987054587.2794.1587739416867.JavaMail.sofacmgr@lxpr429a>
+Subject: Exported From Confluence
+MIME-Version: 1.0
+Content-Type: multipart/related; 
+	boundary="----=_Part_2793_1240909396.1587739416867"
+
+------=_Part_2793_1240909396.1587739416867
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-Location: file:///C:/exported.html
+
+<html xmlns:o=3D'urn:schemas-microsoft-com:office:office'
+      xmlns:w=3D'urn:schemas-microsoft-com:office:word'
+      xmlns:v=3D'urn:schemas-microsoft-com:vml'
+      xmlns=3D'urn:w3-org-ns:HTML'>
+<head>
+    <meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8=
+">
+    <title>2) Kubernetes</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:TargetScreenSize>1024x640</o:TargetScreenSize>
+            <o:PixelsPerInch>72</o:PixelsPerInch>
+            <o:AllowPNG/>
+        </o:OfficeDocumentSettings>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>90</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+                <!--
+        @page Section1 {
+            size: 8.5in 11.0in;
+            margin: 1.0in;
+            mso-header-margin: .5in;
+            mso-footer-margin: .5in;
+            mso-paper-source: 0;
+        }
+
+        table {
+            border: solid 1px;
+            border-collapse: collapse;
+        }
+
+        table td, table th {
+            border: solid 1px;
+            padding: 5px;
+        }
+
+        td {
+            page-break-inside: avoid;
+        }
+
+        tr {
+            page-break-after: avoid;
+        }
+
+        div.Section1 {
+            page: Section1;
+        }
+
+        /* Confluence print stylesheet. Common to all themes for print medi=
+a */
+/* Full of !important until we improve batching for print CSS */
+
+@media print {
+    #main {
+        padding-bottom: 1em !important; /* The default padding of 6em is to=
+o much for printouts */
+    }
+
+    body {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        font-size: 10pt;
+        line-height: 1.2;
+    }
+
+    body, #full-height-container, #main, #page, #content, .has-personal-sid=
+ebar #content {
+        background: #fff !important;
+        color: #000 !important;
+        border: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    a, a:link, a:visited, a:focus, a:hover, a:active {
+        color: #000;
+    }
+
+    #content h1,
+    #content h2,
+    #content h3,
+    #content h4,
+    #content h5,
+    #content h6 {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        page-break-after: avoid;
+    }
+
+    pre {
+        font-family: Monaco, "Courier New", monospace;
+    }
+
+    #header,
+    .aui-header-inner,
+    #navigation,
+    #sidebar,
+    .sidebar,
+    #personal-info-sidebar,
+    .ia-fixed-sidebar,
+    .page-actions,
+    .navmenu,
+    .ajs-menu-bar,
+    .noprint,
+    .inline-control-link,
+    .inline-control-link a,
+    a.show-labels-editor,
+    .global-comment-actions,
+    .comment-actions,
+    .quick-comment-container,
+    #addcomment {
+        display: none !important;
+    }
+
+    /* CONF-28544 cannot print multiple pages in IE */
+    #splitter-content {
+        position: relative !important;
+    }
+
+    .comment .date::before {
+        content: none !important; /* remove middot for print view */
+    }
+
+    h1.pagetitle img {
+        height: auto;
+        width: auto;
+    }
+
+    .print-only {
+        display: block;
+    }
+
+    #footer {
+        position: relative !important; /* CONF-17506 Place the footer at en=
+d of the content */
+        margin: 0;
+        padding: 0;
+        background: none;
+        clear: both;
+    }
+
+    #poweredby {
+        border-top: none;
+        background: none;
+    }
+
+    #poweredby li.print-only {
+        display: list-item;
+        font-style: italic;
+    }
+
+    #poweredby li.noprint {
+        display: none;
+    }
+
+    /* no width controls in print */
+    .wiki-content .table-wrap,
+    .wiki-content p,
+    .panel .codeContent,
+    .panel .codeContent pre,
+    .image-wrap {
+        overflow: visible !important;
+    }
+
+    /* TODO - should this work? */
+    #children-section,
+    #comments-section .comment,
+    #comments-section .comment .comment-body,
+    #comments-section .comment .comment-content,
+    #comments-section .comment p {
+        page-break-inside: avoid;
+    }
+
+    #page-children a {
+        text-decoration: none;
+    }
+
+    /**
+     hide twixies
+
+     the specificity here is a hack because print styles
+     are getting loaded before the base styles. */
+    #comments-section.pageSection .section-header,
+    #comments-section.pageSection .section-title,
+    #children-section.pageSection .section-header,
+    #children-section.pageSection .section-title,
+    .children-show-hide {
+        padding-left: 0;
+        margin-left: 0;
+    }
+
+    .children-show-hide.icon {
+        display: none;
+    }
+
+    /* personal sidebar */
+    .has-personal-sidebar #content {
+        margin-right: 0px;
+    }
+
+    .has-personal-sidebar #content .pageSection {
+        margin-right: 0px;
+    }
+
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}
+-->
+    </style>
+</head>
+<body>
+    <h1>2) Kubernetes</h1>
+    <div class=3D"Section1">
+        <h2 class=3D"readme file file-markup wiki-content" id=3D"id-2)Kuber=
+netes-KubernetesControlPlane:">Kubernetes Control Plane:</h2>
+<p class=3D"readme file file-markup wiki-content">It consists of multiple c=
+omponents that controls and makes the whole cluster function:</p>
+<div class=3D"readme file file-markup wiki-content">
+<ul>
+<li>API Server which communicate with and perform operations on the Kuberne=
+tes cluster,</li>
+<li>Scheduler responsible for assigning a worker node to each deployable co=
+mponent,</li>
+<li>Controller Manager performs cluster-level functions such as replicating=
+ components, keeping track of worker nodes, etc.,</li>
+<li>etcd, a reliable distributed data store that stores the whole cluster c=
+onfiguration persistently.</li>
+</ul>
+</div>
+<h2 class=3D"fileview" id=3D"id-2)Kubernetes-Workernodes">Worker nodes</h2>
+<p class=3D"fileview">Machines that actually run our containerized applicat=
+ions</p>
+<div class=3D"fileview">
+<ul>
+<li>Docker container runtime, which runs your containers,</li>
+<li>Kubelet which talks to the master and controls containers on the node,<=
+/li>
+<li>Kube-Proxy which proxies and load balances network traffic between your=
+ application components.<br><br></li>
+</ul>
+</div>
+<p><span class=3D"confluence-embedded-file-wrapper"><img class=3D"confluenc=
+e-embedded-image confluence-external-resource" alt=3D"Alt text" src=3D"http=
+s://bytebucket.org/wymarsalis/paas/raw/c29f8b9184a1f9781e521e5fd63c3e801144=
+133c/training/Screenshot_from_2017-11-08_22-53-18.png?raw=3Dtrue&amp;token=
+=3Da2ecf604e6d8597e98f8adf3d0cddebddeb8aeb7" data-image-src=3D"https://byte=
+bucket.org/wymarsalis/paas/raw/c29f8b9184a1f9781e521e5fd63c3e801144133c/tra=
+ining/Screenshot_from_2017-11-08_22-53-18.png?raw=3Dtrue&amp;token=3Da2ecf6=
+04e6d8597e98f8adf3d0cddebddeb8aeb7"></span></p>
+<h2 id=3D"id-2)Kubernetes-Kubernetescomposants">Kubernetes composants</h2>
+<h4 id=3D"id-2)Kubernetes-Node">Node</h4>
+<p>A nodeis a worker machine in Kubernetes.</p>
+<p>Doc: <a href=3D"https://kubernetes.io/docs/concepts/architecture/nodes/"=
+ class=3D"external-link" rel=3D"nofollow">https://kubernetes.io/docs/concep=
+ts/architecture/nodes/</a></p>
+<h4 class=3D"readme file file-markup wiki-content" id=3D"id-2)Kubernetes-Po=
+d">Pod</h4>
+<p>Group of one or more containers, with shared storage/network, and a spec=
+ification for how to run the containers.</p>
+<p>Doc: <a href=3D"https://kubernetes.io/docs/concepts/workloads/pods/pod/"=
+ class=3D"external-link" rel=3D"nofollow">https://kubernetes.io/docs/concep=
+ts/workloads/pods/pod/</a></p>
+<h4 id=3D"id-2)Kubernetes-ReplicaSet">ReplicaSet</h4>
+<p>Configuration object used during deployment in order to set the number o=
+f pods replicas wanted.</p>
+<p>Doc: <a href=3D"https://kubernetes.io/docs/concepts/workloads/controller=
+s/replicaset/" class=3D"external-link" rel=3D"nofollow">https://kubernetes.=
+io/docs/concepts/workloads/controllers/replicaset/</a></p>
+<h4 id=3D"id-2)Kubernetes-Deployment">Deployment</h4>
+<p>Configuration describing the state wanted for Pods and ReplicaSet.</p>
+<p>Doc: <a href=3D"https://kubernetes.io/docs/concepts/workloads/controller=
+s/deployment/" class=3D"external-link" rel=3D"nofollow">https://kubernetes.=
+io/docs/concepts/workloads/controllers/deployment/</a></p>
+<h4 id=3D"id-2)Kubernetes-Namespace">Namespace</h4>
+<p>Namespaces are intended for use in environments with many users spread a=
+cross multiple teams, or projects.</p>
+<p>Namespaces are a way to divide cluster resources between multiple users/=
+env (dev/int/prod).</p>
+<p>Doc: <a href=3D"https://kubernetes.io/docs/concepts/overview/working-wit=
+h-objects/namespaces/" class=3D"external-link" rel=3D"nofollow">https://kub=
+ernetes.io/docs/concepts/overview/working-with-objects/namespaces/</a></p>
+<h4 id=3D"id-2)Kubernetes-Service">Service</h4>
+<p>Service is an abstraction that make possible to access multiple Pods by =
+node Port, VIp or public Ip.</p>
+<p>Doc: <a href=3D"https://kubernetes.io/docs/concepts/services-networking/=
+service/" class=3D"external-link" rel=3D"nofollow">https://kubernetes.io/do=
+cs/concepts/services-networking/service/</a></p>
+<h4 id=3D"id-2)Kubernetes-Ingress">Ingress</h4>
+<p>An API object that manages external access to the services in a cluster,=
+ typically HTTP.</p>
+<p>Doc: <a href=3D"https://kubernetes.io/docs/concepts/services-networking/=
+ingress/" class=3D"external-link" rel=3D"nofollow">https://kubernetes.io/do=
+cs/concepts/services-networking/ingress/</a></p>
+<h4 id=3D"id-2)Kubernetes-ResourceQuota">ResourceQuota</h4>
+<p>Resource quotas are a tool for administrators to define quota in namespa=
+ce.</p>
+<p>Doc: <a href=3D"https://kubernetes.io/docs/concepts/policy/resource-quot=
+as/" class=3D"external-link" rel=3D"nofollow">https://kubernetes.io/docs/co=
+ncepts/policy/resource-quotas/</a></p>
+<h4 id=3D"id-2)Kubernetes-Role/ClusterRole">Role/ClusterRole</h4>
+<p>A ClusterRole can be used to grant the permissions as a Role</p>
+<p>Doc: <a href=3D"https://kubernetes.io/docs/reference/access-authn-authz/=
+rbac/" class=3D"external-link" rel=3D"nofollow">https://kubernetes.io/docs/=
+reference/access-authn-authz/rbac/</a></p>
+<h4 id=3D"id-2)Kubernetes-RoleBinding/ClusterRoleBinding">RoleBinding/Clust=
+erRoleBinding</h4>
+<p>A role binding grants the permissions defined in a role to a user or set=
+ of users.</p>
+<p>Doc: <a href=3D"https://kubernetes.io/docs/reference/access-authn-authz/=
+rbac/" class=3D"external-link" rel=3D"nofollow">https://kubernetes.io/docs/=
+reference/access-authn-authz/rbac/</a></p>
+<h2 id=3D"id-2)Kubernetes-Plusd'info:">Plus d'info:</h2>
+<ul style=3D"list-style-type: square;">
+<li><a href=3D"https://www.youtube.com/watch?v=3D90kZRyPcRZw" class=3D"exte=
+rnal-link" rel=3D"nofollow">https://www.youtube.com/watch?v=3D90kZRyPcRZw</=
+a></li>
+</ul>
+<h2 id=3D"id-2)Kubernetes-Trainingwithminikube:">Training with minikube:</h=
+2>
+<ul style=3D"list-style-type: square;">
+<li><a href=3D"https://kubernetes.io/docs/tutorials/kubernetes-basics/creat=
+e-cluster/cluster-interactive/" class=3D"external-link" rel=3D"nofollow">ht=
+tps://kubernetes.io/docs/tutorials/kubernetes-basics/create-cluster/cluster=
+-interactive/</a></li>
+</ul>
+<p style=3D"text-align: center;">&nbsp;</p>
+    </div>
+</body>
+</html>
+------=_Part_2793_1240909396.1587739416867--

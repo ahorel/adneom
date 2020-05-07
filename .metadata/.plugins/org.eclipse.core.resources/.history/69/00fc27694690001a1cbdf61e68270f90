@@ -1,0 +1,77 @@
+package fr.adneom.question1;
+
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.junit.Test;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.RunWith;
+import org.junit.runner.notification.Failure;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import fr.adneom.question1.*;
+
+
+public class Question1Test 
+{
+	private static List<Integer> list;
+	private static int[] tailleTab;
+	private static Map<Integer,List<List<Integer>>> res;
+	private static Map<Integer,List<List<Integer>>> expected;
+	
+	@BeforeClass
+	public static void init() {
+		list = Arrays.asList(1, 2, 3, 4, 5);
+		tailleTab = new int[]{2,3,1};
+		res = new HashMap<>();
+		
+		for (int taille : tailleTab) {
+			res.put(taille,Question1.creerPartition(list,taille));
+		}
+		
+		expected = new HashMap();
+
+		List<List<Integer>> splitInSize1 = 
+				List.of(List.of(1),List.of(2),List.of(3),List.of(4),List.of(5));
+		List<List<Integer>> splitInSize2 = 
+				List.of(List.of(1,2),List.of(3,4),List.of(5));
+		List<List<Integer>> splitInSize3 = 
+				List.of(List.of(1,2,3),List.of(4,5));
+		
+		expected.put(1,splitInSize1);
+		expected.put(2,splitInSize1);
+		expected.put(3,splitInSize1);
+		
+	}
+	
+	@Test
+    public  void run()
+    {
+		/*
+		for (Entry<Integer, List<List<Integer>>> entry : res.entrySet()) {
+		    System.out.println("entry=" + entry);
+			List<List<Integer>> list = entry.getValue();
+		    
+			assertEquals(list,new ArrayList<List<Integer>>());
+		    list.forEach(System.out::println);
+		    assertEquals(1,1);
+		    // Do things with the list
+		}
+		*/
+		assertEquals(res,expected);
+    }
+}
+
+
