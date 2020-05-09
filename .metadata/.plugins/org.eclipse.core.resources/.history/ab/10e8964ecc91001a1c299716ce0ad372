@@ -5,14 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Classe Handler permettant de : 
- * Invoquer la strategie de partitionnement définie dans ParametreEntreeAbstract
- * Utiliser une liste générique permettant d'ajouter tout types d'objets dans la liste en entrée
- * @author arthu
- *
- * @param <T>
- */
 public class Handler<T> {
 	private List list;
 	private int taille;
@@ -166,11 +158,11 @@ public class Handler<T> {
 		/**
 		 * On peut ajouter ici tout type de valeur (String, integer, Object)
 		 */
-		handler.addValue("a");
-		handler.addValue("b");
-		handler.addValue("c");
-		handler.addValue("d");
-		handler.addValue("e");
+		handler.addValue(1);
+		handler.addValue(2);
+		handler.addValue(3);
+		handler.addValue(4);
+		handler.addValue(5);
 		
 		ParametreEntreeAbstract strategiePartitionnement = handler.creerStrategiePartitionnement(handler.list, 2);
 		List partitionnement = strategiePartitionnement.partition;

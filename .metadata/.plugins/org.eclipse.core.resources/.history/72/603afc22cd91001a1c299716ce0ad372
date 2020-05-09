@@ -166,14 +166,15 @@ public class Handler<T> {
 		/**
 		 * On peut ajouter ici tout type de valeur (String, integer, Object)
 		 */
-		handler.addValue("a");
-		handler.addValue("b");
-		handler.addValue("c");
-		handler.addValue("d");
-		handler.addValue("e");
+		handler.addValue(1);
+		handler.addValue(2);
+		handler.addValue(3);
+		handler.addValue(4);
+		handler.addValue(5);
 		
 		ParametreEntreeAbstract strategiePartitionnement = handler.creerStrategiePartitionnement(handler.list, 2);
 		List partitionnement = strategiePartitionnement.partition;
+		String t = "";
 	}
 
 

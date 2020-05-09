@@ -5,13 +5,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/**
- * Sous classe qualifiant le tableau utilisé en entrée comme invalide car :
- * - Le typage du tableau est hétérogène
- * @author arthu
- *
- * @param <T>
- */
 public class ParametreEntreeInvalide<T> extends ParametreEntreeAbstract<T> {
 
 	private static ParametreEntreeInvalide instance = null;
@@ -41,9 +34,7 @@ public class ParametreEntreeInvalide<T> extends ParametreEntreeAbstract<T> {
    			try {
    				instance = new ParametreEntreeInvalide( objs, N);
 			} 
-   			catch (RuntimeException e) {
-   				throw new RuntimeException("[ParametreEntreeInvalide] Le paramètre d'entree List est invalide");
-   			} 
+   			catch (Exception e) {} 
    		}
    		return instance;
    	} 

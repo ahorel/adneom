@@ -5,6 +5,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * Sous classe qualifiant le tableau utilisé en entrée comme de type String
+ * On peut donc réaliser un partitionnement
+ * @author arthu
+ *
+ * @param <T>
+ */
 public class ParametreEntreeEntier<T> extends ParametreEntreeAbstract<T> {
 
 	private static ParametreEntreeEntier instance = null;
@@ -66,11 +73,7 @@ public class ParametreEntreeEntier<T> extends ParametreEntreeAbstract<T> {
 	 */
 	@Override
 	protected <T> List<List<T>> creerPartition(List<T> objs, int N) {
-		List<List<T>> test = new ArrayList<>
-		(IntStream.range(0, objs.size()).boxed().collect(
-			Collectors.groupingBy(
-		    	e -> e/N, Collectors.mapping(e->objs.get(e), Collectors.toList())
-		       	)).values());
+
 		return objs!=null ? new ArrayList<>
 			(IntStream.range(0, objs.size()).boxed().collect(
 				Collectors.groupingBy(

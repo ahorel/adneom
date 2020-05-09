@@ -5,27 +5,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/**
- * Sous classe qualifiant le tableau utilisé en entrée comme de type String
- * On peut donc réaliser un partitionnement
- * @author arthu
- *
- * @param <T>
- */
-public class ParametreEntreeString<T> extends ParametreEntreeAbstract<T> {
+public class ParametreEntreeEntier<T> extends ParametreEntreeAbstract<T> {
 
-	private static ParametreEntreeString instance = null;
+	private static ParametreEntreeEntier instance = null;
 	private T list;
 	private int taille;
 	private List<List<T>> partition;
 	
 	/**
-	 * Constructeur ParametreEntreeString
+	 * Constructeur ParametreEntreeEntier
 	 * Permet de consolider les variables stockant le partitionnement et le pas de partitionnement
 	 * @param objs
 	 * @param N
 	 */
-	private ParametreEntreeString(List<T> objs,int N){
+	private ParametreEntreeEntier(List<T> objs,int N){
 		//Rapatrier le paramètrage de la classe abstraite de strategie dans les sous classes typées
 		this.list = super.t;
 		this.partition = creerPartition(objs, N);
@@ -37,10 +30,10 @@ public class ParametreEntreeString<T> extends ParametreEntreeAbstract<T> {
 	 * Recuperer le singleton de la classe ParametreEntreeString
 	 * @return ParametreEntreeString
 	 */
-   	public static <T> ParametreEntreeString getInstance(List<T> objs,int N){
+   	public static <T> ParametreEntreeEntier getInstance(List<T> objs,int N){
    		if(instance == null){   			
    			try {
-   				instance = new ParametreEntreeString( objs, N);
+   				instance = new ParametreEntreeEntier( objs, N);
 			} 
    			catch (Exception e) {} 
    		}
@@ -48,7 +41,7 @@ public class ParametreEntreeString<T> extends ParametreEntreeAbstract<T> {
    	} 
 	
    	/**
-   	 * Encapsulation du paramètre T
+   	 * Encapsulation du parametre T
    	 */
 	@Override
 	protected T get() {
@@ -57,15 +50,14 @@ public class ParametreEntreeString<T> extends ParametreEntreeAbstract<T> {
 	}
 
 
-	/**
-	 * Encapsulation du paramtre T
-	 */
+   	/**
+   	 * Encapsulation du parametre T
+   	 */
 	@Override
 	protected void set(T t1) {
 		// TODO Auto-generated method stub
 		
 	}
-
 
 	/**
 	 * Partitionnement de type JAVA 8
@@ -74,7 +66,11 @@ public class ParametreEntreeString<T> extends ParametreEntreeAbstract<T> {
 	 */
 	@Override
 	protected <T> List<List<T>> creerPartition(List<T> objs, int N) {
-		 
+		List<List<T>> test = new ArrayList<>
+		(IntStream.range(0, objs.size()).boxed().collect(
+			Collectors.groupingBy(
+		    	e -> e/N, Collectors.mapping(e->objs.get(e), Collectors.toList())
+		       	)).values());
 		return objs!=null ? new ArrayList<>
 			(IntStream.range(0, objs.size()).boxed().collect(
 				Collectors.groupingBy(

@@ -5,13 +5,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/**
- * Sous classe qualifiant le tableau utilisé en entrée comme de type String
- * On peut donc réaliser un partitionnement
- * @author arthu
- *
- * @param <T>
- */
 public class ParametreEntreeString<T> extends ParametreEntreeAbstract<T> {
 
 	private static ParametreEntreeString instance = null;

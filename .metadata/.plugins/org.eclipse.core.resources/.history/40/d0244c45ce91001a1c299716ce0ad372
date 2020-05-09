@@ -42,6 +42,7 @@ public class ParametreEntreeInvalide<T> extends ParametreEntreeAbstract<T> {
    				instance = new ParametreEntreeInvalide( objs, N);
 			} 
    			catch (RuntimeException e) {
+   				System.out.println(e.getMessage());
    				throw new RuntimeException("[ParametreEntreeInvalide] Le paramètre d'entree List est invalide");
    			} 
    		}

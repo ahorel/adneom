@@ -6,15 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/**
- * Classe permettant de réaliser la stratégie de partitionnement à partir des trois sous classes :
- * - ParametreEntreeString
- * - ParametreEntreeEntier
- * - ParametreEntreeInvalide
- * @author arthu
- *
- * @param <T>
- */
 public abstract class ParametreEntreeAbstract<T> {
 	protected T t;
 	
