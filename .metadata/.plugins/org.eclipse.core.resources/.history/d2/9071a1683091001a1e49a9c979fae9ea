@@ -1,0 +1,51 @@
+package fr.adneom.question1;
+
+import java.util.List;
+
+public class ParametreEntreeString<T> extends ParametreEntreeAbstract<T> {
+
+	private static ParametreEntreeString instance = null;
+	private T list;
+	
+	private ParametreEntreeString(){
+		
+	}
+	
+	/**
+	 * Recuperer le singleton de la classe ParametreEntreeString
+	 * @return ParametreEntreeString
+	 */
+   	public static ParametreEntreeString getInstance(){
+   		if(instance == null){   			
+   			try {
+   				instance = new ParametreEntreeString();
+			} 
+   			catch (Exception e) {} 
+   		}
+   		return instance;
+   	} 
+	
+
+
+	@Override
+	protected List<List<T>> compute(List<T> list) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	protected T get() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	protected void set(T t1) {
+		// TODO Auto-generated method stub
+		
+	}
+}

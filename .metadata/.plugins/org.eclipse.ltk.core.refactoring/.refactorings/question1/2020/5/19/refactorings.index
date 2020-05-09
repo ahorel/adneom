@@ -1,3 +1,10 @@
 1588835552213	Delete element
 1588838970495	Rename compilation unit 'AppTest.java'
 1588839353652	Rename type 'App'
+1588930470132	Delete element
+1588931087613	Rename type 'GenericType'
+1588931502003	Rename type 'ParametreEntree'
+1588946618273	Copy compilation unit
+1588946636179	Copy compilation unit
+1588950593480	Encapsulate field 't'
+1588952105342	Encapsulate field 'taille'

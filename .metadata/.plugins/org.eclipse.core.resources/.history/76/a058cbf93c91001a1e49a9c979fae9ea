@@ -1,0 +1,99 @@
+package fr.adneom.question1;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class Handler<T> {
+	protected T t;
+
+	public List<T> setMappingStrategy(List<T> list, final int N) {
+		for(T elt : list) {
+			System.out.println("ParametreEntreeAbstract compare elt=" + elt);	
+		}
+		
+        if (list instanceof ArrayList<?>) {
+            ArrayList vals = (ArrayList) list;
+            for (Object val : vals) {
+            	System.out.println("[ParametreEntreeAbstract] 1ère boucle val=" + val);
+            	boolean flag = false;
+            	//L'élément est une chaine de caractère
+                if (val instanceof String) {
+                	System.out.println("[ParametreEntreeAbstract] l'élément="+val+" est de type String");
+                    String stringVal = (String) val;
+
+                    for (Object val2 : vals) {
+                    	System.out.println("[ParametreEntreeAbstract] 2ème boucle val2=" + val2);
+
+                    	if (val2 instanceof Integer) {
+                        	System.out.println("[ParametreEntreeAbstract] l'élément="+val2+" est de type Integer, le tableau est invalide");
+
+                    		//throw new RuntimeException(
+                            //        "[ParametreEntreeAbstract] Objects are of different types");
+                    		flag = true;
+                    	}
+                    }
+                    if(flag == false) {
+                    	System.out.println("[ParametreEntreeAbstract] Création d'un paramètre d'entrée de type String");
+
+                    	return (List<T>) ParametreEntreeString.getInstance(list, N);
+                    }
+                    else {
+                    	System.out.println("[ParametreEntreeAbstract] Création d'un paramètre d'entrée de type Invalide");
+
+                    	return (List<T>) ParametreEntreeInvalide.getInstance(list,N);
+                    }
+                }
+                //L'élément est un entier
+                else if (val instanceof Integer) {
+                	System.out.println("[ParametreEntreeAbstract] l'élément="+val+" est de type Integer");
+
+                    Integer stringVal = (Integer) val;
+                	for (Object val2 : vals) {
+                    	System.out.println("[ParametreEntreeAbstract] 2ème boucle val2=" + val2);
+
+                		//L'élement est une chaine de caractère
+                		if (val2 instanceof String) {
+                			//throw new RuntimeException {
+                			//	"[ParametreEntreeAbstract] Les objets sont de différents types");
+                        	System.out.println("[ParametreEntreeAbstract] l'élément="+val2+" est de type Integer, le tableau est invalide");
+
+                			flag = true;
+                		}
+                	}
+                	if(flag == false) {
+                    	System.out.println("[ParametreEntreeAbstract] Création d'un paramètre d'entrée de type Integer");
+
+                    	return (List<T>) ParametreEntreeEntier.getInstance(list,N);                		
+                	}
+                	else {
+                    	System.out.println("[ParametreEntreeAbstract] Création d'un paramètre d'entrée de type Invalide");
+
+                    	return (List<T>) ParametreEntreeInvalide.getInstance(list,N);                		
+                	}
+               }
+                //Un des elements n'est ni un entier, ni un string
+               else {
+            	   System.out.println("[ParametreEntreeAbstract] Création d'un paramètre d'entrée de type Invalide");
+
+            	   return (List<T>) ParametreEntreeInvalide.getInstance(list,N);                		
+               }
+            //Fin boucle Array List
+            }
+        }
+        //Dans tous les autres cas, on retourne un objet ParametreEntreeInvalide
+
+        return (List<T>) ParametreEntreeInvalide.getInstance(list,N);                		
+	}
+	
+
+	public <T> List<T> convertArrayToList(T[] a) {   
+	    return Arrays.stream(a).collect(Collectors.toList());
+	}
+	
+	public static void main(String[] args) {
+
+		
+	}
+}

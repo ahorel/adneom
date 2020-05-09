@@ -1,0 +1,42 @@
+package fr.adneom.question1;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public abstract class ParametreEntreeAbstract<T> {
+	protected T t;
+	
+	protected abstract T get();
+	
+	protected abstract void set(T t1);
+	
+	public  boolean compare(List<T> list) {
+		System.out.println("ParametreEntreeAbstract compare list=" + Arrays.toString(list));
+        if (list instanceof ArrayList<?>) {
+            ArrayList temp = (ArrayList) value;
+            for (Object vals : temp) {
+                boolean flag = false;
+                if (vals instanceof LinkedHashMap<?, ?>) {
+                    LinkedHashMap<?, ?> map = (LinkedHashMap) vals;
+                    for (Map.Entry entry : map.entrySet()) {
+                        if (entry.getKey() instanceof String
+                                && entry.getValue() instanceof Double) {
+                            flag = true;
+                        }
+
+                        if (!flag) {
+                            throw new RuntimeException(
+                                    "Objects are of different types");
+                        }
+
+                    }
+
+                }
+                targetDetailContainer = (ArrayList<LinkedHashMap<String, Double>>) confData
+                        .get((Object) "Target-Details");
+            }
+
+        }
+	}
+}

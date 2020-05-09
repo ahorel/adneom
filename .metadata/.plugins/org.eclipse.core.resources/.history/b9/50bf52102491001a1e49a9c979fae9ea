@@ -1,0 +1,15 @@
+package fr.adneom.question1;
+
+import java.util.List;
+
+public abstract class ParametreEntreeAbstract<T> {
+	private T t;
+	
+	public abstract T get();
+	
+	public abstract void set(T t1);
+	
+	public  boolean compare(List<T> list) {
+		if
+	}
+}

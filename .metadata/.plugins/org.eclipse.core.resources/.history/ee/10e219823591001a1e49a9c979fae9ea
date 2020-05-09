@@ -1,0 +1,54 @@
+package fr.adneom.question1;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+public class ParametreEntreeInvalide<T> extends ParametreEntreeAbstract<T> {
+
+	private static ParametreEntreeInvalide instance = null;
+	private T list;
+	private int taille;
+	private List<List<T>> partition;
+	
+	private ParametreEntreeInvalide(List<T> objs,int N){
+		this.list = super.t;
+		throw new RuntimeException("[ParametreEntreeInvalide] Le paramètre d'entree List est invalide");
+		
+	}
+	
+	/**
+	 * Recuperer le singleton de la classe ParametreEntreeString
+	 * @return ParametreEntreeString
+	 */
+   	public static <T> ParametreEntreeInvalide getInstance(List<T> objs,int N){
+   		if(instance == null){   			
+   			try {
+   				instance = new ParametreEntreeInvalide( objs, N);
+			} 
+   			catch (Exception e) {} 
+   		}
+   		return instance;
+   	} 
+	
+	@Override
+	protected T get() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	protected void set(T t1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected <T> List<List<T>> creerPartition(List<T> objs, int N) {
+		return null;
+			
+	}
+}

@@ -1,0 +1,68 @@
+package fr.adneom.question1;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+public class ParametreEntreeInvalide<T> extends ParametreEntreeAbstract<T> {
+
+	private static ParametreEntreeInvalide instance = null;
+	private T list;
+	private int taille;
+	private List<List<T>> partition;
+	
+	/**
+	 * On lève une RunTime exception "manuelle" dans le constructeur
+	 * Car au runtime, le typage des éléments du tableau n'est pas vérifié
+	 * Le typage n'est vérifié qu'à la compilation
+	 * @param objs
+	 * @param N
+	 */
+	private ParametreEntreeInvalide(List<T> objs,int N){
+		this.list = super.t;
+		throw new RuntimeException("[ParametreEntreeInvalide] Le paramètre d'entree List est invalide");
+		
+	}
+	
+	/**
+	 * Recuperer le singleton de la classe ParametreEntreeInvalide
+	 * @return ParametreEntreeInvalide
+	 */
+   	public static <T> ParametreEntreeInvalide getInstance(List<T> objs,int N){
+   		if(instance == null){   			
+   			try {
+   				instance = new ParametreEntreeInvalide( objs, N);
+			} 
+   			catch (Exception e) {} 
+   		}
+   		return instance;
+   	} 
+	
+   	/**
+   	 * Encapsulation du paramètre T
+   	 */
+	@Override
+	protected T get() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	/**
+	 * Encapsulation du paramètre T
+	 */
+	@Override
+	protected void set(T t1) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	/**
+	 * On ne fait aucun traitement, le tableau d'entrée est invalide
+	 */
+	@Override
+	protected <T> List<List<T>> creerPartition(List<T> objs, int N) {
+		return null;
+	}
+}

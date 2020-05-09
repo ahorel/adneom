@@ -1,0 +1,166 @@
+package fr.adneom.question1;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class Handler<T> {
+	private List list;
+	private int taille;
+	
+	/**
+	 * Getter : champ list
+	 * @return List<T>
+	 */
+	private List<T> getT() {
+		return list;
+	}
+
+	/**
+	 * Setter : Champ list
+	 * @param list
+	 */
+	private void setT(List<T> list) {
+		this.list = list;
+	}
+	
+	/**
+	 * Getter : champ taille
+	 * @return int
+	 */
+	private int getTaille() {
+		return taille;
+	}
+
+	/**
+	 * Setter : champ taille
+	 * @param taille
+	 */
+	private void setTaille(int taille) {
+		this.taille = taille;
+	}
+	
+	/**
+	 * Ajouter des éléments à la liste générique list
+	 * @param <T>
+	 * @param value
+	 */
+    public <T> void addValue(T value) {
+        if(list == null){
+        	list = getList(value.getClass());
+        }
+        list.add(value);
+    }
+    
+    /**
+     * Initialiser la liste générique
+     * @param <T>
+     * @param requiredType
+     * @return List<T>
+     */
+    private <T> List<T> getList(Class<T> requiredType) {
+        return new ArrayList<>();
+    }
+	
+    /**
+     * Méthode utilitaire pour réaliser la stratégie de partitionnement
+     * @param List<T> list
+     * int taille
+     * @return List<T>
+     */
+	public  ParametreEntreeAbstract creerStrategiePartitionnement(List<T> list, int taille) {
+		for(T elt : list) {
+			System.out.println("ParametreEntreeAbstract compare elt=" + elt);	
+		}
+		
+        if (list instanceof ArrayList<?>) {
+            ArrayList vals = (ArrayList) list;
+            for (Object val : vals) {
+            	System.out.println("[ParametreEntreeAbstract] 1ère boucle val=" + val);
+            	boolean flag = false;
+            	//L'élément est une chaine de caractère
+                if (val instanceof String) {
+                	System.out.println("[ParametreEntreeAbstract] l'élément="+val+" est de type String");
+                    String stringVal = (String) val;
+
+                    for (Object val2 : vals) {
+                    	System.out.println("[ParametreEntreeAbstract] 2ème boucle val2=" + val2);
+
+                    	if (val2 instanceof Integer) {
+                        	System.out.println("[ParametreEntreeAbstract] l'élément="+val2+" est de type Integer, le tableau est invalide");
+
+                    		//throw new RuntimeException(
+                            //        "[ParametreEntreeAbstract] Objects are of different types");
+                    		flag = true;
+                    	}
+                    }
+                    if(flag == false) {
+                    	System.out.println("[ParametreEntreeAbstract] Création d'un paramètre d'entrée de type String");
+
+                    	return ParametreEntreeString.getInstance(list, taille);
+                    }
+                    else {
+                    	System.out.println("[ParametreEntreeAbstract] Création d'un paramètre d'entrée de type Invalide");
+
+                    	return ParametreEntreeInvalide.getInstance(list,taille);
+                    }
+                }
+                //L'élément est un entier
+                else if (val instanceof Integer) {
+                	System.out.println("[ParametreEntreeAbstract] l'élément="+val+" est de type Integer");
+
+                    Integer stringVal = (Integer) val;
+                	for (Object val2 : vals) {
+                    	System.out.println("[ParametreEntreeAbstract] 2ème boucle val2=" + val2);
+
+                		//L'élement est une chaine de caractère
+                		if (val2 instanceof String) {
+                			//throw new RuntimeException {
+                			//	"[ParametreEntreeAbstract] Les objets sont de différents types");
+                        	System.out.println("[ParametreEntreeAbstract] l'élément="+val2+" est de type Integer, le tableau est invalide");
+
+                			flag = true;
+                		}
+                	}
+                	if(flag == false) {
+                    	System.out.println("[ParametreEntreeAbstract] Création d'un paramètre d'entrée de type Integer");
+
+                    	return ParametreEntreeEntier.getInstance(list,taille);                		
+                	}
+                	else {
+                    	System.out.println("[ParametreEntreeAbstract] Création d'un paramètre d'entrée de type Invalide");
+
+                    	return ParametreEntreeInvalide.getInstance(list,taille);                		
+                	}
+               }
+                //Un des elements n'est ni un entier, ni un string
+               else {
+            	   System.out.println("[ParametreEntreeAbstract] Création d'un paramètre d'entrée de type Invalide");
+
+            	   return ParametreEntreeInvalide.getInstance(list,taille);                		
+               }
+            //Fin boucle Array List
+            }
+        }
+        //Dans tous les autres cas, on retourne un objet ParametreEntreeInvalide
+
+        return ParametreEntreeInvalide.getInstance(list,taille);                		
+	}
+
+	//handler.creerStrategieParitionnement(handler.list,2).partition
+	public static void main(String args[]){
+		Handler handler = new Handler();
+		
+		handler.addValue(1);
+		handler.addValue(2);
+		handler.addValue(3);
+		handler.addValue(4);
+		handler.addValue(5);
+		
+		ParametreEntreeAbstract strategiePartitionnement = handler.creerStrategiePartitionnement(handler.list, 2);
+		List partitionnement = strategiePartitionnement.partition;
+	}
+
+
+}

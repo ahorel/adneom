@@ -1,0 +1,11 @@
+package fr.adneom.question1;
+
+public abstract class ParametreEntreeAbstract<T> {
+	private T t;
+	
+	public abstract T get();
+	
+	public abstract void set(T t1);
+	
+	public abstract boolean compareTo();
+}

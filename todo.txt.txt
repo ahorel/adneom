@@ -1,0 +1,32 @@
+//Tester la taille du tableau
+//Tester le type des elements entrés dans le tableau
+
+//Creer une classe pour la conversion des elements insérés en entrée
+
+cf https://www.informit.com/articles/article.aspx?p=1021579&seqNum=3
+
+Use java generic class
+
+https://www.journaldev.com/1663/java-generics-example-method-class-interface
+
+auto boxing un boxing
+
+Golfi
+Declaration d'une méthode utilisant une liste générique
+AbstractUpaDao.java AbstractUpaDao.java 
+
+Utilisation de la méthode findAll utilisant une liste generique
+DepartmentIntegrationTest.java BasicIntegrationTest.java
+
+Classe abstraite declarant la méthode utilisant un type generique
+2 sous classe étandant la classe abstraite et utilisant soit un type integer soit un type string
+
+Les 2 sous classes utiliseront une methode getInstance 
+Utilisation méthode Class
+cf CustomScopeContext.java CustomScopeContextHolder.java
+
+
+https://stackoverflow.com/questions/16745355/check-which-type-of-object-list-contains/16745403
+On ne peut pas distinguer le type de parametre dentree dans une liste au moment du run time 
+
+https://stackoverflow.com/questions/12320429/java-how-to-check-the-type-of-an-arraylist-as-a-whole

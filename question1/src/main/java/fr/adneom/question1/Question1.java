@@ -8,7 +8,8 @@ import java.util.stream.IntStream;
 
 public class Question1
 {
-	public static <Integer> List<List<Integer>> creerPartition(List<Integer> objs, final int N) {
+	//A utiliser Null Object Pattern
+	public static <T> List<List<T>> creerPartition(List<T> objs, final int N) {
 	    return objs!=null ? new ArrayList<>
 	    	(IntStream.range(0, objs.size()).boxed().collect(
 	            Collectors.groupingBy(
@@ -16,3 +17,10 @@ public class Question1
 	                    )).values()) : null;
 	}
 }
+
+//Tester la taille du tableau
+//Tester le type des elements entrés dans le tableau
+
+//Creer une classe pour la conversion des elements insérés en entrée
+
+//
